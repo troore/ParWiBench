@@ -1,5 +1,5 @@
 
-CXXFLAGS := -g -fPIC
+CXXFLAGS := -g -fPIC -I../include
 LDFLAGS := -lm
 
 SHLDFLAGS := $(LDFLAGS) -shared -fPIC

@@ -1,0 +1,19 @@
+/**
+ * @description: Software PHY-TX
+ * @author: Haoyang WU
+ * @param: input_buffer  : Pointer of input from MAC layer, including a whole MAC frame.
+ *         output_buffer : Pointer of output to USRP, including the result of PHY_TX.
+ *         datarate      : This param only has 8 possible values.
+ *                             BPSK_1_2   1
+ *                             BPSK_3_4   2
+ *                             QPSK_1_2   3
+ *                             QPSK_3_4   4
+ *                             QAM16_1_2  5
+ *                             QAM16_3_4  6
+ *                             QAM64_2_3  7
+ *                             QAM64_3_4  8
+ *         length        : Length of input_buffer
+ * @return: Length of output_buffer.
+ */
+ 
+int PHY_SW_TX(char *input_buffer, Complex *output_buffer, int datarate, int length);

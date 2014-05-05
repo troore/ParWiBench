@@ -1,0 +1,11 @@
+/**
+ * @description: Software PHY-RX
+ * @author: Haoyang WU
+ * @param: input_buffer  : Pointer of input from USRP.
+ *         length        : Recent length of input_buffer
+ *         output_buffer : Pointer of output to MAC layer, including the result of PHY_RX.
+ * @return: If there is no return , return 0.
+ *          If a frame completely received, return the length of output_buffer.
+ */
+ 
+int PHY_SW_RX(Complex *input_buffer, int length, char *output_buffer);
