@@ -51,8 +51,11 @@ void ReadOutput(FIFO<float> *pOut,int Sz[]);
 void ReadOutput(FIFO<complex<float> > *pOut,int Sz[]);
 
 
-void GenerateLTEChainInput(FIFO<int> *pDataSource, int DataK, int *pTxDS);
+//void GenerateLTEChainInput(FIFO<int> *pDataSource, int DataK, int *pTxDS);
+void GenerateLTEChainInput(FIFO<int> *pDataSource, int DataK, int *pTxDS, int RANDOMSEED);
+void GenerateLTEChainInput(int *pDataSource, int DataK, int *pTxDS, int RANDOMSEED);
 void ReadLTEChainOutput(FIFO<int> *pFileSink, int *pRxFS);
+void ReadLTEChainOutput(int *pFileSink, int *pRxFS, int DataK);
 
 #endif
 

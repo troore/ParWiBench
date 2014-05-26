@@ -1,33 +1,0 @@
-
-Scrambler.cpp,289
-Scrambler<T>::Scrambler(Scrambler5,44
-void Scrambler<T>::Scrambling(Scrambling41,1145
-Scrambler<T>::Scrambler(Scrambler78,1923
-void Scrambler<T>::Descrambling(Descrambling115,3091
-void Scrambler<T>::GenScrambInt(GenScrambInt162,4017
-Scrambler<T>::~Scrambler(~Scrambler192,4716
-
-main.h,73
-#define NSTD 21,321
-#define MAXRUN 22,336
-#define MaxInfoPktSz 23,353
-
-main.cpp,36
-int RANDOMSEED;4,20
-int main(8,55
-
-Scrambler.h,530
-#define __SCRAMBLER_H_3,24
-using namespace std;14,198
-class Scrambler17,239
-	bool PSFlag;Scrambler::PSFlag20,267
-	bool BufFlag;Scrambler::BufFlag21,281
-	int NInfoBits;Scrambler::NInfoBits22,296
-	int NumLayer;Scrambler::NumLayer23,312
-	int NumULSymbSF;Scrambler::NumULSymbSF25,328
-	int MDFT;Scrambler::MDFT26,346
-	int MQAM;Scrambler::MQAM27,357
-	int *pScrambInt;Scrambler::pScrambInt39,497
-	int InBufSz;Scrambler::InBufSz43,545
-	int OutBufSz;Scrambler::OutBufSz48,646
-	Scrambler(Scrambler::Scrambler51,686

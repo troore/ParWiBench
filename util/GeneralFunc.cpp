@@ -800,7 +800,7 @@ void ReadOutput(FIFO<complex<float> > *pOut,int Sz[])
 }
 //////////////////////////END Read Output//////////////////////////
 
-void GenerateLTEChainInput(FIFO<int> *pDataSource, int DataK, int *pTxDS)
+void GenerateLTEChainInput(FIFO<int> *pDataSource, int DataK, int *pTxDS, int RANDOMSEED)
 {
 	int sd = -RANDOMSEED;
 
@@ -815,8 +815,38 @@ void GenerateLTEChainInput(FIFO<int> *pDataSource, int DataK, int *pTxDS)
 	(*pDataSource).Write(pTxDS);
 }
 
+void GenerateLTEChainInput(int *pDataSource, int DataK, int *pTxDS, int RANDOMSEED)
+{
+	int sd = -RANDOMSEED;
+	float v;
+
+	for(int i = 0; i < DataK; i++)
+	{
+		sd -= i;
+		v = (float)gauss1(&sd);
+		
+		pTxDS[i] = (v > 0) ? 1 : 0;
+	}
+
+//	(*pDataSource).Write(pTxDS);
+	for (int i = 0; i < DataK; i++)
+	{
+		pDataSource[i] = pTxDS[i];
+	}
+}
+
 void ReadLTEChainOutput(FIFO<int> *pFileSink, int *pRxFS)
 {
 	(*pFileSink).Read(pRxFS);
 }
+
+void ReadLTEChainOutput(int *pFileSink, int *pRxFS, int DataK)
+{
+//	(*pFileSink).Read(pRxFS);
+	for (int i = 0; i < DataK; i++)
+	{
+		pRxFS[i] = pFileSink[i];
+	}
+}
+
 
