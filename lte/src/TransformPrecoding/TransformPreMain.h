@@ -1,6 +1,6 @@
 
-#ifndef __LTEUPLINK_H_
-#define __LTEUPLINK_H_
+#ifndef __TRANSFORMPREMAIN_H_
+#define __TRANSFORMPREMAIN_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,7 +11,6 @@
 #include <string>
 #include <fstream>
 #include <stdexcept>
-
 #include "gauss.h"
 #include "FIFO.h"
 #include "BSPara.h"
@@ -19,14 +18,11 @@
 #include "matrix.h"
 #include "GeneralFunc.h"
 
-#include "Turbo.h"
-#include "RateMatcher.h"
-#include "Scrambler.h"
-#include "Modulation.h"
+#include "TransformPrecoder.h"
 
 
-//#define NSTD 1
-#define MAX_SFRAMES 1
-#define MAX_BLOCK_SIZE 6144
+#define NSTD 2
+#define MAXRUN 4
+#define MaxInfoPktSz 6144
 
 #endif

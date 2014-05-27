@@ -1,5 +1,5 @@
 
-#include "main.h"
+#include "ResMapMain.h"
 
 int RANDOMSEED;
 
@@ -15,7 +15,7 @@ int main()
 	BSPara BS;
 	BS.initBSPara();
 	UserPara User(&BS);
-	RESMapper SCM(&User);
+	ResMapper SCM(&User);
 	//FIFO<complex<float> > SCMIn(1,SCM.InBufSz);
 //	FIFO<complex<float> > SCMOut(1,SCM.OutBufSz);
 	complex<float> *pInpData = new complex<float>[SCM.InBufSz];
@@ -44,7 +44,7 @@ int main()
 	BSPara BS;
 	BS.initBSPara();
 //	UserPara User(&BS);
-	RESMapper SCD(&BS);
+	ResMapper SCD(&BS);
 	//FIFO<complex<float> > SCDIn(1,SCD.InBufSz);
 //	FIFO<complex<float> > SCDOut(1,SCD.OutBufSz);
 	

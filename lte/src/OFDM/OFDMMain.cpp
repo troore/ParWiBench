@@ -1,7 +1,7 @@
 
-#include "main.h"
+#include "OFDMMain.h"
 
-int RANDOMSEED;
+//int RANDOMSEED;
 
 //#define MOD
 

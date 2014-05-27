@@ -6,7 +6,7 @@
 #include "UserPara.h"
 #include "FIFO.h"
 
-class RESMapper
+class ResMapper
 {
  private:
 	bool PSFlag;
@@ -36,10 +36,10 @@ class RESMapper
 	int OutBufSz;
 
 	// Default constructor
-	RESMapper() {}
-    RESMapper(UserPara* pUser);
-	RESMapper(BSPara *pBS);
-	~RESMapper();
+	ResMapper() {}
+    ResMapper(UserPara* pUser);
+	ResMapper(BSPara *pBS);
+	~ResMapper();
 	//    void SubCarrierMapping(FIFO<complex<float> > *pInpBuf, FIFO<complex<float> > *pOutBuf);
 	//	void SubCarrierMapping(FIFO<complex<float> > *pOutBuf);
 	//	void SubCarrierDemapping(FIFO<complex<float> >* pOutBuf);

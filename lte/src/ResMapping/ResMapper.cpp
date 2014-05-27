@@ -1,8 +1,8 @@
 
-#include "resmapper.h"
+#include "ResMapper.h"
 
 
-RESMapper::RESMapper(UserPara* pUser)
+ResMapper::ResMapper(UserPara* pUser)
 {
 	PSFlag = (*pUser).ProcessingStatusFlag;
 	BufFlag= (*pUser).BufferSizeFlag;
@@ -56,7 +56,7 @@ RESMapper::RESMapper(UserPara* pUser)
 }
 
 
-RESMapper::RESMapper(BSPara* pBS)
+ResMapper::ResMapper(BSPara* pBS)
 {
 	PSFlag = (*pBS).ProcessingStatusFlag;
 	BufFlag=(*pBS).BufferSizeFlag;
@@ -101,8 +101,8 @@ RESMapper::RESMapper(BSPara* pBS)
 	//////////////////End of initialization of its own input buffer//////////////////
 }
 
-//void RESMapper::SubCarrierMapping(FIFO<complex<float> > *pOutBuf)
-void RESMapper::SubCarrierMapping(complex<float> *pInpData, complex<float> *pOutData)
+//void ResMapper::SubCarrierMapping(FIFO<complex<float> > *pOutBuf)
+void ResMapper::SubCarrierMapping(complex<float> *pInpData, complex<float> *pOutData)
 {
  	if(PSFlag)
 	{
@@ -167,8 +167,8 @@ void RESMapper::SubCarrierMapping(complex<float> *pInpData, complex<float> *pOut
 }
 
 
-//void RESMapper::SubCarrierDemapping(FIFO<complex<float> >* pOutBuf)
-void RESMapper::SubCarrierDemapping(complex<float> *pInpData, complex<float> *pOutData)
+//void ResMapper::SubCarrierDemapping(FIFO<complex<float> >* pOutBuf)
+void ResMapper::SubCarrierDemapping(complex<float> *pInpData, complex<float> *pOutData)
 {
 	if(PSFlag)
 	{
@@ -235,7 +235,7 @@ void RESMapper::SubCarrierDemapping(complex<float> *pInpData, complex<float> *pO
 
 }
 
-RESMapper::~RESMapper()
+ResMapper::~ResMapper()
 {
 //	delete[] pOutData;
 //	delete[] pInpData;

@@ -1,21 +1,11 @@
+### Code References
 
-### mod usage
+[1] [WiBench](http://wibench.eecs.umich.edu)
 
-### turbo usage
+[2] [OpenLTE](http://openlte.sourceforge.net/)
 
-**functional test**
+[3] MATLAB R2013b LTE Toolkit
 
-	$ cd turbo
-	$ make turbo
-	$ ./turbo
+[4] [itpp library](itpp.sourceforge.net)
 
-Then check if "tx.dat" matches "rx.dat", where "tx.dat" is generated data to encode and send, and "rx.dat" is data received and decoded.
-
-**plot**
-
-	$ cd turbo
-	$ make libturbo
-	$ python tx.py
-	$ python rx.py
-
-Where "tx.py" is script controlling data generating and sending, and "rx.py" is that controlling data receiving and decoding, then plotting.
+[5] [LTE Uplink Receiver PHY Benchmark](http://sourceforge.net/projects/lte-benchmark/)

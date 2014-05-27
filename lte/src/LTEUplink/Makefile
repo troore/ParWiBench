@@ -2,7 +2,7 @@ include ../../../common/makefile.config
 
 TARGETS = LTEUplink.out
 
-FILE_LIST = Turbo/Turbo.cpp RateMatching/RateMatcher.cpp RateMatching/SubblockInterleaver_lte.cpp Scrambling/Scrambler.cpp Modulation/Modulation.cpp
+FILE_LIST = Turbo/Turbo.cpp RateMatching/RateMatcher.cpp RateMatching/SubblockInterleaver_lte.cpp Scrambling/Scrambler.cpp Modulation/Modulation.cpp TransformPrecoding/TransformPrecoder.cpp ResMapping/ResMapper.cpp Equalizing/Equalizer.cpp OFDM/OFDM.cpp
 
 SRC = LTEUplink.cpp
 SRC += $(LTE_DIR)/src/LTEUplink/BSPara.cpp $(LTE_DIR)/src/LTEUplink/UserPara.cpp

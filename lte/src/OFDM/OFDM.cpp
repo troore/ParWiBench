@@ -1,5 +1,5 @@
 
-#include "ofdm.h"
+#include "OFDM.h"
 #include <cstring>
 
 OFDM::OFDM(UserPara* pUser)

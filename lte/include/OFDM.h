@@ -1,4 +1,7 @@
 
+#ifndef __OFDM_H_
+#define __OFDM_H_
+
 #include <complex>
 #include <fftw3.h>
 #include "UserPara.h"
@@ -46,3 +49,4 @@ class OFDM
 	void demodulating(complex<float> *pInpData, complex<float> *pOutData);
 };
 
+#endif

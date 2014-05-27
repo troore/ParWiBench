@@ -42,18 +42,14 @@ int main(int argc, char *argv[])
 	RateMatcher TxRM(&User);
 	Scrambler<int> TxSCRB(&User);
 	Modulation TxMod(&User);
-	/*
-	TransformPrecoder TxTP(&User);
-	SubCarrierMap TxSCM(&User);
-	SCFDMAModulation TxSCFM(&User);
-	*/
+	TransformPrecoder TxTransPre(&User);
+	ResMapper TxResMap(&User);
+	OFDM TxOFDM(&User);
 //	Channel TxCRx(&BS);
-	/*
-	SCFDMADemodulation RxSCFD(&BS);
-	SubCarrierDemap RxSCD(&BS);
-	Equalizer RxE(&BS,&User);
-	TransformDecoder RxTD(&BS);
-	*/
+	OFDM RxOFDM(&BS);
+	ResMapper RxResMap(&BS);
+	Equalizer RxEq(&BS, &User);
+	TransformPrecoder RxTransPre(&BS);
 	Modulation RxMod(&BS);
 	Scrambler<float> RxSCRB(&BS);
 	RateMatcher RxRM(&BS);
@@ -65,27 +61,53 @@ int main(int argc, char *argv[])
 	//////////////////End of allocation of FIFOs /////////////////////////
 	
 	/** Allocate inputs and outputs **/
+	// Turbo
 	int *pTxTbInp = new int[TxTurbo.InBufSz];
 	int *pTxTbOut = new int[TxTurbo.OutBufSz];
 	float *pRxTbInp = new float[RxTurbo.InBufSz];
 	int *pRxTbOut = new int[RxTurbo.OutBufSz];
 
+	// Rate matching
 	int *pTxRMInp = new int[TxRM.InBufSz];
 	int *pTxRMOut = new int[TxRM.OutBufSz];
 	float *pRxRMInp = new float[RxRM.InBufSz];
 	float *pRxRMOut = new float[RxRM.OutBufSz];
 	int *pRxRMHard = new int[RxRM.OutBufSz];
 
+	// Scrambling
 	int *pTxSCRBInp = new int[TxSCRB.InBufSz];
 	int *pTxSCRBOut = new int[TxSCRB.OutBufSz];
 	float *pRxSCRBInp = new float[RxSCRB.InBufSz];
 	float *pRxSCRBOut = new float[RxSCRB.OutBufSz];
 
+	// Modulation
 	int *pTxModInp = new int[TxMod.InBufSz];
 	complex<float> *pTxModOut = new complex<float>[TxMod.OutBufSz];
 	complex<float> *pRxModInp = new complex<float>[RxMod.InBufSz];
 	float *pRxModOut = new float[RxMod.OutBufSz];
 	int *pRxModHD = new int[RxMod.OutBufSz];
+
+	// Transform precoding
+	complex<float> *pTxTransPreInp = new complex<float>[TxTransPre.InBufSz];
+	complex<float> *pTxTransPreOut = new complex<float>[TxTransPre.OutBufSz];
+	complex<float> *pRxTransPreInp = new complex<float>[RxTransPre.InBufSz];
+	complex<float> *pRxTransPreOut = new complex<float>[RxTransPre.OutBufSz];
+	
+	// Resource mapping
+	complex<float> *pTxResMapInp = new complex<float>[TxResMap.InBufSz];
+	complex<float> *pTxResMapOut = new complex<float>[TxResMap.OutBufSz];
+	complex<float> *pRxResMapInp = new complex<float>[RxResMap.InBufSz];
+	complex<float> *pRxResMapOut = new complex<float>[RxResMap.OutBufSz];
+
+	// Equalizing
+	complex<float> *pRxEqInp = new complex<float>[RxEq.InBufSz];
+	complex<float> *pRxEqOut = new complex<float>[RxEq.OutBufSz];
+
+	// OFDM
+	complex<float> *pTxOFDMInp = new complex<float>[TxOFDM.InBufSz];
+	complex<float> *pTxOFDMOut = new complex<float>[TxOFDM.OutBufSz];
+	complex<float> *pRxOFDMInp = new complex<float>[RxOFDM.InBufSz];
+	complex<float> *pRxOFDMOut = new complex<float>[RxOFDM.OutBufSz];
 	
 	/** End of allocations **/
 
@@ -151,47 +173,71 @@ int main(int argc, char *argv[])
 		//	cout << endl;
 
 			TxMod.Modulating(pTxModInp, pTxModOut);
+
+			for (int i = 0; i < TxTransPre.InBufSz; i++)
+			{
+				pTxTransPreInp[i] = pTxModOut[i];
+			}
+
+			TxTransPre.TransformPrecoding(pTxTransPreInp, pTxTransPreOut);
+
+			for (int i = 0; i < TxResMap.InBufSz; i++)
+			{
+				pTxResMapInp[i] = pTxTransPreOut[i];
+			}
+
+			TxResMap.SubCarrierMapping(pTxResMapInp, pTxResMapOut);
 			
+			for (int i = 0; i < TxOFDM.InBufSz; i++)
+			{
+				pTxOFDMInp[i] = pTxResMapOut[i];
+			}
 
-			/*
-			TxTP.TransformPrecoding(TxSCM.pInpBuf);
-
-
-			TxSCM.SubCarrierMapping(TxSCFM.pInpBuf);
-
-
-			TxSCFM.SCFDMAModulating(TxCRx.pInpBuf);
+			TxOFDM.modulating(pTxOFDMInp, pTxOFDMOut);
 
 
-			TxCRx.ApplyChannel(RxSCFD.pInpBuf,(AWGNSigmaArray[nsnr]));
+			/** TODO: Adding channel **/
+//			TxCRx.ApplyChannel(RxSCFD.pInpBuf,(AWGNSigmaArray[nsnr]));
 
+			for (int i = 0; i < RxOFDM.InBufSz; i++)
+			{
+				pRxOFDMInp[i] = pTxOFDMOut[i];
+			}
 
-			RxSCFD.SCFDMADemodulating(RxSCD.pInpBuf);
+			RxOFDM.demodulating(pRxOFDMInp, pRxOFDMOut);
 
+			for (int i = 0; i < RxResMap.InBufSz; i++)
+			{
+				pRxResMapInp[i] = pRxOFDMOut[i];
+			}
 
-			RxSCD.SubCarrierDemapping(RxE.pInpBuf);
-
+			RxResMap.SubCarrierDemapping(pRxResMapInp, pRxResMapOut);
 
 			// RxE.Equalizing(RxTD.pInpBuf,TxCRx.GetpPCSI(),TxCRx.GetAWGNNo());
+			
+			for (int i = 0; i < RxEq.InBufSz; i++)
+			{
+				pRxEqInp[i] = pRxResMapOut[i];
+			}
+			
+			RxEq.Equalizing(pRxEqInp, pRxEqOut);
 
-			RxE.Equalizing(RxTD.pInpBuf);
-
-
-			RxTD.TransformDecoding(RxD.pInpBuf);
-
-
-			// RxD.Demodulating(RxDSCRB.pInpBuf,RxE.GetpEqW(),RxE.GetpHdm(),(AWGNSigmaArray[nsnr]));
-			*/
-
+			for (int i = 0; i < RxTransPre.InBufSz; i++)
+			{
+				pRxTransPreInp[i] = pRxEqOut[i];
+			}
+			
+			RxTransPre.TransformDecoding(pRxTransPreInp, pRxTransPreOut);
 
 		//	cout << "Modulating Rx Input" << endl;
 			for (int i = 0; i < RxMod.InBufSz; i++)
 			{
-				pRxModInp[i] = pTxModOut[i];
+				pRxModInp[i] = pRxTransPreOut[i];
 		//		cout << pRxModInp[i] << "\t";
 			}
 		//	cout << endl;
 			
+			// RxD.Demodulating(RxDSCRB.pInpBuf,RxE.GetpEqW(),RxE.GetpHdm(),(AWGNSigmaArray[nsnr]));			
 			RxMod.Demodulating(pRxModInp, pRxModOut, (AWGNSigmaArray[nsnr]));
 		//	RxMod.Demodulating(pRxModInp, pRxModHD);
 
@@ -217,14 +263,6 @@ int main(int argc, char *argv[])
 		   
 			RxRM.RxRateMatching(pRxRMInp, pRxRMOut, pRxRMHard);
 
-			/*
-			for (int i = 0; i < (RxRM.OutBufSz / 3); i++)
-			{
-				pRxTbInp[3 * i] = pRxRMOut[i];
-				pRxTbInp[3 * i + 1] = pRxRMOut[i + 1];
-				pRxTbInp[3 * i + 2] = pRxRMOut[i + 2];
-			}
-			*/
 
 			cout << "Turbo Rx Input" << endl;
 			for (int i = 0; i < RxTurbo.InBufSz; i++)
@@ -359,26 +397,55 @@ int main(int argc, char *argv[])
 	delete[] pHDFS;
 	delete[] pRxFS;
 
+	/** Deallocation **/
+	// Turbo
 	delete[] pTxTbInp;
 	delete[] pTxTbOut;
 	delete[] pRxTbInp;
 	delete[] pRxTbOut;
 
+	// Rate matching
 	delete[] pTxRMInp;
 	delete[] pTxRMOut;
 	delete[] pRxRMInp;
 	delete[] pRxRMOut;
 	delete[] pRxRMHard;
 
+	// Scrambling
 	delete[] pTxSCRBInp;
 	delete[] pTxSCRBOut;
 	delete[] pRxSCRBInp;
 	delete[] pRxSCRBOut;
 
+	// Modulation
 	delete[] pTxModInp;
 	delete[] pTxModOut;
 	delete[] pRxModInp;
 	delete[] pRxModOut;
+
+	// Transform precoding
+	delete[] pTxTransPreInp;
+	delete[] pTxTransPreOut;
+	delete[] pRxTransPreInp;
+	delete[] pRxTransPreOut;
+	
+	// Resouce mapping
+	delete[] pTxResMapInp;
+	delete[] pTxResMapOut;
+	delete[] pRxResMapInp;
+	delete[] pRxResMapOut;
+
+	// Equalizing
+	delete[] pRxEqInp;
+	delete[] pRxEqOut;
+
+	// OFDM
+	delete[] pTxOFDMInp;
+	delete[] pTxOFDMOut;
+	delete[] pRxOFDMInp;
+	delete[] pRxOFDMOut;
+	
+	/** End of deallocation**/
 
 	return 0;
 }

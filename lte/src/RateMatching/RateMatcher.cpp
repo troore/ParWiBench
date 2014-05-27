@@ -241,6 +241,7 @@ RateMatcher::RateMatcher(BSPara* pBS)
 	MQAM=(*pBS).MQAMPerUser;
 	NumLayer=(*pBS).NumLayerPerUser;
 	DataLength=(*pBS).DataLengthPerUser;
+	BlkSize = pBS->BlkSize;
 
 	Rate=3;
 
@@ -249,7 +250,7 @@ RateMatcher::RateMatcher(BSPara* pBS)
 //	LastBlockLen=(DataLength%6144);
 //	NumBlock=(DataLength-LastBlockLen)/6144+1;
 //	NumBlock = (DataLength - DataLength % 6144) / 6144 + 1;
-	NumBlock = (DataLength + pBS->BlkSize - 1) / pBS->BlkSize;
+	NumBlock = (DataLength + BlkSize - 1) / BlkSize;
 	LastBlockLen = (DataLength % BlkSize) ? (DataLength % BlkSize) : BlkSize;
 //	EncDataLen=(NumBlock-1)*(6144*Rate+12)+1*(LastBlockLen*Rate+12);
 //	pLLRout=new float[EncDataLen];
