@@ -338,6 +338,33 @@ void GeneRandomInput(FIFO<int> *pIn,int Sz[2],const char *name)
 	}
 }
 
+void GeneRandomInput(int *pIn,int Sz,const char *name)
+{
+	FILE *fptr=NULL;
+	int sd = -111;
+
+	int *pRandom=new int[Sz];
+
+	fptr = fopen(name,"w+");
+	for(int i = 0; i < Sz; i++)
+	{
+		sd-=i;
+		float v=(float)gauss1(&sd);
+		if(v>0){*(pRandom+i)=1;}
+		else{*(pRandom+i)=0;}
+		fprintf(fptr,"%d\n",*(pRandom+i));
+	}
+	fclose(fptr);
+
+	for (int i = 0; i < Sz; i++)
+	{
+		pIn[i] = pRandom[i];
+	}
+
+	delete[] pRandom;
+}
+
+
 
 void GeneRandomInput(FIFO<float> *pIn,int Sz[2],const char *name)
 {
@@ -615,7 +642,7 @@ void WriteOutputToFiles(int *pOut, int Sz, const char *name)
 	fptr = fopen(name,"w+");
 	for(int i=0;i<Sz;i++)
 	{
-		fprintf(fptr,"%d\t",*(pOut+i));
+		fprintf(fptr,"%d\n",*(pOut+i));
 	}
 	fclose(fptr);
 }

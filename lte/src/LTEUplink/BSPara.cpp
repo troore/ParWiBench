@@ -7,7 +7,7 @@ BSPara::BSPara()
 void BSPara::initBSPara(void)
 {
 	NumULSymbSF=14;
-	NIFFT=128;
+	NIFFT = 128;
 	CPLen=9;
 	RSU=0;
 	RSV=0;
@@ -16,7 +16,7 @@ void BSPara::initBSPara(void)
 	DMRSSymbPos[1]=10;
 
 	SCLocPattern=1;
-	MDFTPerUser=75;
+	MDFTPerUser = 75;
 	MQAMPerUser=16;
 	NumLayerPerUser=2;
 	
@@ -35,7 +35,7 @@ void BSPara::initBSPara(void)
 	n_gens = 2;
 	gens[0] = 013, gens[1] = 015;
 	constraint_length = 4;
-	n_iterations = 2;
+	n_iterations = 4;
 	/* Turbo parameters over... */
 	
 	if(BSParameterPrintFlag)

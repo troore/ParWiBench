@@ -694,7 +694,7 @@ void Turbo::decode_block(float *recv_syst1, float *recv_syst2,
 	{
 		int_recv_syst[i] = recv_syst2[i] + int_recv_syst1[i];
 	}
-	for (int i = m_n_uncoded; i < n_tailed; i++)
+	for (int i = interleaver_size; i < n_tailed; i++)
 	{
 		recv_syst[i] = recv_syst1[i];
 		int_recv_syst[i] = recv_syst2[i];
@@ -705,15 +705,25 @@ void Turbo::decode_block(float *recv_syst1, float *recv_syst2,
 	{
 	//	map_decoder(recv_syst1, recv_parity1, Le21, Le12, interleaver_size);
 		log_decoder(recv_syst, recv_parity1, Le21, Le12, interleaver_size);
-		//	for (int i = 0; i < interleaver_size; i++)
-		//	std::cout << Le21[i] << "\t" << Le12[i] << std::endl;
+		/*
+		for (int j = 0; j < interleaver_size; j++)
+			std::cout << Le21[j] << "\t" << Le12[j] << std::endl;
+			*/
 		internal_interleaver(Le12, Le12_int, interleaver_size);
-
-//		for (int i = 0; i < interleaver_size; i++)
-//			std::cout << Le12[i] << "\t" << Le12_int[i] << std::endl;
-		memset(Le12_int + interleaver_size, 0, m_n_tail);
+		/*
+		for (int j = 0; j < interleaver_size; j++)
+			std::cout << Le12[j] << "\t" << Le12_int[j] << std::endl;
+			*/
+		memset(Le12_int + interleaver_size, 0, m_n_tail * sizeof(float));
 	//	map_decoder(recv_syst2, recv_parity2, Le12_int, Le21_int, interleaver_size);
 		log_decoder(int_recv_syst, recv_parity2, Le12_int, Le21_int, interleaver_size);
+		/*
+		for (int j = 0; j < interleaver_size; j++)
+		{
+		//	std::cout << int_recv_syst[j] << "\t" << recv_parity2[j] << std::endl;
+			std::cout << Le12_int[j] << "\t" << Le21_int[j] << std::endl;
+		}
+		*/
 		internal_deinterleaver(Le21_int, Le21, interleaver_size);
 		memset(Le21 + interleaver_size, 0, m_n_tail);
 	}
@@ -721,7 +731,7 @@ void Turbo::decode_block(float *recv_syst1, float *recv_syst2,
 	for (int i = 0; i < interleaver_size; i++)
 	{
 		L[i] = recv_syst[i] + Le21[i] + Le12[i];
-		std::cout << recv_syst1[i] << "\t" << Le21[i] << "\t" << Le12[i] << std::endl;
+	//	std::cout << recv_syst1[i] << "\t" << Le21[i] << "\t" << Le12[i] << std::endl;
 		decoded_bits_i[i] = (L[i] > 0.0) ? 1 : -1;
 	//	decoded_bits_i[i] = (L[i] >= 0.0) ? 1 : 0;
 	}
@@ -1048,6 +1058,7 @@ void Turbo::log_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 			den = com_log(den, alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp1 + beta[s1 * (block_length + 1) + k]);
 		}
 		extrinsic[kk] = nom - den;
+	//	std::cout << extrinsic[kk] << endl;
 	}
 	
 	delete[] alpha;

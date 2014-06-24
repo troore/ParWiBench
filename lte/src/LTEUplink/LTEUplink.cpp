@@ -134,23 +134,24 @@ int main(int argc, char *argv[])
 			//	GenerateLTEChainInput(TxTbE.pInpBuf,DataK,pTxDS);
 			GenerateLTEChainInput(pTxTbInp, DataK, pTxDS, RANDOMSEED);
 
-			
+			/*
 			cout << "Turbo Tx Input" << endl;
 			for (int i = 0; i < DataK; i++)
 				cout << pTxTbInp[i] << "\t";
 			cout << endl;
+			*/
 			
 
 			//	TxTbE.TurboEncoding(TxRM.pInpBuf);
 			TxTurbo.TurboEncoding(pTxTbInp, pTxTbOut);
 
-			cout << "RateMatching Tx Input" << endl;
+			//	cout << "RateMatching Tx Input" << endl;
 			for (int i = 0; i < TxRM.InBufSz; i++)
 			{
 				pTxRMInp[i] = pTxTbOut[i];
-				cout << pTxRMInp[i] << "\t";
+				//	cout << pTxRMInp[i] << "\t";
 			}
-			cout << endl;
+			//	cout << endl;
 
 			TxRM.TxRateMatching(pTxRMInp, pTxRMOut);
 
@@ -264,23 +265,23 @@ int main(int argc, char *argv[])
 			RxRM.RxRateMatching(pRxRMInp, pRxRMOut, pRxRMHard);
 
 
-			cout << "Turbo Rx Input" << endl;
+			//	cout << "Turbo Rx Input" << endl;
 			for (int i = 0; i < RxTurbo.InBufSz; i++)
 			{
 				pRxTbInp[i] = pRxRMOut[i];
-				cout << pRxTbInp[i] << "\t";
+				//	cout << pRxTbInp[i] << "\t";
 			}
-			cout << endl;
+			//	cout << endl;
 			//	RxTbD.TurboDecoding(&RxFileSink);
 			RxTurbo.TurboDecoding(pRxTbInp, pRxTbOut);
 
-			cout << "Turbo Rx Output" << endl;
+			//	cout << "Turbo Rx Output" << endl;
 			for (int i = 0; i < RxTurbo.OutBufSz; i++)
 			{
 				pRxTbOut[i] = (1 - pRxTbOut[i]) / 2;
-				cout << pRxTbOut[i] << "\t";
+				//	cout << pRxTbOut[i] << "\t";
 			}
-			cout << endl;
+			//	cout << endl;
 
 			//	ReadLTEChainOutput(&RxFileSink,pRxFS);
 			ReadLTEChainOutput(pRxTbOut, pRxFS, DataK);

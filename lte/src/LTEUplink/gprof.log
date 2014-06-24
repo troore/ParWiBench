@@ -1,0 +1,813 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 66.67      0.02     0.02        8     2.50     2.50  Turbo::log_decoder(float*, float*, float*, float*, int)
+ 33.34      0.03     0.01    59400     0.00     0.00  std::complex<float>::imag() const
+  0.00      0.03     0.00   758656     0.00     0.00  max_log(float, float)
+  0.00      0.03     0.00   107554     0.00     0.00  std::complex<float>::complex(float, float)
+  0.00      0.03     0.00    59400     0.00     0.00  std::complex<float>::real() const
+  0.00      0.03     0.00    30000     0.00     0.00  std::complex<float>& std::complex<float>::operator-=<float>(std::complex<float> const&)
+  0.00      0.03     0.00    28801     0.00     0.00  __gnu_cxx::__promote_2<float, double, __gnu_cxx::__promote<float, std::__is_integer<float>::__value>::__type, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type>::__type std::pow<float, double>(float, double)
+  0.00      0.03     0.00    28800     0.00     0.00  std::complex<float>::__rep() const
+  0.00      0.03     0.00    28800     0.00     0.00  std::__complex_abs(floatcomplex )
+  0.00      0.03     0.00    28800     0.00     0.00  float std::abs<float>(std::complex<float> const&)
+  0.00      0.03     0.00    28800     0.00     0.00  std::complex<float> std::operator-<float>(std::complex<float> const&, std::complex<float> const&)
+  0.00      0.03     0.00    14400     0.00     0.00  Modulation::vecmin(float*, int)
+  0.00      0.03     0.00    14400     0.00     0.00  std::complex<float>& std::complex<float>::operator*=<float>(std::complex<float> const&)
+  0.00      0.03     0.00    14400     0.00     0.00  std::complex<float> std::operator*<float>(std::complex<float> const&, std::complex<float> const&)
+  0.00      0.03     0.00    13200     0.00     0.00  std::complex<float>& std::complex<float>::operator+=<float>(std::complex<float> const&)
+  0.00      0.03     0.00    10768     0.00     0.00  std::complex<float>::operator/=(float)
+  0.00      0.03     0.00    10768     0.00     0.00  std::sqrt(float)
+  0.00      0.03     0.00    10768     0.00     0.00  std::complex<float> std::operator/<float>(std::complex<float> const&, float const&)
+  0.00      0.03     0.00     7200     0.00     0.00  __gnu_cxx::__promote_2<double, float, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type, __gnu_cxx::__promote<float, std::__is_integer<float>::__value>::__type>::__type std::pow<double, float>(double, float)
+  0.00      0.03     0.00     6600     0.00     0.00  std::complex<float> InnerProd<int, std::complex<float> >(int, std::complex<float>*, std::complex<float>*)
+  0.00      0.03     0.00     3054     0.00     0.00  ran1(int*)
+  0.00      0.03     0.00     2368     0.00     0.00  gauss1(int*)
+  0.00      0.03     0.00     1800     0.00     0.00  void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>*, std::complex<float>*)
+  0.00      0.03     0.00     1200     0.00     0.00  void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>**, std::complex<float>**)
+  0.00      0.03     0.00     1200     0.00     0.00  std::complex<float>& std::complex<float>::operator/=<float>(std::complex<float> const&)
+  0.00      0.03     0.00     1200     0.00     0.00  std::complex<float> std::operator/<float>(std::complex<float> const&, std::complex<float> const&)
+  0.00      0.03     0.00      600     0.00     0.00  std::complex<float> std::conj<float>(std::complex<float> const&)
+  0.00      0.03     0.00      446     0.00     0.00  std::complex<double>::complex(double, double)
+  0.00      0.03     0.00      300     0.00     0.00  std::complex<double>::imag() const
+  0.00      0.03     0.00      300     0.00     0.00  std::complex<double>::real() const
+  0.00      0.03     0.00      300     0.00     0.00  std::complex<double>::__rep() const
+  0.00      0.03     0.00      300     0.00     0.00  std::complex<double>& std::complex<double>::operator*=<double>(std::complex<double> const&)
+  0.00      0.03     0.00      300     0.00     0.00  std::complex<float>::complex(std::complex<double> const&)
+  0.00      0.03     0.00      300     0.00     0.00  std::complex<double> std::operator*<double>(std::complex<double> const&, std::complex<double> const&)
+  0.00      0.03     0.00      150     0.00     0.00  void MatrixInv<int, std::complex<float> >(int, std::complex<float>**, std::complex<float>**)
+  0.00      0.03     0.00       75     0.00     0.01  Equalizer::FDLSEstimation(std::complex<float>**, std::complex<float>**, std::complex<float>**, std::complex<float>**, int)
+  0.00      0.03     0.00       75     0.00     0.06  Equalizer::FDLSEqualization(std::complex<float>*, std::complex<float>**, int, int, std::complex<float>*)
+  0.00      0.03     0.00       75     0.00     0.00  std::complex<float>::operator*=(float)
+  0.00      0.03     0.00       32     0.00     0.00  Turbo::calc_state_transition(int, int, int*)
+  0.00      0.03     0.00        5     0.00     0.00  void Turbo::internal_interleaver<float>(float*, float*, int)
+  0.00      0.03     0.00        5     0.00     0.00  void Turbo::internal_deinterleaver<float>(float*, float*, int)
+  0.00      0.03     0.00        4     0.00     0.00  Turbo::reverse_int(int, int)
+  0.00      0.03     0.00        2     0.00     0.00  Modulation::InitModTables()
+  0.00      0.03     0.00        2     0.00     0.00  Modulation::~Modulation()
+  0.00      0.03     0.00        2     0.00     0.00  RateMatcher::~RateMatcher()
+  0.00      0.03     0.00        2     0.00     0.00  TransformPrecoder::~TransformPrecoder()
+  0.00      0.03     0.00        2     0.00     0.00  SubblockInterleaver_lte<int, float>::SubblockInterleaver_lte()
+  0.00      0.03     0.00        2     0.00     0.00  SubblockInterleaver_lte<int, float>::~SubblockInterleaver_lte()
+  0.00      0.03     0.00        2     0.00     0.00  SubblockInterleaver_lte<int, int>::SubblockInterleaver_lte()
+  0.00      0.03     0.00        2     0.00     0.00  SubblockInterleaver_lte<int, int>::~SubblockInterleaver_lte()
+  0.00      0.03     0.00        2     0.00     0.00  OFDM::~OFDM()
+  0.00      0.03     0.00        2     0.00     0.00  Turbo::set_parameters(int*, int, int, int, int)
+  0.00      0.03     0.00        2     0.00     0.00  Turbo::constituent_encoder(int*, int, int*, int*)
+  0.00      0.03     0.00        2     0.00     0.00  Turbo::set_generator_polynomials(int*, int, int)
+  0.00      0.03     0.00        2     0.00     0.00  Turbo::~Turbo()
+  0.00      0.03     0.00        2     0.00     0.00  ResMapper::~ResMapper()
+  0.00      0.03     0.00        2     0.00     0.00  std::log(float)
+  0.00      0.03     0.00        1     0.00     0.00  _GLOBAL__sub_I_TURBO_INT_K_TABLE
+  0.00      0.03     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z18ReadInputFromFilesP4FIFOIiEPiPKc
+  0.00      0.03     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN10Modulation13InitModTablesEv
+  0.00      0.03     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN11RateMatcherC2EP8UserPara
+  0.00      0.03     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN17TransformPrecoderC2EP8UserPara
+  0.00      0.03     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN4OFDMC2EP8UserPara
+  0.00      0.03     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN6BSParaC2Ev
+  0.00      0.03     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN8UserParaC2EP6BSPara
+  0.00      0.03     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN9EqualizerC2EP6BSParaP8UserPara
+  0.00      0.03     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN9ResMapperC2EP8UserPara
+  0.00      0.03     0.00        1     0.00     0.00  _GLOBAL__sub_I_main
+  0.00      0.03     0.00        1     0.00     0.00  ReadLTEChainOutput(int*, int*, int)
+  0.00      0.03     0.00        1     0.00     0.00  GenerateLTEChainInput(int*, int, int*, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00      0.03     0.00        1     0.00     0.00  Modulation::Modulating(int*, std::complex<float>*)
+  0.00      0.03     0.00        1     0.00     4.85  Modulation::Demodulating(std::complex<float>*, float*, float)
+  0.00      0.03     0.00        1     0.00     0.00  Modulation::Modulation(BSPara*)
+  0.00      0.03     0.00        1     0.00     0.00  Modulation::Modulation(UserPara*)
+  0.00      0.03     0.00        1     0.00     0.00  RateMatcher::RxRateMatching(float*, float*, int*)
+  0.00      0.03     0.00        1     0.00     0.00  RateMatcher::TxRateMatching(int*, int*)
+  0.00      0.03     0.00        1     0.00     0.00  RateMatcher::RateMatcher(UserPara*)
+  0.00      0.03     0.00        1     0.00     0.00  RateMatcher::RateMatcher(BSPara*)
+  0.00      0.03     0.00        1     0.00     0.00  TransformPrecoder::TransformDecoding(std::complex<float>*, std::complex<float>*)
+  0.00      0.03     0.00        1     0.00     0.00  TransformPrecoder::TransformPrecoding(std::complex<float>*, std::complex<float>*)
+  0.00      0.03     0.00        1     0.00     0.00  TransformPrecoder::TransformPrecoder(BSPara*)
+  0.00      0.03     0.00        1     0.00     0.00  TransformPrecoder::TransformPrecoder(UserPara*)
+  0.00      0.03     0.00        1     0.00     0.00  SubblockInterleaver_lte<int, float>::SubblockDeInterleaving(int, float**, float**)
+  0.00      0.03     0.00        1     0.00     0.00  SubblockInterleaver_lte<int, int>::SubblockInterleaving(int, int**, int**)
+  0.00      0.03     0.00        1     0.00     0.00  OFDM::modulating(std::complex<float>*, std::complex<float>*)
+  0.00      0.03     0.00        1     0.00     0.00  OFDM::demodulating(std::complex<float>*, std::complex<float>*)
+  0.00      0.03     0.00        1     0.00     0.00  OFDM::OFDM(UserPara*)
+  0.00      0.03     0.00        1     0.00     0.00  OFDM::OFDM(BSPara*)
+  0.00      0.03     0.00        1     0.00    20.00  Turbo::decode_block(float*, float*, float*, float*, int*, int)
+  0.00      0.03     0.00        1     0.00    20.00  Turbo::TurboDecoding(float*, int*)
+  0.00      0.03     0.00        1     0.00     0.00  Turbo::TurboEncoding(int*, int*)
+  0.00      0.03     0.00        1     0.00     0.00  void Turbo::internal_interleaver<int>(int*, int*, int)
+  0.00      0.03     0.00        1     0.00     0.00  Turbo::Turbo(BSPara*)
+  0.00      0.03     0.00        1     0.00     0.00  Turbo::Turbo(UserPara*)
+  0.00      0.03     0.00        1     0.00     0.00  BSPara::initBSPara()
+  0.00      0.03     0.00        1     0.00     0.00  BSPara::BSPara()
+  0.00      0.03     0.00        1     0.00     0.00  BSPara::~BSPara()
+  0.00      0.03     0.00        1     0.00     0.00  UserPara::initUserPara()
+  0.00      0.03     0.00        1     0.00     0.00  UserPara::geneDMRS()
+  0.00      0.03     0.00        1     0.00     0.00  UserPara::UserPara(BSPara*)
+  0.00      0.03     0.00        1     0.00     0.00  UserPara::~UserPara()
+  0.00      0.03     0.00        1     0.00     5.15  Equalizer::Equalizing(std::complex<float>*, std::complex<float>*)
+  0.00      0.03     0.00        1     0.00     5.15  Equalizer::LSFreqDomain(std::complex<float>*, std::complex<float>*)
+  0.00      0.03     0.00        1     0.00     0.00  Equalizer::Equalizer(BSPara*, UserPara*)
+  0.00      0.03     0.00        1     0.00     0.00  Equalizer::~Equalizer()
+  0.00      0.03     0.00        1     0.00     0.00  ResMapper::SubCarrierMapping(std::complex<float>*, std::complex<float>*)
+  0.00      0.03     0.00        1     0.00     0.00  ResMapper::SubCarrierDemapping(std::complex<float>*, std::complex<float>*)
+  0.00      0.03     0.00        1     0.00     0.00  ResMapper::ResMapper(BSPara*)
+  0.00      0.03     0.00        1     0.00     0.00  ResMapper::ResMapper(UserPara*)
+  0.00      0.03     0.00        1     0.00     0.00  Scrambler<float>::Descrambling(float*, float*)
+  0.00      0.03     0.00        1     0.00     0.00  Scrambler<float>::GenScrambInt()
+  0.00      0.03     0.00        1     0.00     0.00  Scrambler<float>::Scrambler(BSPara*)
+  0.00      0.03     0.00        1     0.00     0.00  Scrambler<float>::~Scrambler()
+  0.00      0.03     0.00        1     0.00     0.00  Scrambler<int>::Scrambling(int*, int*)
+  0.00      0.03     0.00        1     0.00     0.00  Scrambler<int>::GenScrambInt()
+  0.00      0.03     0.00        1     0.00     0.00  Scrambler<int>::Scrambler(UserPara*)
+  0.00      0.03     0.00        1     0.00     0.00  Scrambler<int>::~Scrambler()
+  0.00      0.03     0.00        1     0.00     0.00  UserPara::GetpDMRS() const
+  0.00      0.03     0.00        1     0.00     0.00  std::numeric_limits<double>::max()
+  0.00      0.03     0.00        1     0.00     0.00  std::numeric_limits<double>::min()
+
+			Call graph
+
+
+granularity: each sample hit covers 2 byte(s) for 33.33% of 0.03 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]    100.0    0.00    0.03                 main [1]
+                0.00    0.02       1/1           Turbo::TurboDecoding(float*, int*) [4]
+                0.00    0.01       1/1           Equalizer::Equalizing(std::complex<float>*, std::complex<float>*) [6]
+                0.00    0.00       1/1           Modulation::Demodulating(std::complex<float>*, float*, float) [10]
+                0.00    0.00   40608/107554      std::complex<float>::complex(float, float) [30]
+                0.00    0.00       2/2           RateMatcher::~RateMatcher() [57]
+                0.00    0.00       2/2           Turbo::~Turbo() [67]
+                0.00    0.00       2/2           Modulation::~Modulation() [56]
+                0.00    0.00       2/2           TransformPrecoder::~TransformPrecoder() [58]
+                0.00    0.00       2/2           ResMapper::~ResMapper() [68]
+                0.00    0.00       2/2           OFDM::~OFDM() [63]
+                0.00    0.00       1/1           BSPara::BSPara() [120]
+                0.00    0.00       1/1           BSPara::initBSPara() [119]
+                0.00    0.00       1/1           UserPara::UserPara(BSPara*) [124]
+                0.00    0.00       1/2           std::log(float) [69]
+                0.00    0.00       1/1           Turbo::Turbo(UserPara*) [118]
+                0.00    0.00       1/1           RateMatcher::RateMatcher(UserPara*) [103]
+                0.00    0.00       1/1           Scrambler<int>::Scrambler(UserPara*) [138]
+                0.00    0.00       1/1           Modulation::Modulation(UserPara*) [100]
+                0.00    0.00       1/1           TransformPrecoder::TransformPrecoder(UserPara*) [108]
+                0.00    0.00       1/1           ResMapper::ResMapper(UserPara*) [131]
+                0.00    0.00       1/1           OFDM::OFDM(UserPara*) [113]
+                0.00    0.00       1/1           OFDM::OFDM(BSPara*) [114]
+                0.00    0.00       1/1           ResMapper::ResMapper(BSPara*) [130]
+                0.00    0.00       1/1           Equalizer::Equalizer(BSPara*, UserPara*) [126]
+                0.00    0.00       1/1           TransformPrecoder::TransformPrecoder(BSPara*) [107]
+                0.00    0.00       1/1           Modulation::Modulation(BSPara*) [99]
+                0.00    0.00       1/1           Scrambler<float>::Scrambler(BSPara*) [134]
+                0.00    0.00       1/1           RateMatcher::RateMatcher(BSPara*) [104]
+                0.00    0.00       1/1           Turbo::Turbo(BSPara*) [117]
+                0.00    0.00       1/1           GenerateLTEChainInput(int*, int, int*, int) [82]
+                0.00    0.00       1/1           Turbo::TurboEncoding(int*, int*) [115]
+                0.00    0.00       1/1           RateMatcher::TxRateMatching(int*, int*) [102]
+                0.00    0.00       1/1           Scrambler<int>::Scrambling(int*, int*) [136]
+                0.00    0.00       1/1           Modulation::Modulating(int*, std::complex<float>*) [98]
+                0.00    0.00       1/1           TransformPrecoder::TransformPrecoding(std::complex<float>*, std::complex<float>*) [106]
+                0.00    0.00       1/1           ResMapper::SubCarrierMapping(std::complex<float>*, std::complex<float>*) [128]
+                0.00    0.00       1/1           OFDM::modulating(std::complex<float>*, std::complex<float>*) [111]
+                0.00    0.00       1/1           OFDM::demodulating(std::complex<float>*, std::complex<float>*) [112]
+                0.00    0.00       1/1           ResMapper::SubCarrierDemapping(std::complex<float>*, std::complex<float>*) [129]
+                0.00    0.00       1/1           TransformPrecoder::TransformDecoding(std::complex<float>*, std::complex<float>*) [105]
+                0.00    0.00       1/1           Scrambler<float>::Descrambling(float*, float*) [132]
+                0.00    0.00       1/1           RateMatcher::RxRateMatching(float*, float*, int*) [101]
+                0.00    0.00       1/1           ReadLTEChainOutput(int*, int*, int) [81]
+                0.00    0.00       1/1           Scrambler<float>::~Scrambler() [135]
+                0.00    0.00       1/1           Equalizer::~Equalizer() [127]
+                0.00    0.00       1/1           Scrambler<int>::~Scrambler() [139]
+                0.00    0.00       1/1           UserPara::~UserPara() [125]
+                0.00    0.00       1/1           BSPara::~BSPara() [121]
+-----------------------------------------------
+                0.02    0.00       8/8           Turbo::decode_block(float*, float*, float*, float*, int*, int) [3]
+[2]     66.7    0.02    0.00       8         Turbo::log_decoder(float*, float*, float*, float*, int) [2]
+                0.00    0.00  758656/758656      max_log(float, float) [29]
+-----------------------------------------------
+                0.00    0.02       1/1           Turbo::TurboDecoding(float*, int*) [4]
+[3]     66.7    0.00    0.02       1         Turbo::decode_block(float*, float*, float*, float*, int*, int) [3]
+                0.02    0.00       8/8           Turbo::log_decoder(float*, float*, float*, float*, int) [2]
+                0.00    0.00       5/5           void Turbo::internal_interleaver<float>(float*, float*, int) [52]
+                0.00    0.00       5/5           void Turbo::internal_deinterleaver<float>(float*, float*, int) [53]
+-----------------------------------------------
+                0.00    0.02       1/1           main [1]
+[4]     66.7    0.00    0.02       1         Turbo::TurboDecoding(float*, int*) [4]
+                0.00    0.02       1/1           Turbo::decode_block(float*, float*, float*, float*, int*, int) [3]
+-----------------------------------------------
+                0.00    0.00     600/59400       std::complex<float> std::conj<float>(std::complex<float> const&) [22]
+                0.00    0.00    1200/59400       std::complex<float>& std::complex<float>::operator/=<float>(std::complex<float> const&) [20]
+                0.00    0.00   13200/59400       std::complex<float>& std::complex<float>::operator+=<float>(std::complex<float> const&) [16]
+                0.00    0.00   14400/59400       std::complex<float>& std::complex<float>::operator*=<float>(std::complex<float> const&) [13]
+                0.01    0.00   30000/59400       std::complex<float>& std::complex<float>::operator-=<float>(std::complex<float> const&) [8]
+[5]     33.3    0.01    0.00   59400         std::complex<float>::imag() const [5]
+-----------------------------------------------
+                0.00    0.01       1/1           main [1]
+[6]     17.2    0.00    0.01       1         Equalizer::Equalizing(std::complex<float>*, std::complex<float>*) [6]
+                0.00    0.01       1/1           Equalizer::LSFreqDomain(std::complex<float>*, std::complex<float>*) [7]
+-----------------------------------------------
+                0.00    0.01       1/1           Equalizer::Equalizing(std::complex<float>*, std::complex<float>*) [6]
+[7]     17.2    0.00    0.01       1         Equalizer::LSFreqDomain(std::complex<float>*, std::complex<float>*) [7]
+                0.00    0.00      75/75          Equalizer::FDLSEqualization(std::complex<float>*, std::complex<float>**, int, int, std::complex<float>*) [12]
+                0.00    0.00      75/75          Equalizer::FDLSEstimation(std::complex<float>**, std::complex<float>**, std::complex<float>**, std::complex<float>**, int) [18]
+                0.00    0.00     300/600         std::complex<float> std::conj<float>(std::complex<float> const&) [22]
+                0.00    0.00    1200/107554      std::complex<float>::complex(float, float) [30]
+                0.00    0.00       1/1           UserPara::GetpDMRS() const [140]
+-----------------------------------------------
+                0.00    0.00    1200/30000       void MatrixInv<int, std::complex<float> >(int, std::complex<float>**, std::complex<float>**) [19]
+                0.00    0.00   28800/30000       std::complex<float> std::operator-<float>(std::complex<float> const&, std::complex<float> const&) [9]
+[8]     16.8    0.00    0.01   30000         std::complex<float>& std::complex<float>::operator-=<float>(std::complex<float> const&) [8]
+                0.01    0.00   30000/59400       std::complex<float>::imag() const [5]
+                0.00    0.00   30000/59400       std::complex<float>::real() const [31]
+-----------------------------------------------
+                0.00    0.00   28800/28800       Modulation::Demodulating(std::complex<float>*, float*, float) [10]
+[9]     16.2    0.00    0.00   28800         std::complex<float> std::operator-<float>(std::complex<float> const&, std::complex<float> const&) [9]
+                0.00    0.00   28800/30000       std::complex<float>& std::complex<float>::operator-=<float>(std::complex<float> const&) [8]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[10]    16.2    0.00    0.00       1         Modulation::Demodulating(std::complex<float>*, float*, float) [10]
+                0.00    0.00   28800/28800       std::complex<float> std::operator-<float>(std::complex<float> const&, std::complex<float> const&) [9]
+                0.00    0.00   28801/28801       __gnu_cxx::__promote_2<float, double, __gnu_cxx::__promote<float, std::__is_integer<float>::__value>::__type, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type>::__type std::pow<float, double>(float, double) [32]
+                0.00    0.00   28800/107554      std::complex<float>::complex(float, float) [30]
+                0.00    0.00   28800/28800       float std::abs<float>(std::complex<float> const&) [35]
+                0.00    0.00   14400/14400       Modulation::vecmin(float*, int) [36]
+-----------------------------------------------
+                0.00    0.00    3000/6600        void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>**, std::complex<float>**) [17]
+                0.00    0.00    3600/6600        void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>*, std::complex<float>*) [15]
+[11]    14.8    0.00    0.00    6600         std::complex<float> InnerProd<int, std::complex<float> >(int, std::complex<float>*, std::complex<float>*) [11]
+                0.00    0.00   13200/14400       std::complex<float> std::operator*<float>(std::complex<float> const&, std::complex<float> const&) [14]
+                0.00    0.00   13200/13200       std::complex<float>& std::complex<float>::operator+=<float>(std::complex<float> const&) [16]
+                0.00    0.00    6600/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00      75/75          Equalizer::LSFreqDomain(std::complex<float>*, std::complex<float>*) [7]
+[12]    14.7    0.00    0.00      75         Equalizer::FDLSEqualization(std::complex<float>*, std::complex<float>**, int, int, std::complex<float>*) [12]
+                0.00    0.00    1800/1800        void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>*, std::complex<float>*) [15]
+                0.00    0.00     975/1200        void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>**, std::complex<float>**) [17]
+                0.00    0.00      75/150         void MatrixInv<int, std::complex<float> >(int, std::complex<float>**, std::complex<float>**) [19]
+                0.00    0.00     300/600         std::complex<float> std::conj<float>(std::complex<float> const&) [22]
+                0.00    0.00    8550/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00   14400/14400       std::complex<float> std::operator*<float>(std::complex<float> const&, std::complex<float> const&) [14]
+[13]     8.1    0.00    0.00   14400         std::complex<float>& std::complex<float>::operator*=<float>(std::complex<float> const&) [13]
+                0.00    0.00   14400/59400       std::complex<float>::imag() const [5]
+                0.00    0.00   14400/59400       std::complex<float>::real() const [31]
+-----------------------------------------------
+                0.00    0.00    1200/14400       void MatrixInv<int, std::complex<float> >(int, std::complex<float>**, std::complex<float>**) [19]
+                0.00    0.00   13200/14400       std::complex<float> InnerProd<int, std::complex<float> >(int, std::complex<float>*, std::complex<float>*) [11]
+[14]     8.1    0.00    0.00   14400         std::complex<float> std::operator*<float>(std::complex<float> const&, std::complex<float> const&) [14]
+                0.00    0.00   14400/14400       std::complex<float>& std::complex<float>::operator*=<float>(std::complex<float> const&) [13]
+-----------------------------------------------
+                0.00    0.00    1800/1800        Equalizer::FDLSEqualization(std::complex<float>*, std::complex<float>**, int, int, std::complex<float>*) [12]
+[15]     8.1    0.00    0.00    1800         void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>*, std::complex<float>*) [15]
+                0.00    0.00    3600/6600        std::complex<float> InnerProd<int, std::complex<float> >(int, std::complex<float>*, std::complex<float>*) [11]
+-----------------------------------------------
+                0.00    0.00   13200/13200       std::complex<float> InnerProd<int, std::complex<float> >(int, std::complex<float>*, std::complex<float>*) [11]
+[16]     7.4    0.00    0.00   13200         std::complex<float>& std::complex<float>::operator+=<float>(std::complex<float> const&) [16]
+                0.00    0.00   13200/59400       std::complex<float>::imag() const [5]
+                0.00    0.00   13200/59400       std::complex<float>::real() const [31]
+-----------------------------------------------
+                0.00    0.00     225/1200        Equalizer::FDLSEstimation(std::complex<float>**, std::complex<float>**, std::complex<float>**, std::complex<float>**, int) [18]
+                0.00    0.00     975/1200        Equalizer::FDLSEqualization(std::complex<float>*, std::complex<float>**, int, int, std::complex<float>*) [12]
+[17]     6.7    0.00    0.00    1200         void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>**, std::complex<float>**) [17]
+                0.00    0.00    3000/6600        std::complex<float> InnerProd<int, std::complex<float> >(int, std::complex<float>*, std::complex<float>*) [11]
+                0.00    0.00   10800/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00      75/75          Equalizer::LSFreqDomain(std::complex<float>*, std::complex<float>*) [7]
+[18]     2.3    0.00    0.00      75         Equalizer::FDLSEstimation(std::complex<float>**, std::complex<float>**, std::complex<float>**, std::complex<float>**, int) [18]
+                0.00    0.00     225/1200        void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>**, std::complex<float>**) [17]
+                0.00    0.00      75/150         void MatrixInv<int, std::complex<float> >(int, std::complex<float>**, std::complex<float>**) [19]
+                0.00    0.00     900/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00      75/150         Equalizer::FDLSEstimation(std::complex<float>**, std::complex<float>**, std::complex<float>**, std::complex<float>**, int) [18]
+                0.00    0.00      75/150         Equalizer::FDLSEqualization(std::complex<float>*, std::complex<float>**, int, int, std::complex<float>*) [12]
+[19]     2.0    0.00    0.00     150         void MatrixInv<int, std::complex<float> >(int, std::complex<float>**, std::complex<float>**) [19]
+                0.00    0.00    1200/1200        std::complex<float> std::operator/<float>(std::complex<float> const&, std::complex<float> const&) [21]
+                0.00    0.00    1200/14400       std::complex<float> std::operator*<float>(std::complex<float> const&, std::complex<float> const&) [14]
+                0.00    0.00    1200/30000       std::complex<float>& std::complex<float>::operator-=<float>(std::complex<float> const&) [8]
+                0.00    0.00    2400/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00    1200/1200        std::complex<float> std::operator/<float>(std::complex<float> const&, std::complex<float> const&) [21]
+[20]     0.7    0.00    0.00    1200         std::complex<float>& std::complex<float>::operator/=<float>(std::complex<float> const&) [20]
+                0.00    0.00    1200/59400       std::complex<float>::imag() const [5]
+                0.00    0.00    1200/59400       std::complex<float>::real() const [31]
+-----------------------------------------------
+                0.00    0.00    1200/1200        void MatrixInv<int, std::complex<float> >(int, std::complex<float>**, std::complex<float>**) [19]
+[21]     0.7    0.00    0.00    1200         std::complex<float> std::operator/<float>(std::complex<float> const&, std::complex<float> const&) [21]
+                0.00    0.00    1200/1200        std::complex<float>& std::complex<float>::operator/=<float>(std::complex<float> const&) [20]
+-----------------------------------------------
+                0.00    0.00     300/600         Equalizer::FDLSEqualization(std::complex<float>*, std::complex<float>**, int, int, std::complex<float>*) [12]
+                0.00    0.00     300/600         Equalizer::LSFreqDomain(std::complex<float>*, std::complex<float>*) [7]
+[22]     0.3    0.00    0.00     600         std::complex<float> std::conj<float>(std::complex<float> const&) [22]
+                0.00    0.00     600/59400       std::complex<float>::imag() const [5]
+                0.00    0.00     600/59400       std::complex<float>::real() const [31]
+                0.00    0.00     600/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00  758656/758656      Turbo::log_decoder(float*, float*, float*, float*, int) [2]
+[29]     0.0    0.00    0.00  758656         max_log(float, float) [29]
+-----------------------------------------------
+                0.00    0.00     150/107554      TransformPrecoder::TransformPrecoding(std::complex<float>*, std::complex<float>*) [106]
+                0.00    0.00     150/107554      TransformPrecoder::TransformDecoding(std::complex<float>*, std::complex<float>*) [105]
+                0.00    0.00     256/107554      OFDM::modulating(std::complex<float>*, std::complex<float>*) [111]
+                0.00    0.00     256/107554      OFDM::demodulating(std::complex<float>*, std::complex<float>*) [112]
+                0.00    0.00     300/107554      UserPara::initUserPara() [122]
+                0.00    0.00     600/107554      Equalizer::Equalizer(BSPara*, UserPara*) [126]
+                0.00    0.00     600/107554      std::complex<float> std::conj<float>(std::complex<float> const&) [22]
+                0.00    0.00     900/107554      Equalizer::FDLSEstimation(std::complex<float>**, std::complex<float>**, std::complex<float>**, std::complex<float>**, int) [18]
+                0.00    0.00    1200/107554      Equalizer::LSFreqDomain(std::complex<float>*, std::complex<float>*) [7]
+                0.00    0.00    1800/107554      Modulation::Modulating(int*, std::complex<float>*) [98]
+                0.00    0.00    2400/107554      void MatrixInv<int, std::complex<float> >(int, std::complex<float>**, std::complex<float>**) [19]
+                0.00    0.00    3584/107554      ResMapper::SubCarrierMapping(std::complex<float>*, std::complex<float>*) [128]
+                0.00    0.00    6600/107554      std::complex<float> InnerProd<int, std::complex<float> >(int, std::complex<float>*, std::complex<float>*) [11]
+                0.00    0.00    8550/107554      Equalizer::FDLSEqualization(std::complex<float>*, std::complex<float>**, int, int, std::complex<float>*) [12]
+                0.00    0.00   10800/107554      void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>**, std::complex<float>**) [17]
+                0.00    0.00   28800/107554      Modulation::Demodulating(std::complex<float>*, float*, float) [10]
+                0.00    0.00   40608/107554      main [1]
+[30]     0.0    0.00    0.00  107554         std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00     600/59400       std::complex<float> std::conj<float>(std::complex<float> const&) [22]
+                0.00    0.00    1200/59400       std::complex<float>& std::complex<float>::operator/=<float>(std::complex<float> const&) [20]
+                0.00    0.00   13200/59400       std::complex<float>& std::complex<float>::operator+=<float>(std::complex<float> const&) [16]
+                0.00    0.00   14400/59400       std::complex<float>& std::complex<float>::operator*=<float>(std::complex<float> const&) [13]
+                0.00    0.00   30000/59400       std::complex<float>& std::complex<float>::operator-=<float>(std::complex<float> const&) [8]
+[31]     0.0    0.00    0.00   59400         std::complex<float>::real() const [31]
+-----------------------------------------------
+                0.00    0.00   28801/28801       Modulation::Demodulating(std::complex<float>*, float*, float) [10]
+[32]     0.0    0.00    0.00   28801         __gnu_cxx::__promote_2<float, double, __gnu_cxx::__promote<float, std::__is_integer<float>::__value>::__type, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type>::__type std::pow<float, double>(float, double) [32]
+-----------------------------------------------
+                0.00    0.00   28800/28800       float std::abs<float>(std::complex<float> const&) [35]
+[33]     0.0    0.00    0.00   28800         std::complex<float>::__rep() const [33]
+-----------------------------------------------
+                0.00    0.00   28800/28800       float std::abs<float>(std::complex<float> const&) [35]
+[34]     0.0    0.00    0.00   28800         std::__complex_abs(floatcomplex ) [34]
+-----------------------------------------------
+                0.00    0.00   28800/28800       Modulation::Demodulating(std::complex<float>*, float*, float) [10]
+[35]     0.0    0.00    0.00   28800         float std::abs<float>(std::complex<float> const&) [35]
+                0.00    0.00   28800/28800       std::complex<float>::__rep() const [33]
+                0.00    0.00   28800/28800       std::__complex_abs(floatcomplex ) [34]
+-----------------------------------------------
+                0.00    0.00   14400/14400       Modulation::Demodulating(std::complex<float>*, float*, float) [10]
+[36]     0.0    0.00    0.00   14400         Modulation::vecmin(float*, int) [36]
+-----------------------------------------------
+                0.00    0.00   10768/10768       std::complex<float> std::operator/<float>(std::complex<float> const&, float const&) [39]
+[37]     0.0    0.00    0.00   10768         std::complex<float>::operator/=(float) [37]
+-----------------------------------------------
+                0.00    0.00    1800/10768       TransformPrecoder::TransformPrecoding(std::complex<float>*, std::complex<float>*) [106]
+                0.00    0.00    1800/10768       TransformPrecoder::TransformDecoding(std::complex<float>*, std::complex<float>*) [105]
+                0.00    0.00    3584/10768       OFDM::modulating(std::complex<float>*, std::complex<float>*) [111]
+                0.00    0.00    3584/10768       OFDM::demodulating(std::complex<float>*, std::complex<float>*) [112]
+[38]     0.0    0.00    0.00   10768         std::sqrt(float) [38]
+-----------------------------------------------
+                0.00    0.00    1800/10768       TransformPrecoder::TransformPrecoding(std::complex<float>*, std::complex<float>*) [106]
+                0.00    0.00    1800/10768       TransformPrecoder::TransformDecoding(std::complex<float>*, std::complex<float>*) [105]
+                0.00    0.00    3584/10768       OFDM::modulating(std::complex<float>*, std::complex<float>*) [111]
+                0.00    0.00    3584/10768       OFDM::demodulating(std::complex<float>*, std::complex<float>*) [112]
+[39]     0.0    0.00    0.00   10768         std::complex<float> std::operator/<float>(std::complex<float> const&, float const&) [39]
+                0.00    0.00   10768/10768       std::complex<float>::operator/=(float) [37]
+-----------------------------------------------
+                0.00    0.00    7200/7200        Modulation::Modulating(int*, std::complex<float>*) [98]
+[40]     0.0    0.00    0.00    7200         __gnu_cxx::__promote_2<double, float, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type, __gnu_cxx::__promote<float, std::__is_integer<float>::__value>::__type>::__type std::pow<double, float>(double, float) [40]
+-----------------------------------------------
+                0.00    0.00    3054/3054        gauss1(int*) [42]
+[41]     0.0    0.00    0.00    3054         ran1(int*) [41]
+-----------------------------------------------
+                0.00    0.00    2368/2368        GenerateLTEChainInput(int*, int, int*, int) [82]
+[42]     0.0    0.00    0.00    2368         gauss1(int*) [42]
+                0.00    0.00    3054/3054        ran1(int*) [41]
+-----------------------------------------------
+                0.00    0.00     446/446         UserPara::geneDMRS() [123]
+[43]     0.0    0.00    0.00     446         std::complex<double>::complex(double, double) [43]
+-----------------------------------------------
+                0.00    0.00     300/300         std::complex<double>& std::complex<double>::operator*=<double>(std::complex<double> const&) [47]
+[44]     0.0    0.00    0.00     300         std::complex<double>::imag() const [44]
+-----------------------------------------------
+                0.00    0.00     300/300         std::complex<double>& std::complex<double>::operator*=<double>(std::complex<double> const&) [47]
+[45]     0.0    0.00    0.00     300         std::complex<double>::real() const [45]
+-----------------------------------------------
+                0.00    0.00     300/300         std::complex<float>::complex(std::complex<double> const&) [48]
+[46]     0.0    0.00    0.00     300         std::complex<double>::__rep() const [46]
+-----------------------------------------------
+                0.00    0.00     300/300         std::complex<double> std::operator*<double>(std::complex<double> const&, std::complex<double> const&) [49]
+[47]     0.0    0.00    0.00     300         std::complex<double>& std::complex<double>::operator*=<double>(std::complex<double> const&) [47]
+                0.00    0.00     300/300         std::complex<double>::real() const [45]
+                0.00    0.00     300/300         std::complex<double>::imag() const [44]
+-----------------------------------------------
+                0.00    0.00     300/300         UserPara::geneDMRS() [123]
+[48]     0.0    0.00    0.00     300         std::complex<float>::complex(std::complex<double> const&) [48]
+                0.00    0.00     300/300         std::complex<double>::__rep() const [46]
+-----------------------------------------------
+                0.00    0.00     300/300         UserPara::geneDMRS() [123]
+[49]     0.0    0.00    0.00     300         std::complex<double> std::operator*<double>(std::complex<double> const&, std::complex<double> const&) [49]
+                0.00    0.00     300/300         std::complex<double>& std::complex<double>::operator*=<double>(std::complex<double> const&) [47]
+-----------------------------------------------
+                0.00    0.00      75/75          UserPara::geneDMRS() [123]
+[50]     0.0    0.00    0.00      75         std::complex<float>::operator*=(float) [50]
+-----------------------------------------------
+                0.00    0.00      32/32          Turbo::set_generator_polynomials(int*, int, int) [66]
+[51]     0.0    0.00    0.00      32         Turbo::calc_state_transition(int, int, int*) [51]
+-----------------------------------------------
+                0.00    0.00       5/5           Turbo::decode_block(float*, float*, float*, float*, int*, int) [3]
+[52]     0.0    0.00    0.00       5         void Turbo::internal_interleaver<float>(float*, float*, int) [52]
+-----------------------------------------------
+                0.00    0.00       5/5           Turbo::decode_block(float*, float*, float*, float*, int*, int) [3]
+[53]     0.0    0.00    0.00       5         void Turbo::internal_deinterleaver<float>(float*, float*, int) [53]
+-----------------------------------------------
+                0.00    0.00       4/4           Turbo::set_generator_polynomials(int*, int, int) [66]
+[54]     0.0    0.00    0.00       4         Turbo::reverse_int(int, int) [54]
+-----------------------------------------------
+                0.00    0.00       1/2           Modulation::Modulation(UserPara*) [100]
+                0.00    0.00       1/2           Modulation::Modulation(BSPara*) [99]
+[55]     0.0    0.00    0.00       2         Modulation::InitModTables() [55]
+-----------------------------------------------
+                0.00    0.00       2/2           main [1]
+[56]     0.0    0.00    0.00       2         Modulation::~Modulation() [56]
+-----------------------------------------------
+                0.00    0.00       2/2           main [1]
+[57]     0.0    0.00    0.00       2         RateMatcher::~RateMatcher() [57]
+                0.00    0.00       2/2           SubblockInterleaver_lte<int, float>::~SubblockInterleaver_lte() [60]
+                0.00    0.00       2/2           SubblockInterleaver_lte<int, int>::~SubblockInterleaver_lte() [62]
+-----------------------------------------------
+                0.00    0.00       2/2           main [1]
+[58]     0.0    0.00    0.00       2         TransformPrecoder::~TransformPrecoder() [58]
+-----------------------------------------------
+                0.00    0.00       1/2           RateMatcher::RateMatcher(UserPara*) [103]
+                0.00    0.00       1/2           RateMatcher::RateMatcher(BSPara*) [104]
+[59]     0.0    0.00    0.00       2         SubblockInterleaver_lte<int, float>::SubblockInterleaver_lte() [59]
+-----------------------------------------------
+                0.00    0.00       2/2           RateMatcher::~RateMatcher() [57]
+[60]     0.0    0.00    0.00       2         SubblockInterleaver_lte<int, float>::~SubblockInterleaver_lte() [60]
+-----------------------------------------------
+                0.00    0.00       1/2           RateMatcher::RateMatcher(UserPara*) [103]
+                0.00    0.00       1/2           RateMatcher::RateMatcher(BSPara*) [104]
+[61]     0.0    0.00    0.00       2         SubblockInterleaver_lte<int, int>::SubblockInterleaver_lte() [61]
+-----------------------------------------------
+                0.00    0.00       2/2           RateMatcher::~RateMatcher() [57]
+[62]     0.0    0.00    0.00       2         SubblockInterleaver_lte<int, int>::~SubblockInterleaver_lte() [62]
+-----------------------------------------------
+                0.00    0.00       2/2           main [1]
+[63]     0.0    0.00    0.00       2         OFDM::~OFDM() [63]
+-----------------------------------------------
+                0.00    0.00       1/2           Turbo::Turbo(UserPara*) [118]
+                0.00    0.00       1/2           Turbo::Turbo(BSPara*) [117]
+[64]     0.0    0.00    0.00       2         Turbo::set_parameters(int*, int, int, int, int) [64]
+                0.00    0.00       2/2           Turbo::set_generator_polynomials(int*, int, int) [66]
+-----------------------------------------------
+                0.00    0.00       2/2           Turbo::TurboEncoding(int*, int*) [115]
+[65]     0.0    0.00    0.00       2         Turbo::constituent_encoder(int*, int, int*, int*) [65]
+-----------------------------------------------
+                0.00    0.00       2/2           Turbo::set_parameters(int*, int, int, int, int) [64]
+[66]     0.0    0.00    0.00       2         Turbo::set_generator_polynomials(int*, int, int) [66]
+                0.00    0.00      32/32          Turbo::calc_state_transition(int, int, int*) [51]
+                0.00    0.00       4/4           Turbo::reverse_int(int, int) [54]
+-----------------------------------------------
+                0.00    0.00       2/2           main [1]
+[67]     0.0    0.00    0.00       2         Turbo::~Turbo() [67]
+-----------------------------------------------
+                0.00    0.00       2/2           main [1]
+[68]     0.0    0.00    0.00       2         ResMapper::~ResMapper() [68]
+-----------------------------------------------
+                0.00    0.00       1/2           Modulation::Modulation(BSPara*) [99]
+                0.00    0.00       1/2           main [1]
+[69]     0.0    0.00    0.00       2         std::log(float) [69]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [287]
+[70]     0.0    0.00    0.00       1         _GLOBAL__sub_I_TURBO_INT_K_TABLE [70]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [88]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [287]
+[71]     0.0    0.00    0.00       1         _GLOBAL__sub_I__Z18ReadInputFromFilesP4FIFOIiEPiPKc [71]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [86]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [287]
+[72]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN10Modulation13InitModTablesEv [72]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [92]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [287]
+[73]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN11RateMatcherC2EP8UserPara [73]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [89]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [287]
+[74]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN17TransformPrecoderC2EP8UserPara [74]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [93]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [287]
+[75]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN4OFDMC2EP8UserPara [75]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [96]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [287]
+[76]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN6BSParaC2Ev [76]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [83]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [287]
+[77]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN8UserParaC2EP6BSPara [77]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [84]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [287]
+[78]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN9EqualizerC2EP6BSParaP8UserPara [78]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [95]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [287]
+[79]     0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN9ResMapperC2EP8UserPara [79]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [94]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [287]
+[80]     0.0    0.00    0.00       1         _GLOBAL__sub_I_main [80]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [97]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[81]     0.0    0.00    0.00       1         ReadLTEChainOutput(int*, int*, int) [81]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[82]     0.0    0.00    0.00       1         GenerateLTEChainInput(int*, int, int*, int) [82]
+                0.00    0.00    2368/2368        gauss1(int*) [42]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__ZN6BSParaC2Ev [76]
+[83]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [83]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__ZN8UserParaC2EP6BSPara [77]
+[84]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [84]
+-----------------------------------------------
+                                   1             __static_initialization_and_destruction_0(int, int) [85]
+                0.00    0.00       1/1           __libc_csu_init [287]
+[85]     0.0    0.00    0.00       1+1       __static_initialization_and_destruction_0(int, int) [85]
+                                   1             __static_initialization_and_destruction_0(int, int) [85]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__Z18ReadInputFromFilesP4FIFOIiEPiPKc [71]
+[86]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [86]
+-----------------------------------------------
+                                   1             __static_initialization_and_destruction_0(int, int) [87]
+                0.00    0.00       1/1           __libc_csu_init [287]
+[87]     0.0    0.00    0.00       1+1       __static_initialization_and_destruction_0(int, int) [87]
+                                   1             __static_initialization_and_destruction_0(int, int) [87]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I_TURBO_INT_K_TABLE [70]
+[88]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [88]
+                0.00    0.00       1/1           std::numeric_limits<double>::max() [141]
+                0.00    0.00       1/1           std::numeric_limits<double>::min() [142]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__ZN11RateMatcherC2EP8UserPara [73]
+[89]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [89]
+-----------------------------------------------
+                                   1             __static_initialization_and_destruction_0(int, int) [90]
+                0.00    0.00       1/1           __libc_csu_init [287]
+[90]     0.0    0.00    0.00       1+1       __static_initialization_and_destruction_0(int, int) [90]
+                                   1             __static_initialization_and_destruction_0(int, int) [90]
+-----------------------------------------------
+                                   1             __static_initialization_and_destruction_0(int, int) [91]
+                0.00    0.00       1/1           __libc_csu_init [287]
+[91]     0.0    0.00    0.00       1+1       __static_initialization_and_destruction_0(int, int) [91]
+                                   1             __static_initialization_and_destruction_0(int, int) [91]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__ZN10Modulation13InitModTablesEv [72]
+[92]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [92]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__ZN17TransformPrecoderC2EP8UserPara [74]
+[93]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [93]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__ZN9ResMapperC2EP8UserPara [79]
+[94]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [94]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__ZN9EqualizerC2EP6BSParaP8UserPara [78]
+[95]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [95]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__ZN4OFDMC2EP8UserPara [75]
+[96]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [96]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I_main [80]
+[97]     0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [97]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[98]     0.0    0.00    0.00       1         Modulation::Modulating(int*, std::complex<float>*) [98]
+                0.00    0.00    7200/7200        __gnu_cxx::__promote_2<double, float, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type, __gnu_cxx::__promote<float, std::__is_integer<float>::__value>::__type>::__type std::pow<double, float>(double, float) [40]
+                0.00    0.00    1800/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[99]     0.0    0.00    0.00       1         Modulation::Modulation(BSPara*) [99]
+                0.00    0.00       1/2           std::log(float) [69]
+                0.00    0.00       1/2           Modulation::InitModTables() [55]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[100]    0.0    0.00    0.00       1         Modulation::Modulation(UserPara*) [100]
+                0.00    0.00       1/2           Modulation::InitModTables() [55]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[101]    0.0    0.00    0.00       1         RateMatcher::RxRateMatching(float*, float*, int*) [101]
+                0.00    0.00       1/1           SubblockInterleaver_lte<int, float>::SubblockDeInterleaving(int, float**, float**) [109]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[102]    0.0    0.00    0.00       1         RateMatcher::TxRateMatching(int*, int*) [102]
+                0.00    0.00       1/1           SubblockInterleaver_lte<int, int>::SubblockInterleaving(int, int**, int**) [110]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[103]    0.0    0.00    0.00       1         RateMatcher::RateMatcher(UserPara*) [103]
+                0.00    0.00       1/2           SubblockInterleaver_lte<int, int>::SubblockInterleaver_lte() [61]
+                0.00    0.00       1/2           SubblockInterleaver_lte<int, float>::SubblockInterleaver_lte() [59]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[104]    0.0    0.00    0.00       1         RateMatcher::RateMatcher(BSPara*) [104]
+                0.00    0.00       1/2           SubblockInterleaver_lte<int, int>::SubblockInterleaver_lte() [61]
+                0.00    0.00       1/2           SubblockInterleaver_lte<int, float>::SubblockInterleaver_lte() [59]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[105]    0.0    0.00    0.00       1         TransformPrecoder::TransformDecoding(std::complex<float>*, std::complex<float>*) [105]
+                0.00    0.00    1800/10768       std::sqrt(float) [38]
+                0.00    0.00    1800/10768       std::complex<float> std::operator/<float>(std::complex<float> const&, float const&) [39]
+                0.00    0.00     150/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[106]    0.0    0.00    0.00       1         TransformPrecoder::TransformPrecoding(std::complex<float>*, std::complex<float>*) [106]
+                0.00    0.00    1800/10768       std::sqrt(float) [38]
+                0.00    0.00    1800/10768       std::complex<float> std::operator/<float>(std::complex<float> const&, float const&) [39]
+                0.00    0.00     150/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[107]    0.0    0.00    0.00       1         TransformPrecoder::TransformPrecoder(BSPara*) [107]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[108]    0.0    0.00    0.00       1         TransformPrecoder::TransformPrecoder(UserPara*) [108]
+-----------------------------------------------
+                0.00    0.00       1/1           RateMatcher::RxRateMatching(float*, float*, int*) [101]
+[109]    0.0    0.00    0.00       1         SubblockInterleaver_lte<int, float>::SubblockDeInterleaving(int, float**, float**) [109]
+-----------------------------------------------
+                0.00    0.00       1/1           RateMatcher::TxRateMatching(int*, int*) [102]
+[110]    0.0    0.00    0.00       1         SubblockInterleaver_lte<int, int>::SubblockInterleaving(int, int**, int**) [110]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[111]    0.0    0.00    0.00       1         OFDM::modulating(std::complex<float>*, std::complex<float>*) [111]
+                0.00    0.00    3584/10768       std::sqrt(float) [38]
+                0.00    0.00    3584/10768       std::complex<float> std::operator/<float>(std::complex<float> const&, float const&) [39]
+                0.00    0.00     256/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[112]    0.0    0.00    0.00       1         OFDM::demodulating(std::complex<float>*, std::complex<float>*) [112]
+                0.00    0.00    3584/10768       std::sqrt(float) [38]
+                0.00    0.00    3584/10768       std::complex<float> std::operator/<float>(std::complex<float> const&, float const&) [39]
+                0.00    0.00     256/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[113]    0.0    0.00    0.00       1         OFDM::OFDM(UserPara*) [113]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[114]    0.0    0.00    0.00       1         OFDM::OFDM(BSPara*) [114]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[115]    0.0    0.00    0.00       1         Turbo::TurboEncoding(int*, int*) [115]
+                0.00    0.00       2/2           Turbo::constituent_encoder(int*, int, int*, int*) [65]
+                0.00    0.00       1/1           void Turbo::internal_interleaver<int>(int*, int*, int) [116]
+-----------------------------------------------
+                0.00    0.00       1/1           Turbo::TurboEncoding(int*, int*) [115]
+[116]    0.0    0.00    0.00       1         void Turbo::internal_interleaver<int>(int*, int*, int) [116]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[117]    0.0    0.00    0.00       1         Turbo::Turbo(BSPara*) [117]
+                0.00    0.00       1/2           Turbo::set_parameters(int*, int, int, int, int) [64]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[118]    0.0    0.00    0.00       1         Turbo::Turbo(UserPara*) [118]
+                0.00    0.00       1/2           Turbo::set_parameters(int*, int, int, int, int) [64]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[119]    0.0    0.00    0.00       1         BSPara::initBSPara() [119]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[120]    0.0    0.00    0.00       1         BSPara::BSPara() [120]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[121]    0.0    0.00    0.00       1         BSPara::~BSPara() [121]
+-----------------------------------------------
+                0.00    0.00       1/1           UserPara::UserPara(BSPara*) [124]
+[122]    0.0    0.00    0.00       1         UserPara::initUserPara() [122]
+                0.00    0.00     300/107554      std::complex<float>::complex(float, float) [30]
+                0.00    0.00       1/1           UserPara::geneDMRS() [123]
+-----------------------------------------------
+                0.00    0.00       1/1           UserPara::initUserPara() [122]
+[123]    0.0    0.00    0.00       1         UserPara::geneDMRS() [123]
+                0.00    0.00     446/446         std::complex<double>::complex(double, double) [43]
+                0.00    0.00     300/300         std::complex<double> std::operator*<double>(std::complex<double> const&, std::complex<double> const&) [49]
+                0.00    0.00     300/300         std::complex<float>::complex(std::complex<double> const&) [48]
+                0.00    0.00      75/75          std::complex<float>::operator*=(float) [50]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[124]    0.0    0.00    0.00       1         UserPara::UserPara(BSPara*) [124]
+                0.00    0.00       1/1           UserPara::initUserPara() [122]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[125]    0.0    0.00    0.00       1         UserPara::~UserPara() [125]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[126]    0.0    0.00    0.00       1         Equalizer::Equalizer(BSPara*, UserPara*) [126]
+                0.00    0.00     600/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[127]    0.0    0.00    0.00       1         Equalizer::~Equalizer() [127]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[128]    0.0    0.00    0.00       1         ResMapper::SubCarrierMapping(std::complex<float>*, std::complex<float>*) [128]
+                0.00    0.00    3584/107554      std::complex<float>::complex(float, float) [30]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[129]    0.0    0.00    0.00       1         ResMapper::SubCarrierDemapping(std::complex<float>*, std::complex<float>*) [129]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[130]    0.0    0.00    0.00       1         ResMapper::ResMapper(BSPara*) [130]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[131]    0.0    0.00    0.00       1         ResMapper::ResMapper(UserPara*) [131]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[132]    0.0    0.00    0.00       1         Scrambler<float>::Descrambling(float*, float*) [132]
+                0.00    0.00       1/1           Scrambler<float>::GenScrambInt() [133]
+-----------------------------------------------
+                0.00    0.00       1/1           Scrambler<float>::Descrambling(float*, float*) [132]
+[133]    0.0    0.00    0.00       1         Scrambler<float>::GenScrambInt() [133]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[134]    0.0    0.00    0.00       1         Scrambler<float>::Scrambler(BSPara*) [134]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[135]    0.0    0.00    0.00       1         Scrambler<float>::~Scrambler() [135]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[136]    0.0    0.00    0.00       1         Scrambler<int>::Scrambling(int*, int*) [136]
+                0.00    0.00       1/1           Scrambler<int>::GenScrambInt() [137]
+-----------------------------------------------
+                0.00    0.00       1/1           Scrambler<int>::Scrambling(int*, int*) [136]
+[137]    0.0    0.00    0.00       1         Scrambler<int>::GenScrambInt() [137]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[138]    0.0    0.00    0.00       1         Scrambler<int>::Scrambler(UserPara*) [138]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[139]    0.0    0.00    0.00       1         Scrambler<int>::~Scrambler() [139]
+-----------------------------------------------
+                0.00    0.00       1/1           Equalizer::LSFreqDomain(std::complex<float>*, std::complex<float>*) [7]
+[140]    0.0    0.00    0.00       1         UserPara::GetpDMRS() const [140]
+-----------------------------------------------
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [88]
+[141]    0.0    0.00    0.00       1         std::numeric_limits<double>::max() [141]
+-----------------------------------------------
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [88]
+[142]    0.0    0.00    0.00       1         std::numeric_limits<double>::min() [142]
+-----------------------------------------------
+
+Index by function name
+
+  [70] _GLOBAL__sub_I_TURBO_INT_K_TABLE (Turbo.cpp) [104] RateMatcher::RateMatcher(BSPara*) [127] Equalizer::~Equalizer()
+  [71] _GLOBAL__sub_I__Z18ReadInputFromFilesP4FIFOIiEPiPKc (GeneralFunc.cpp) [57] RateMatcher::~RateMatcher() [128] ResMapper::SubCarrierMapping(std::complex<float>*, std::complex<float>*)
+  [72] _GLOBAL__sub_I__ZN10Modulation13InitModTablesEv (Modulation.cpp) [105] TransformPrecoder::TransformDecoding(std::complex<float>*, std::complex<float>*) [129] ResMapper::SubCarrierDemapping(std::complex<float>*, std::complex<float>*)
+  [73] _GLOBAL__sub_I__ZN11RateMatcherC2EP8UserPara (RateMatcher.cpp) [106] TransformPrecoder::TransformPrecoding(std::complex<float>*, std::complex<float>*) [130] ResMapper::ResMapper(BSPara*)
+  [74] _GLOBAL__sub_I__ZN17TransformPrecoderC2EP8UserPara (TransformPrecoder.cpp) [107] TransformPrecoder::TransformPrecoder(BSPara*) [131] ResMapper::ResMapper(UserPara*)
+  [75] _GLOBAL__sub_I__ZN4OFDMC2EP8UserPara (OFDM.cpp) [108] TransformPrecoder::TransformPrecoder(UserPara*) [68] ResMapper::~ResMapper()
+  [76] _GLOBAL__sub_I__ZN6BSParaC2Ev (BSPara.cpp) [58] TransformPrecoder::~TransformPrecoder() [132] Scrambler<float>::Descrambling(float*, float*)
+  [77] _GLOBAL__sub_I__ZN8UserParaC2EP6BSPara (UserPara.cpp) [109] SubblockInterleaver_lte<int, float>::SubblockDeInterleaving(int, float**, float**) [133] Scrambler<float>::GenScrambInt()
+  [78] _GLOBAL__sub_I__ZN9EqualizerC2EP6BSParaP8UserPara (Equalizer.cpp) [59] SubblockInterleaver_lte<int, float>::SubblockInterleaver_lte() [134] Scrambler<float>::Scrambler(BSPara*)
+  [79] _GLOBAL__sub_I__ZN9ResMapperC2EP8UserPara (ResMapper.cpp) [60] SubblockInterleaver_lte<int, float>::~SubblockInterleaver_lte() [135] Scrambler<float>::~Scrambler()
+  [80] _GLOBAL__sub_I_main (LTEUplink.cpp) [110] SubblockInterleaver_lte<int, int>::SubblockInterleaving(int, int**, int**) [136] Scrambler<int>::Scrambling(int*, int*)
+  [15] void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>*, std::complex<float>*) [61] SubblockInterleaver_lte<int, int>::SubblockInterleaver_lte() [137] Scrambler<int>::GenScrambInt()
+  [17] void MatrixProd<int, std::complex<float> >(int, int, int, std::complex<float>**, std::complex<float>**, std::complex<float>**) [62] SubblockInterleaver_lte<int, int>::~SubblockInterleaver_lte() [138] Scrambler<int>::Scrambler(UserPara*)
+  [81] ReadLTEChainOutput(int*, int*, int) [111] OFDM::modulating(std::complex<float>*, std::complex<float>*) [139] Scrambler<int>::~Scrambler()
+  [82] GenerateLTEChainInput(int*, int, int*, int) [112] OFDM::demodulating(std::complex<float>*, std::complex<float>*) [140] UserPara::GetpDMRS() const
+  [83] __static_initialization_and_destruction_0(int, int) (BSPara.cpp) [113] OFDM::OFDM(UserPara*) [44] std::complex<double>::imag() const
+  [84] __static_initialization_and_destruction_0(int, int) (UserPara.cpp) [114] OFDM::OFDM(BSPara*) [45] std::complex<double>::real() const
+  [85] __static_initialization_and_destruction_0(int, int) (FIFO.cpp) [63] OFDM::~OFDM() [46] std::complex<double>::__rep() const
+  [86] __static_initialization_and_destruction_0(int, int) (GeneralFunc.cpp) [2] Turbo::log_decoder(float*, float*, float*, float*, int) [5] std::complex<float>::imag() const
+  [87] __static_initialization_and_destruction_0(int, int) (matrix.cpp) [54] Turbo::reverse_int(int, int) [31] std::complex<float>::real() const
+  [88] __static_initialization_and_destruction_0(int, int) (Turbo.cpp) [3] Turbo::decode_block(float*, float*, float*, float*, int*, int) [33] std::complex<float>::__rep() const
+  [89] __static_initialization_and_destruction_0(int, int) (RateMatcher.cpp) [4] Turbo::TurboDecoding(float*, int*) [141] std::numeric_limits<double>::max()
+  [90] __static_initialization_and_destruction_0(int, int) (SubblockInterleaver_lte.cpp) [115] Turbo::TurboEncoding(int*, int*) [142] std::numeric_limits<double>::min()
+  [91] __static_initialization_and_destruction_0(int, int) (Scrambler.cpp) [64] Turbo::set_parameters(int*, int, int, int, int) [43] std::complex<double>::complex(double, double)
+  [92] __static_initialization_and_destruction_0(int, int) (Modulation.cpp) [65] Turbo::constituent_encoder(int*, int, int*, int*) [47] std::complex<double>& std::complex<double>::operator*=<double>(std::complex<double> const&)
+  [93] __static_initialization_and_destruction_0(int, int) (TransformPrecoder.cpp) [52] void Turbo::internal_interleaver<float>(float*, float*, int) [48] std::complex<float>::complex(std::complex<double> const&)
+  [94] __static_initialization_and_destruction_0(int, int) (ResMapper.cpp) [116] void Turbo::internal_interleaver<int>(int*, int*, int) [30] std::complex<float>::complex(float, float)
+  [95] __static_initialization_and_destruction_0(int, int) (Equalizer.cpp) [51] Turbo::calc_state_transition(int, int, int*) [37] std::complex<float>::operator/=(float)
+  [96] __static_initialization_and_destruction_0(int, int) (OFDM.cpp) [53] void Turbo::internal_deinterleaver<float>(float*, float*, int) [20] std::complex<float>& std::complex<float>::operator/=<float>(std::complex<float> const&)
+  [97] __static_initialization_and_destruction_0(int, int) (LTEUplink.cpp) [66] Turbo::set_generator_polynomials(int*, int, int) [8] std::complex<float>& std::complex<float>::operator-=<float>(std::complex<float> const&)
+  [41] ran1(int*)            [117] Turbo::Turbo(BSPara*)  [50] std::complex<float>::operator*=(float)
+  [42] gauss1(int*)          [118] Turbo::Turbo(UserPara*) [13] std::complex<float>& std::complex<float>::operator*=<float>(std::complex<float> const&)
+  [29] max_log(float, float)  [67] Turbo::~Turbo()        [16] std::complex<float>& std::complex<float>::operator+=<float>(std::complex<float> const&)
+  [11] std::complex<float> InnerProd<int, std::complex<float> >(int, std::complex<float>*, std::complex<float>*) [119] BSPara::initBSPara() [34] std::__complex_abs(floatcomplex )
+  [19] void MatrixInv<int, std::complex<float> >(int, std::complex<float>**, std::complex<float>**) [120] BSPara::BSPara() [35] float std::abs<float>(std::complex<float> const&)
+  [98] Modulation::Modulating(int*, std::complex<float>*) [121] BSPara::~BSPara() [69] std::log(float)
+  [10] Modulation::Demodulating(std::complex<float>*, float*, float) [122] UserPara::initUserPara() [40] __gnu_cxx::__promote_2<double, float, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type, __gnu_cxx::__promote<float, std::__is_integer<float>::__value>::__type>::__type std::pow<double, float>(double, float)
+  [55] Modulation::InitModTables() [123] UserPara::geneDMRS() [32] __gnu_cxx::__promote_2<float, double, __gnu_cxx::__promote<float, std::__is_integer<float>::__value>::__type, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type>::__type std::pow<float, double>(float, double)
+  [36] Modulation::vecmin(float*, int) [124] UserPara::UserPara(BSPara*) [22] std::complex<float> std::conj<float>(std::complex<float> const&)
+  [99] Modulation::Modulation(BSPara*) [125] UserPara::~UserPara() [38] std::sqrt(float)
+ [100] Modulation::Modulation(UserPara*) [6] Equalizer::Equalizing(std::complex<float>*, std::complex<float>*) [39] std::complex<float> std::operator/<float>(std::complex<float> const&, float const&)
+  [56] Modulation::~Modulation() [7] Equalizer::LSFreqDomain(std::complex<float>*, std::complex<float>*) [21] std::complex<float> std::operator/<float>(std::complex<float> const&, std::complex<float> const&)
+ [101] RateMatcher::RxRateMatching(float*, float*, int*) [18] Equalizer::FDLSEstimation(std::complex<float>**, std::complex<float>**, std::complex<float>**, std::complex<float>**, int) [9] std::complex<float> std::operator-<float>(std::complex<float> const&, std::complex<float> const&)
+ [102] RateMatcher::TxRateMatching(int*, int*) [12] Equalizer::FDLSEqualization(std::complex<float>*, std::complex<float>**, int, int, std::complex<float>*) [49] std::complex<double> std::operator*<double>(std::complex<double> const&, std::complex<double> const&)
+ [103] RateMatcher::RateMatcher(UserPara*) [126] Equalizer::Equalizer(BSPara*, UserPara*) [14] std::complex<float> std::operator*<float>(std::complex<float> const&, std::complex<float> const&)

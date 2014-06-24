@@ -1,0 +1,27 @@
+\begin{thebibliography}{1}
+
+\bibitem{36series-212}
+3GPP.
+\newblock {LTE; Evolved Universal Terrestrial Radio Access (E-UTRA);
+  Multiplexing and channel coding}.
+\newblock Technical Report 3GPP TS 36.212 version 11.3.0 Release 11, ETSI,
+  2013.
+
+\bibitem{36series-211}
+3GPP.
+\newblock {LTE; Evolved Universal Terrestrial Radio Access (E-UTRA);
+  Multiplexing and channel coding}.
+\newblock Technical Report 3GPP TS 36.211 version 11.3.0 Release 11, ETSI,
+  2013.
+
+\bibitem{erik}
+Eric Dahlman, Stefan Parkvall, Johan Sk\"old, and et~al.
+\newblock {\em {3G Evolution: HSPA and LTE for Mobile Broadhand, 2nd Edition}}.
+\newblock Academic Press, 2008.
+
+\bibitem{nutshell}
+White Paper.
+\newblock {LTE in a Nutshell: The Physical Layer}.
+\newblock Technical report, Telesystem Innovations, 2010.
+
+\end{thebibliography}

@@ -29,6 +29,7 @@ void ReadInputFromFiles(complex<float> *pIn, int Sz, const char *nameReal, const
 
 
 void GeneRandomInput(FIFO<int> *pIn,int Sz[],const char *name);
+void GeneRandomInput(int *pIn,int Sz,const char *name);
 void GeneRandomInput(FIFO<float> *pIn,int Sz[],const char *name);
 void GeneRandomInput(FIFO<complex<float> > *pIn,int Sz[],const char *nameReal, const char *nameImag);
 

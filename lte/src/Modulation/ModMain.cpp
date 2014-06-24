@@ -53,8 +53,8 @@ int main()
 	int *pHD = new int[Dmd.OutBufSz];
 	float awgn_sigma = 0.193649;//this value is for the standard input  see "AWGNSigma"
 //	ReadInputFromFiles(Dmd.pInpBuf,(Dmd.InBufSz),"DemodulationInputReal","DemodulationInputImag");
-	ReadInputFromFiles(pDecQAMSeq, (Dmd.InBufSz), "DemodulationInputReal", "DemodulationInputImag");
-//	ReadInputFromFiles(pDecQAMSeq, (Dmd.InBufSz), "testModulationRandomOutputReal", "testModulationRandomOutputImag");
+//	ReadInputFromFiles(pDecQAMSeq, (Dmd.InBufSz), "DemodulationInputReal", "DemodulationInputImag");
+	ReadInputFromFiles(pDecQAMSeq, (Dmd.InBufSz), "testModulationRandomOutputReal", "testModulationRandomOutputImag");
 //GeneRandomInput(Dmd.pInpBuf,Dmd.InBufSz,"DemodulationRandomInputReal","DemodulationRandomInputImag");
 //GeneRandomInput(Dmd.pInpBuf,Dmd.InBufSz);
 //	Dmd.Demodulating(&DmdOut,awgn_sigma);

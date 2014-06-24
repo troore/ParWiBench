@@ -27,14 +27,16 @@ int main()
 	int *pcSeq = new int[TbE.OutBufSz];
 	
 //	ReadInputFromFiles(TbE.pInpBuf,(TbE.InBufSz),"TurboEncoderInput");
-	ReadInputFromFiles(piSeq, (TbE.InBufSz), "TurboEncoderInput");
-//GeneRandomInput(TbE.pInpBuf,TbE.InBufSz,"TurboEncoderRandomInput");
+//	ReadInputFromFiles(piSeq, (TbE.InBufSz), "TurboEncoderInput");
+	ReadInputFromFiles(piSeq, (TbE.InBufSz), "TurboEncoderRandomInput");
+//	GeneRandomInput(piSeq, TbE.InBufSz, "TurboEncoderRandomInput");
 //GeneRandomInput(TbE.pInpBuf,TbE.InBufSz);
 //	TbE.TurboEncoding(&TbEOut);
 	TbE.TurboEncoding(piSeq, pcSeq);
 	
 //	WriteOutputToFiles(&TbEOut,(TbE.OutBufSz),"testTurboEncoderOutput");
 	WriteOutputToFiles(pcSeq, (TbE.OutBufSz), "testTurboEncoderOutput");
+//	WriteOutputToFiles(pcSeq, (TbE.OutBufSz), "testTurboEncoderOutput.bak");
 //ReadOutput(&TbEOut,(TbE.OutBufSz));
 	
 	cout<<"Turbo Encoder ends"<<endl;
@@ -53,12 +55,12 @@ int main()
 	int *pOutBits = new int[TbD.OutBufSz];
 	
 //	ReadInputFromFiles(TbD.pInpBuf,TbD.InBufSz,"TurboDecoderInput");
-	ReadInputFromFiles(pInpData, TbD.InBufSz, "TurboDecoderInput");
-	/*
+//	ReadInputFromFiles(pInpData, TbD.InBufSz, "TurboDecoderInput");
+	
 	ReadInputFromFiles(pInpData, TbD.InBufSz, "testTurboEncoderOutput");
 	for (int i = 0; i < TbD.InBufSz; i++)
 		pInpData[i] = (1 - 2 * pInpData[i]);
-	*/
+	
 //GeneRandomInput(TbD.pInpBuf,TbD.InBufSz,"TurboDecoderRandomInput");
 //GeneRandomInput(TbD.pInpBuf,TbD.InBufSz);
 //	TbD.TurboDecoding(&TbDOut);
