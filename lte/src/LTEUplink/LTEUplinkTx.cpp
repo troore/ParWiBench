@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
 	TransformPrecoder TxTransPre(&User);
 	ResMapper TxResMap(&User);
 	OFDM TxOFDM(&User);
+	Sync TxSync(&User);
 //	Channel TxCRx(&BS);
 	/*
 	  OFDM RxOFDM(&BS);
@@ -95,6 +96,10 @@ int main(int argc, char *argv[])
 	complex<float> *pTxOFDMOut = new complex<float>[TxOFDM.OutBufSz];
 //	complex<float> *pRxOFDMInp = new complex<float>[RxOFDM.InBufSz];
 //	complex<float> *pRxOFDMOut = new complex<float>[RxOFDM.OutBufSz];
+
+	// Synchronization
+	complex<float> *pTxSyncInp = new complex<float>[TxSync.InBufSz];
+	complex<float> *pTxSyncOut = new complex<float>[TxSync.OutBufSz];
 	
 	/** End of allocations **/
 
@@ -175,8 +180,15 @@ int main(int argc, char *argv[])
 
 		TxOFDM.modulating(pTxOFDMInp, pTxOFDMOut);
 
+		for (int i = 0; i < TxSync.InBufSz; i++)
+		{
+			pTxSyncInp[i] = pTxOFDMOut[i];
+		}
+
+		TxSync.AddPreamble(pTxSyncInp, pTxSyncOut);
+
 		// Send modulated data to air channel
-		SendToChannel(pTxOFDMOut, TxOFDM.OutBufSz);
+		SendToChannel(pTxSyncOut, TxSync.OutBufSz);
 
 
 		////////////////////////// END Run Subframe/////////////////////////////////
@@ -222,6 +234,16 @@ int main(int argc, char *argv[])
 	delete[] pTxResMapOut;
 //	delete[] pRxResMapInp;
 //	delete[] pRxResMapOut;
+
+	// OFDM
+	delete[] pTxOFDMInp;
+	delete[] pTxOFDMOut;
+
+	// Sycnronization
+	delete[] pTxSyncInp;
+	delete[] pTxSyncOut;
+//	delete[] pRxSyncInp;
+//	delete[] pRxSyncOut;
 
 	/** End of deallocation**/
 

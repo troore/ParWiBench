@@ -20,7 +20,7 @@ class OFDM
 	int NumRxAntenna;
 	int SymNum;
 
-	// "0" for user, "1" for basestation
+	// "0" for terminal, "1" for basestation
 	//	int user_flag;
 	
 	//	complex<float>** pInpData;
@@ -39,8 +39,10 @@ class OFDM
 
 	// Default constructor
 	OFDM() {};
+	// User defined constructors
     OFDM(UserPara* pUser);
 	OFDM(BSPara *pPS);
+	// Desructor
 	~OFDM();
 
 	//    void modulating(FIFO<complex<float> > *pOutBuf);

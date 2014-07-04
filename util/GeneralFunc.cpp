@@ -410,6 +410,33 @@ void GeneRandomInput(FIFO<float> *pIn,int Sz[2],const char *name)
     }
 }
 
+void GeneRandomInput(complex<float> *pIn, int Sz, const char *nameReal, const char *nameImag)
+{
+    FILE *fptr_real=NULL;
+    FILE *fptr_imag=NULL;
+    int sd = -111;
+
+	complex<float> *pRandom=new complex<float>[Sz];
+
+	fptr_real = fopen(nameReal,"w+");
+	fptr_imag = fopen(nameImag,"w+");
+	for(int i=0;i<Sz;i++)
+	{
+		sd-=i;
+		float vr = (float)gauss1(&sd);
+		sd-=222;
+		float vi = (float)gauss1(&sd);
+		*(pRandom+i)=complex<float>(vr,vi);
+		fprintf(fptr_real,"%f\n",(*(pRandom+i)).real());
+		fprintf(fptr_imag,"%f\n",(*(pRandom+i)).imag());
+	}
+	fclose(fptr_real);
+	fclose(fptr_imag);
+
+	delete[] pRandom;
+}
+
+
 
 void GeneRandomInput(FIFO<complex<float> > *pIn,int Sz[2],const char *nameReal,const char *nameImag)
 {
@@ -753,8 +780,8 @@ void WriteOutputToFiles(complex<float> *pOut, int Sz, const char *nameReal, cons
 	
 	for(int i=0;i<Sz;i++)
 	{
-		fprintf(fptr_real,"%f\t",(pOut[i]).real());
-		fprintf(fptr_imag,"%f\t",(pOut[i]).imag());
+		fprintf(fptr_real,"%f\n",(pOut[i]).real());
+		fprintf(fptr_imag,"%f\n",(pOut[i]).imag());
 	}
 	
 	fclose(fptr_real);

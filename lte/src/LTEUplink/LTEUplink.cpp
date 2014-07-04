@@ -445,7 +445,7 @@ int main(int argc, char *argv[])
 	delete[] pTxOFDMOut;
 	delete[] pRxOFDMInp;
 	delete[] pRxOFDMOut;
-	
+
 	/** End of deallocation**/
 
 	return 0;

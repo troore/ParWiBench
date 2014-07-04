@@ -32,6 +32,7 @@ void GeneRandomInput(FIFO<int> *pIn,int Sz[],const char *name);
 void GeneRandomInput(int *pIn,int Sz,const char *name);
 void GeneRandomInput(FIFO<float> *pIn,int Sz[],const char *name);
 void GeneRandomInput(FIFO<complex<float> > *pIn,int Sz[],const char *nameReal, const char *nameImag);
+void GeneRandomInput(complex<float> *pIn, int Sz, const char *nameReal, const char *nameImag);
 
 void GeneRandomInput(FIFO<int> *pIn,int Sz[]);
 void GeneRandomInput(FIFO<float> *pIn,int Sz[]);

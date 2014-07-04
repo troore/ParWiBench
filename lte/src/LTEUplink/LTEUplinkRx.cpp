@@ -4,9 +4,50 @@
 
 using namespace std;
 
+/*
 void RecvFromChannel(complex<float> *pRxRecv, int n)
 {
 	ReadInputFromFiles(pRxRecv, n, "TxImag.dat", "TxReal.dat");
+}
+*/
+void Synchronization(complex<float> *output_buffer, Sync *pRxSync)
+{
+	ifstream fin_real, fin_imag;
+
+	float real, imag;
+	complex<float> data;
+	int rx_len;
+
+	fin_real.open("TxImag.dat");
+	fin_imag.open("TxReal.dat");
+
+	int cnt = 0;
+	
+	if (fin_real.is_open() && fin_imag.is_open())
+	{
+		while (!fin_real.eof() && !fin_imag.eof()/* && !rx_len*/)
+		{
+			std::cout << cnt++ << std::endl;
+			fin_real >> real;
+			fin_imag >> imag;
+			data = complex<float>(real, imag);
+
+			rx_len = pRxSync->TryDetectPreamble(&data, 1, output_buffer);
+
+			std::cout << rx_len << std::endl;
+		}
+	}
+	else
+	{
+		std::cout << "Fail to open file to read. Exiting..." << std::endl;
+
+		exit(1);
+	} 
+
+	fin_imag.close();
+	fin_real.close();
+
+//	WriteOutputToFiles(pOutData, sync.OutBufSz, "SynchronizationOutputReal", "SynchronizationOutputImag");
 }
 
 int main(int argc, char *argv[])
@@ -44,6 +85,10 @@ int main(int argc, char *argv[])
 	  OFDM TxOFDM(&User);
 	*/
 //	Channel TxCRx(&BS);
+	Sync RxSync(&BS);
+
+	std::cout << RxSync.InBufSz << std::endl;
+	
 	OFDM RxOFDM(&BS);
 	ResMapper RxResMap(&BS);
 	Equalizer RxEq(&BS, &User);
@@ -106,6 +151,10 @@ int main(int argc, char *argv[])
 //	complex<float> *pTxOFDMOut = new complex<float>[TxOFDM.OutBufSz];
 	complex<float> *pRxOFDMInp = new complex<float>[RxOFDM.InBufSz];
 	complex<float> *pRxOFDMOut = new complex<float>[RxOFDM.OutBufSz];
+
+	// Synchronization
+//	complex<float> *pRxSyncInp = new complex<float>[RxSync.InBufSz];
+	complex<float> *pRxSyncOut = new complex<float>[RxSync.OutBufSz];
 	
 	/** End of allocations **/
 
@@ -129,7 +178,13 @@ int main(int argc, char *argv[])
 
 			//	GenerateLTEChainInput(TxTbE.pInpBuf,DataK,pTxDS);
 			//	GenerateLTEChainInput(pTxTbInp, DataK, pTxDS, RANDOMSEED);
-			RecvFromChannel(pRxOFDMInp, RxOFDM.InBufSz);
+			//	RecvFromChannel(pRxOFDMInp, RxOFDM.InBufSz);
+			Synchronization(pRxSyncOut, &RxSync);
+
+			for (int i = 0; i < RxOFDM.InBufSz; i++)
+			{
+				pRxOFDMInp[i] = pRxSyncOut[i];
+			}
 
 			RxOFDM.demodulating(pRxOFDMInp, pRxOFDMOut);
 
@@ -271,6 +326,10 @@ int main(int argc, char *argv[])
 	// OFDM
 	delete[] pRxOFDMInp;
 	delete[] pRxOFDMOut;
+
+	// Synchronization
+//	delete[] pRxSyncInp;
+	delete[] pRxSyncOut;
 	
 	/** End of deallocation**/
 

@@ -27,6 +27,7 @@
 #include "ResMapper.h"
 #include "Equalizer.h"
 #include "OFDM.h"
+#include "Sync.h"
 
 
 //#define NSTD 1
