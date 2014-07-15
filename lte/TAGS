@@ -516,3 +516,674 @@ class Scrambler17,239
 	int InBufSz;Scrambler::InBufSz43,545
 	int OutBufSz;Scrambler::OutBufSz48,646
 	Scrambler(Scrambler::Scrambler51,686
+
+src/TransformPrecoding/TransformPreMain.h,108
+#define __TRANSFORMPREMAIN_H_3,31
+#define NSTD 24,390
+#define MAXRUN 25,405
+#define MaxInfoPktSz 26,422
+
+src/TransformPrecoding/TransformPrecoder.cpp,242
+TransformPrecoder::TransformPrecoder(5,52
+void TransformPrecoder::TransformPrecoding(50,1627
+TransformPrecoder::TransformPrecoder(106,3235
+void TransformPrecoder::TransformDecoding(153,4795
+TransformPrecoder::~TransformPrecoder(201,6394
+
+src/TransformPrecoding/TransformPreMain.cpp,36
+int RANDOMSEED;4,32
+int main(8,73
+
+src/Equalizing/EqualizerMain.cpp,15
+int main(6,48
+
+src/Equalizing/Equalizer.cpp,264
+Equalizer::Equalizer(4,25
+void Equalizer::FDLSEstimation(69,2073
+void Equalizer::FDLSEqualization(93,3357
+void Equalizer::FDMMSEEqualization(181,6745
+void Equalizer::LSFreqDomain(265,9945
+void Equalizer::Equalizing(343,13189
+Equalizer::~Equalizer(407,14988
+
+src/Equalizing/EqualizerMain.h,105
+#define __EQUALIZERMAIN_H_3,28
+#define NSTD 24,376
+#define MAXRUN 25,391
+#define MaxInfoPktSz 26,408
+
+src/RateMatching/RateMatcherMain.h,107
+#define __RATEMATCHERMAIN_H_3,30
+#define NSTD 25,419
+#define MAXRUN 26,434
+#define MaxInfoPktSz 27,451
+
+src/RateMatching/RateMatcher.cpp,188
+RateMatcher::RateMatcher(5,28
+void RateMatcher::TxRateMatching(73,2148
+RateMatcher::RateMatcher(233,6178
+void RateMatcher::RxRateMatching(297,8264
+RateMatcher::~RateMatcher(395,10573
+
+src/RateMatching/RateMatcherMain.cpp,36
+int RANDOMSEED;6,50
+int main(8,67
+
+src/RateMatching/SubblockInterleaver_lte.cpp,350
+SubblockInterleaver_lte<U,T>::SubblockInterleaver_lte(SubblockInterleaver_lte8,108
+void SubblockInterleaver_lte<U,T>::SubblockInterleaving(SubblockInterleaving18,401
+void SubblockInterleaver_lte<U,T>::SubblockDeInterleaving(SubblockDeInterleaving98,2650
+SubblockInterleaver_lte<U,T>::~SubblockInterleaver_lte(~SubblockInterleaver_lte204,5491
+
+src/OFDM/OFDMMain.cpp,15
+int main(8,58
+
+src/OFDM/OFDM.cpp,124
+OFDM::OFDM(5,39
+OFDM::OFDM(45,1387
+void OFDM::modulating(90,2789
+void OFDM::demodulating(168,5229
+OFDM::~OFDM(224,6983
+
+src/OFDM/OFDMMain.h,100
+#define __OFDMMAIN_H_3,23
+#define NSTD 24,361
+#define MAXRUN 25,376
+#define MaxInfoPktSz 26,393
+
+src/Synchronization/SyncMain.h,27
+#define __SYNCMAIN_H_2,22
+
+src/Synchronization/Sync.cpp,226
+Sync::Sync(3,19
+Sync::Sync(34,829
+void Sync::AddPreamble(58,1300
+int Sync::TimeSync(211,6060
+float Sync::GetFreqOffset(538,13186
+int Sync::FreqSync(542,13264
+int Sync::TryDetectPreamble(546,13370
+Sync::~Sync(643,15150
+
+src/Synchronization/SyncMain.cpp,15
+int main(7,58
+
+src/Scrambling/Scrambler.cpp,289
+Scrambler<T>::Scrambler(Scrambler5,44
+void Scrambler<T>::Scrambling(Scrambling41,1145
+Scrambler<T>::Scrambler(Scrambler78,1923
+void Scrambler<T>::Descrambling(Descrambling115,3091
+void Scrambler<T>::GenScrambInt(GenScrambInt162,4017
+Scrambler<T>::~Scrambler(~Scrambler192,4716
+
+src/Scrambling/ScrambMain.cpp,36
+int RANDOMSEED;4,26
+int main(8,61
+
+src/Scrambling/ScrambMain.h,102
+#define __SCRAMBMAIN_H_3,25
+#define NSTD 24,370
+#define MAXRUN 25,385
+#define MaxInfoPktSz 26,402
+
+src/LTEUplink/LTEUplink.h,87
+#define __LTEUPLINK_H_3,24
+#define MAX_SFRAMES 34,567
+#define MAX_BLOCK_SIZE 35,589
+
+src/LTEUplink/LTEUplinkTx.cpp,42
+void SendToChannel(7,48
+int main(12,165
+
+src/LTEUplink/UserPara.cpp,124
+UserPara::UserPara(3,23
+void UserPara::initUserPara(21,590
+void UserPara::geneDMRS(83,1859
+UserPara::~UserPara(123,2633
+
+src/LTEUplink/BSPara.cpp,77
+BSPara::BSPara(4,86
+void BSPara::initBSPara(7,107
+BSPara::~BSPara(61,1288
+
+src/LTEUplink/LTEUplink.cpp,17
+int main(11,139
+
+src/LTEUplink/LTEUplinkRx.cpp,46
+void Synchronization(13,172
+int main(53,988
+
+src/RF/csapp.h,385
+#define __CSAPP_H__3,41
+#define DEF_MODE 30,585
+#define DEF_UMASK 31,652
+typedef struct sockaddr SA;36,794
+#define RIO_BUFSIZE 41,921
+    int rio_fd;43,963
+    int rio_cnt;44,1033
+    char *rio_bufptr;rio_bufptr45,1099
+    char rio_buf[rio_buf46,1169
+} rio_t;47,1222
+#define	MAXLINE	55,1402
+#define MAXBUF 56,1452
+#define LISTENQ 57,1501
+typedef void handler_t(78,2129
+
+src/RF/hostinfo.cpp,15
+int main(4,42
+
+src/RF/echoserveri.cpp,155
+typedef float complex_type;11,144
+#define MAXBUFSZ 13,173
+#define BYTES_PER_COMPLEX 14,193
+int connfd;16,247
+int usrp_source(18,260
+int main(68,1193
+
+src/RF/csapp.cpp,1994
+void unix_error(9,173
+void posix_error(16,317
+void dns_error(22,451
+void app_error(28,574
+pid_t Fork(40,864
+void Execve(50,998
+pid_t Wait(57,1168
+pid_t Waitpid(67,1309
+void Kill(77,1506
+void Pause(86,1640
+unsigned int Sleep(92,1690
+unsigned int Alarm(101,1832
+void Setpgid(105,1906
+pid_t Getpgrp(113,2042
+handler_t *Signal(Signal122,2228
+void Sigprocmask(136,2644
+void Sigemptyset(143,2804
+void Sigfillset(150,2918
+void Sigaddset(157,3030
+void Sigdelset(164,3158
+int Sigismember(171,3286
+int Open(184,3552
+ssize_t Read(193,3718
+ssize_t Write(202,3872
+off_t Lseek(211,4034
+void Close(220,4199
+int Select(228,4296
+int Dup2(238,4532
+void Stat(247,4656
+void Fstat(253,4773
+void *Mmap(Mmap262,4997
+void Munmap(271,5217
+void *Malloc(Malloc281,5489
+void *Realloc(Realloc290,5616
+void *Calloc(Calloc299,5762
+void Free(308,5909
+void Fclose(316,6084
+FILE *Fdopen(Fdopen322,6167
+char *Fgets(Fgets332,6314
+FILE *Fopen(Fopen342,6495
+void Fputs(352,6659
+size_t Fread(358,6771
+void Fwrite(367,6976
+int Socket(378,7226
+void Setsockopt(387,7388
+void Bind(395,7586
+void Listen(403,7745
+int Accept(411,7866
+void Connect(420,8036
+struct hostent *Gethostbyname(Gethostbyname433,8315
+struct hostent *Gethostbyaddr(Gethostbyaddr443,8511
+void Pthread_create(456,8864
+void Pthread_cancel(465,9095
+void Pthread_join(472,9232
+void Pthread_detach(480,9420
+void Pthread_exit(488,9575
+pthread_t Pthread_self(492,9638
+void Pthread_once(496,9700
+void Sem_init(504,9926
+void P(510,10066
+void V(516,10143
+ssize_t rio_readn(529,10486
+ssize_t rio_writen(555,11108
+static ssize_t rio_read(585,11997
+void rio_readinitb(617,12828
+ssize_t rio_readnb(629,13057
+ssize_t rio_readlineb(655,13696
+ssize_t Rio_readn(681,14278
+void Rio_writen(690,14447
+void Rio_readinitb(696,14575
+ssize_t Rio_readnb(701,14646
+ssize_t Rio_readlineb(710,14818
+int open_clientfd(729,15391
+int open_listenfd(759,16329
+int Open_clientfd(792,17416
+int Open_listenfd(805,17667
+
+src/RF/echoclient.cpp,85
+#define MAXBUFSZ 9,108
+int clientfd;11,129
+void usrp_sink(13,144
+int main(36,620
+
+src/Turbo/backup/turbo.cpp,795
+uint32_T TURBO_INT_K_TABLE[TURBO_INT_K_TABLE10,169
+uint32_T TURBO_INT_F1_TABLE[TURBO_INT_F1_TABLE30,1441
+uint32_T TURBO_INT_F2_TABLE[TURBO_INT_F2_TABLE46,2465
+Turbo::Turbo(62,3480
+void Turbo::internal_interleaver(99,4470
+void Turbo::internal_deinterleaver(125,5036
+void Turbo::spec_constituent_encoder(150,5585
+void Turbo::spec_encoder(217,7310
+int Turbo::reverse_int(275,8759
+int Turbo::calc_state_transition(292,9070
+void Turbo::set_generator_polynomials(323,9982
+void Turbo::constituent_encoder(379,11589
+void Turbo::encoder(413,12592
+void Turbo::gen_trellis(518,15466
+void Turbo::spec_decoder(593,17637
+void Turbo::spec_map_decoder(698,20637
+void Turbo::map_decoder(875,26986
+void Turbo::decode_block(1040,33955
+void Turbo::decoder(1083,35303
+Turbo::~Turbo(1139,36992
+
+src/Turbo/backup/pccc_wrapper.cpp,153
+void wrapper_turbo_encoder(15,211
+void wrapper_send(28,598
+void wrapper_channel(52,991
+void wrapper_recv(59,1112
+void wrapper_turbo_decoder(83,1540
+
+src/Turbo/backup/pccc.cpp,17
+int main(12,154
+
+src/Turbo/backup/turbo.h,911
+#define __TURBO_H_2,19
+class Turbo7,79
+    uint32_T m_cst_len;Turbo::m_cst_len51,1958
+	uint32_T m_n_states;Turbo::m_n_states52,2003
+	uint32_T m_n_uncoded,Turbo::m_n_uncoded57,2142
+	uint32_T m_n_uncoded, m_n_coded;Turbo::m_n_coded57,2142
+	uint32_T m_n_tail;Turbo::m_n_tail58,2176
+	uint32_T m_n_gens;Turbo::m_n_gens59,2196
+	uint32_T m_interleaver_size;Turbo::m_interleaver_size60,2241
+	uint32_T *m_gen_pols;Turbo::m_gen_pols65,2381
+	uint32_T *m_rev_gen_pols;Turbo::m_rev_gen_pols66,2404
+	uint8_T *m_output_parity;Turbo::m_output_parity69,2482
+	uint8_T *m_rev_output_parity;Turbo::m_rev_output_parity70,2509
+	uint8_T *m_state_trans;Turbo::m_state_trans72,2571
+	uint8_T *m_rev_state_trans;Turbo::m_rev_state_trans73,2596
+	uint32_T m_n_iters;Turbo::m_n_iters75,2626
+	int8_T *m_trellis;Turbo::m_trellis76,2647
+	float_point Lc;Turbo::Lc78,2668
+#define TURBO_INT_K_TABLE_SIZE 81,2689
+
+src/Turbo/backup/pccc_wrapper.h,31
+#define __PCCC_WRAPPER_H_2,26
+
+src/Turbo/TurboMain.cpp,38
+int RANDOMSEED;4,25
+int main(14,179
+
+src/Turbo/TurboMain.h,101
+#define __TURBOMAIN_H_3,24
+#define NSTD 25,415
+#define MAXRUN 26,430
+#define MaxInfoPktSz 27,447
+
+src/Turbo/Turbo.cpp,878
+#define LOG_INFINITY 6,58
+const double log_double_max 9,149
+const double log_double_min 11,290
+#define TURBO_INT_K_TABLE_SIZE 15,430
+int TURBO_INT_K_TABLE[TURBO_INT_K_TABLE17,466
+int TURBO_INT_F1_TABLE[TURBO_INT_F1_TABLE37,1747
+int TURBO_INT_F2_TABLE[TURBO_INT_F2_TABLE53,2738
+float max_log(70,3763
+float add_log(75,3825
+Turbo::Turbo(90,4051
+void Turbo::set_parameters(153,5763
+void Turbo::internal_interleaver(191,6741
+void Turbo::internal_deinterleaver(225,7383
+void Turbo::constituent_encoder(259,8009
+void Turbo::TurboEncoding(294,8968
+int Turbo::calc_state_transition(428,12335
+int Turbo::reverse_int(459,13211
+void Turbo::set_generator_polynomials(476,13517
+Turbo::Turbo(533,15064
+void Turbo::TurboDecoding(588,16689
+void Turbo::decode_block(665,18658
+void Turbo::map_decoder(753,21516
+void Turbo::log_decoder(921,28478
+Turbo::~Turbo(1070,32559
+
+src/ResMapping/ResMapMain.cpp,36
+int RANDOMSEED;4,26
+int main(8,63
+
+src/ResMapping/ResMapMain.h,102
+#define __RESMAPMAIN_H_3,25
+#define NSTD 24,370
+#define MAXRUN 25,385
+#define MaxInfoPktSz 26,402
+
+src/ResMapping/ResMapper.cpp,179
+ResMapper::ResMapper(5,26
+ResMapper::ResMapper(59,1690
+void ResMapper::SubCarrierMapping(105,3310
+void ResMapper::SubCarrierDemapping(171,4928
+ResMapper::~ResMapper(238,6557
+
+src/Modulation/ModMain.h,99
+#define __MODMAIN_H_3,22
+#define NSTD 24,365
+#define MAXRUN 25,380
+#define MaxInfoPktSz 26,397
+
+src/Modulation/Modulation.cpp,433
+static const float INF 4,26
+void Modulation::InitModTables(6,59
+void Modulation::dec2bits(143,5377
+Modulation::Modulation(155,5517
+void Modulation::Modulating(205,6999
+Modulation::Modulation(239,7732
+float Modulation::vecmin(294,9328
+float Modulation::eudist(314,9583
+void Modulation::Demodulating(319,9702
+void Modulation::Demodulating(369,10872
+void Modulation::Demodulating(562,15671
+Modulation::~Modulation(633,17862
+
+src/Modulation/backup/mod.cpp,380
+Modulator::Modulator(6,39
+Modulator::~Modulator(29,356
+void Modulator::dec2bits(41,533
+float_point Modulator::eudist(53,758
+void Modulator::modulate_bits(59,913
+float_point Modulator::vec_min(80,1387
+void Modulator::demodulate_bits(93,1602
+void Modulator::demodulate_soft_bits(129,2614
+BPSK::BPSK(185,3957
+BPSK::~BPSK(223,4807
+QPSK::QPSK(229,4870
+QPSK::~QPSK(266,5700
+
+src/Modulation/backup/mod.h,408
+#define __MODULATOR_H2,22
+class Modulator23,221
+	Modulator(Modulator::Modulator27,272
+	int32_T M;Modulator::M48,1284
+	int32_T k;Modulator::k50,1337
+	float_point *m_mod_table;Modulator::m_mod_table52,1397
+	uint8_T *bitmap;Modulator::bitmap54,1463
+class BPSK 57,1485
+	float_point *m_BPSK_table;BPSK::m_BPSK_table72,2086
+class QPSK 76,2119
+	float_point *m_QPSK_table;QPSK::m_QPSK_table91,2725
+
+src/Modulation/backup/main.cpp,35
+#define N 12,172
+int main(14,189
+
+src/Modulation/ModMain.cpp,37
+int RANDOMSEED;6,38
+int main(10,77
+
+include/Turbo.h,1288
+#define __TURBO_H_3,20
+using namespace std;17,246
+class Turbo19,268
+	bool PSFlag;Turbo::PSFlag22,292
+	bool BufFlag;Turbo::BufFlag23,306
+	int InpBlockShift;Turbo::InpBlockShift24,321
+	int OutBlockShift;Turbo::OutBlockShift25,341
+	int NumBlock;Turbo::NumBlock26,361
+	int DataLength;Turbo::DataLength27,376
+	int LastBlockLength;Turbo::LastBlockLength28,393
+	int Rate;Turbo::Rate32,439
+	int iSeqLength;Turbo::iSeqLength33,450
+	int m_gens[Turbo::m_gens42,569
+	int m_n_gens;Turbo::m_n_gens43,585
+	int m_cst_len;Turbo::m_cst_len44,600
+	int m_block_size;Turbo::m_block_size45,616
+	int m_n_iters;Turbo::m_n_iters46,635
+	int m_n_tail;Turbo::m_n_tail47,651
+	int m_n_states;Turbo::m_n_states48,666
+	int m_n_uncoded;Turbo::m_n_uncoded49,683
+	int m_n_coded;Turbo::m_n_coded50,701
+	int *m_gen_pols;Turbo::m_gen_pols52,718
+	int *m_rev_gen_pols;Turbo::m_rev_gen_pols53,736
+	int *m_state_trans;Turbo::m_state_trans54,758
+	int *m_rev_state_trans;Turbo::m_rev_state_trans55,779
+	int *m_output_parity;Turbo::m_output_parity56,804
+	int *m_rev_output_parity;Turbo::m_rev_output_parity57,827
+	float Lc;Turbo::Lc59,855
+	string metric;Turbo::metric60,866
+	int InBufSz;Turbo::InBufSz66,988
+	int OutBufSz;Turbo::OutBufSz70,1071
+	Turbo(Turbo::Turbo73,1111
+
+include/RateMatcher.h,1097
+#define __RATEMATCHER_H_3,26
+using namespace std;13,202
+class RateMatcher15,224
+	bool PSFlag;RateMatcher::PSFlag18,254
+	bool BufFlag;RateMatcher::BufFlag19,268
+	int NumULSymbSF;RateMatcher::NumULSymbSF20,283
+	int MDFT;RateMatcher::MDFT22,302
+	int MQAM;RateMatcher::MQAM23,313
+	int NumLayer;RateMatcher::NumLayer24,324
+	int DataLength;RateMatcher::DataLength26,340
+	int Rate;RateMatcher::Rate28,358
+	int LastBlockLen;RateMatcher::LastBlockLen31,391
+	int NumBlock;RateMatcher::NumBlock32,410
+	int BlkSize;RateMatcher::BlkSize34,445
+	int NInfoBits;RateMatcher::NInfoBits36,460
+	int NumExtraBits;RateMatcher::NumExtraBits42,544
+	SubblockInterleaver_lte<RateMatcher::SubblockInterleaver_lte53,689
+	SubblockInterleaver_lte<int,int> SbInterleaver;RateMatcher::SbInterleaver53,689
+	SubblockInterleaver_lte<RateMatcher::SubblockInterleaver_lte54,738
+	SubblockInterleaver_lte<int,float> SbDeInterleaver;RateMatcher::SbDeInterleaver54,738
+	int InBufSz;RateMatcher::InBufSz59,842
+	int OutBufSz;RateMatcher::OutBufSz60,856
+	RateMatcher(RateMatcher::RateMatcher68,998
+
+include/ResMapper.h,696
+#define __RESMAPPER_H_3,24
+class ResMapper9,108
+	bool PSFlag;ResMapper::PSFlag12,136
+	bool BufFlag;ResMapper::BufFlag13,150
+	int MDFT;ResMapper::MDFT14,165
+	int NIFFT;ResMapper::NIFFT15,176
+	int NumULSymbSF;ResMapper::NumULSymbSF16,188
+	int NumLayer;ResMapper::NumLayer17,206
+	int SCLoc;ResMapper::SCLoc18,221
+	int SCLocPattern;ResMapper::SCLocPattern19,233
+	int MDFTPerUser;ResMapper::MDFTPerUser20,252
+	int NumRxAntenna;ResMapper::NumRxAntenna21,270
+	int DMRSSymbPos[ResMapper::DMRSSymbPos23,290
+	complex<float>*** VpDMRS;ResMapper::VpDMRS25,313
+	int InBufSz;ResMapper::InBufSz32,433
+	int OutBufSz;ResMapper::OutBufSz36,531
+	ResMapper(ResMapper::ResMapper39,571
+
+include/Equalizer.h,1043
+#define __EQUALIZER_H_3,24
+using namespace std;17,221
+class Equalizer19,243
+		bool PSFlag;Equalizer::PSFlag22,271
+		bool BufFlag;Equalizer::BufFlag23,286
+		int NumULSymbSF;Equalizer::NumULSymbSF25,303
+		int MDFTPerUser;Equalizer::MDFTPerUser26,322
+		int NumLayerPerUser;Equalizer::NumLayerPerUser27,341
+		int NumRxAntenna;Equalizer::NumRxAntenna29,365
+		int EstimationMethod;Equalizer::EstimationMethod30,385
+		UserPara* VpUser;Equalizer::VpUser32,410
+		complex<float>*** pDMRS;Equalizer::pDMRS33,430
+		FIFO<complex<float> >* VpOutBuf;Equalizer::VpOutBuf35,494
+		complex<float>** pInpData;Equalizer::pInpData37,530
+		complex<float>** pOutData;Equalizer::pOutData38,559
+		complex<float> ***VpCSI;Equalizer::VpCSI41,590
+		complex<float> ***pEqW;Equalizer::pEqW42,617
+		complex<float> ***pHdm;Equalizer::pHdm43,643
+		int InBufSz;Equalizer::InBufSz56,1231
+		int OutBufSz;Equalizer::OutBufSz60,1326
+		complex<float> ***GetpEqW(Equalizer::GetpEqW68,1810
+		complex<float> ***GetpHdm(Equalizer::GetpHdm69,1865
+
+include/UserPara.h,1181
+#define __USERPARA_H_3,23
+#define PI 13,176
+using namespace std;15,206
+class UserPara17,228
+	int** pPrimeTable;UserPara::pPrimeTable20,255
+	int Nzc;UserPara::Nzc21,275
+	BSPara *VpBS;UserPara::VpBS23,307
+	int NIFFT;UserPara::NIFFT27,359
+	int CPLen;UserPara::CPLen28,371
+	int NumULSymbSF;UserPara::NumULSymbSF29,383
+	int RSu;UserPara::RSu31,402
+	int RSv;UserPara::RSv32,412
+	int MQAM;UserPara::MQAM34,423
+	int MDFT;UserPara::MDFT35,434
+	int NumLayer;UserPara::NumLayer36,445
+	int ncs[UserPara::ncs37,460
+	int SCLoc;UserPara::SCLoc38,473
+	int DataLength;UserPara::DataLength39,485
+	int DMRSSymbPos[UserPara::DMRSSymbPos41,503
+	int NInfoBits;UserPara::NInfoBits43,525
+	int QAMLen;UserPara::QAMLen44,541
+	bool ProcessingStatusFlag;UserPara::ProcessingStatusFlag45,554
+	bool BufferSizeFlag;UserPara::BufferSizeFlag46,582
+	complex<float>*** pDMRS;UserPara::pDMRS47,604
+	int gens[UserPara::gens50,655
+	int n_gens;UserPara::n_gens51,669
+	int constraint_length;UserPara::constraint_length52,682
+	int BlkSize;UserPara::BlkSize53,706
+	int n_iterations;UserPara::n_iterations54,720
+    complex<float>*** GetpDMRS(UserPara::GetpDMRS58,799
+
+include/SubblockInterleaver_lte.h,498
+class SubblockInterleaver_lte36,1725
+	int D;SubblockInterleaver_lte::D39,1766
+        int K_pi;SubblockInterleaver_lte::K_pi40,1774
+        int Rate;SubblockInterleaver_lte::Rate41,1792
+	int C_sb;SubblockInterleaver_lte::C_sb42,1810
+	int R_sb;SubblockInterleaver_lte::R_sb43,1821
+        int NumDummy;SubblockInterleaver_lte::NumDummy44,1832
+        T DummyValue;SubblockInterleaver_lte::DummyValue45,1854
+	int InterColumnPattern[SubblockInterleaver_lte::InterColumnPattern47,1877
+
+include/Sync.h,632
+#define __SYNC_H_2,18
+class Sync10,123
+	int NIFFT;Sync::NIFFT13,146
+	int CPLen;Sync::CPLen14,158
+	int NumULSymbSF;Sync::NumULSymbSF15,170
+	int NumLayer;Sync::NumLayer16,188
+	int NumRxAntenna;Sync::NumRxAntenna17,203
+	complex<float> *output_time_synchro;Sync::output_time_synchro19,224
+	int syn_state;Sync::syn_state20,262
+	int n_signal_output;Sync::n_signal_output21,278
+	int n_data_output;Sync::n_data_output22,300
+	int PreambleLen;Sync::PreambleLen23,320
+	int InBufSz;Sync::InBufSz26,349
+	int OutBufSz;Sync::OutBufSz27,363
+	Sync(Sync::Sync30,403
+	inline int GetPreambleLen(Sync::GetPreambleLen37,485
+
+include/Modulation.h,938
+#define __MODULATION_H_3,25
+using namespace std;15,219
+class Modulation17,241
+	bool PSFlag;Modulation::PSFlag20,270
+	bool BufFlag;Modulation::BufFlag21,284
+	bool SCFDMAFlag;Modulation::SCFDMAFlag22,299
+	float** pBPSKtable;Modulation::pBPSKtable24,319
+	float** pQPSKtable;Modulation::pQPSKtable25,340
+	float** pQAM16table;Modulation::pQAM16table26,361
+	float** pQAM64table;Modulation::pQAM64table27,383
+	int NumLayer;Modulation::NumLayer29,406
+	int NInfoBits;Modulation::NInfoBits30,421
+	int QAMLen;Modulation::QAMLen31,437
+	int BitsPerSymb;Modulation::BitsPerSymb34,452
+	float** pTable;Modulation::pTable36,472
+	int NumULSymbSF;Modulation::NumULSymbSF41,540
+	int NumRxAntenna;Modulation::NumRxAntenna42,558
+	int MDFT;Modulation::MDFT44,578
+	int MQAM;Modulation::MQAM45,589
+	int InBufSz;Modulation::InBufSz65,1012
+	int OutBufSz;Modulation::OutBufSz70,1117
+	Modulation(Modulation::Modulation73,1157
+
+include/OFDM.h,428
+#define __OFDM_H_3,19
+class OFDM11,137
+	bool PSFlag;OFDM::PSFlag14,160
+	bool BufFlag;OFDM::BufFlag15,174
+	int NIFFT;OFDM::NIFFT16,189
+	int CPLen;OFDM::CPLen17,201
+	int NumULSymbSF;OFDM::NumULSymbSF18,213
+	int NumLayer;OFDM::NumLayer19,231
+	int NumRxAntenna;OFDM::NumRxAntenna20,246
+	int SymNum;OFDM::SymNum21,265
+	int InBufSz;OFDM::InBufSz34,508
+	int OutBufSz;OFDM::OutBufSz38,606
+	OFDM(OFDM::OFDM41,646
+
+include/TransformPrecoder.h,647
+#define __TRANSFORM_PRECODER_H_2,32
+using namespace std;12,199
+class TransformPrecoder14,221
+		bool PSFlag;TransformPrecoder::PSFlag17,257
+		bool BufFlag;TransformPrecoder::BufFlag18,272
+		int QAMLen;TransformPrecoder::QAMLen19,288
+		int NumULSymbSF;TransformPrecoder::NumULSymbSF20,302
+		int MDFT;TransformPrecoder::MDFT21,321
+		int NumLayer;TransformPrecoder::NumLayer22,333
+		int QAM;TransformPrecoder::QAM24,350
+		int SymbNum;TransformPrecoder::SymbNum25,361
+		int InBufSz;TransformPrecoder::InBufSz38,646
+		int OutBufSz;TransformPrecoder::OutBufSz39,661
+		TransformPrecoder(TransformPrecoder::TransformPrecoder42,703
+
+include/BSPara.h,1080
+#define MAX_BLOCK_SIZE 6,118
+using namespace std;8,147
+class BSPara10,169
+		int NumULSymbSF;BSPara::NumULSymbSF13,193
+		int NIFFT;BSPara::NIFFT15,213
+		int CPLen;BSPara::CPLen16,226
+		int RSU;BSPara::RSU17,239
+		int RSV;BSPara::RSV18,250
+		int DMRSSymbPos[BSPara::DMRSSymbPos20,262
+		int SCLocPattern;BSPara::SCLocPattern21,284
+		int MDFTPerUser;BSPara::MDFTPerUser22,304
+		int MQAMPerUser;BSPara::MQAMPerUser23,323
+		int NumLayerPerUser;BSPara::NumLayerPerUser24,342
+		int DataLengthPerUser;BSPara::DataLengthPerUser25,365
+		int EstimationMethod;BSPara::EstimationMethod27,391
+		int NumRxAntenna;BSPara::NumRxAntenna28,415
+		bool ProcessingStatusFlag;BSPara::ProcessingStatusFlag30,436
+		bool BSParameterPrintFlag;BSPara::BSParameterPrintFlag31,465
+		bool BufferSizeFlag;BSPara::BufferSizeFlag32,494
+		int Rate;BSPara::Rate35,543
+		int gens[BSPara::gens36,555
+		int n_gens;BSPara::n_gens37,570
+		int constraint_length;BSPara::constraint_length38,584
+		int BlkSize;BSPara::BlkSize39,609
+		int n_iterations;BSPara::n_iterations40,624
+
+include/Scrambler.h,530
+#define __SCRAMBLER_H_3,24
+using namespace std;14,198
+class Scrambler17,239
+	bool PSFlag;Scrambler::PSFlag20,267
+	bool BufFlag;Scrambler::BufFlag21,281
+	int NInfoBits;Scrambler::NInfoBits22,296
+	int NumLayer;Scrambler::NumLayer23,312
+	int NumULSymbSF;Scrambler::NumULSymbSF25,328
+	int MDFT;Scrambler::MDFT26,346
+	int MQAM;Scrambler::MQAM27,357
+	int *pScrambInt;Scrambler::pScrambInt39,497
+	int InBufSz;Scrambler::InBufSz43,545
+	int OutBufSz;Scrambler::OutBufSz48,646
+	Scrambler(Scrambler::Scrambler51,686

@@ -27,14 +27,14 @@ void Synchronization(complex<float> *output_buffer, Sync *pRxSync)
 	{
 		while (!fin_real.eof() && !fin_imag.eof()/* && !rx_len*/)
 		{
-			std::cout << cnt++ << std::endl;
+//			std::cout << cnt++ << std::endl;
 			fin_real >> real;
 			fin_imag >> imag;
 			data = complex<float>(real, imag);
 
 			rx_len = pRxSync->TryDetectPreamble(&data, 1, output_buffer);
 
-			std::cout << rx_len << std::endl;
+//			std::cout << rx_len << std::endl;
 		}
 	}
 	else
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 //	Channel TxCRx(&BS);
 	Sync RxSync(&BS);
 
-	std::cout << RxSync.InBufSz << std::endl;
+	std::cout << "HAHA:" <<  RxSync.OutBufSz << std::endl;
 	
 	OFDM RxOFDM(&BS);
 	ResMapper RxResMap(&BS);
@@ -163,6 +163,10 @@ int main(int argc, char *argv[])
 	int* pTxDS=new int[DataK];
 	int* pRxFS=new int[DataK];
 
+	double start, end, cost;
+
+	start = clock();
+
 	for (int nsnr = 0; nsnr < SNRArrayLen; nsnr++)
 	{
 		int PacketErr=0;
@@ -179,21 +183,38 @@ int main(int argc, char *argv[])
 			//	GenerateLTEChainInput(TxTbE.pInpBuf,DataK,pTxDS);
 			//	GenerateLTEChainInput(pTxTbInp, DataK, pTxDS, RANDOMSEED);
 			//	RecvFromChannel(pRxOFDMInp, RxOFDM.InBufSz);
+
+			//	start = clock();
 			Synchronization(pRxSyncOut, &RxSync);
+			//	end = clock();
+			//	cost = ((end - start) / CLOCKS_PER_SEC) * 1000;
+
+			//	std::cout <<"Synchronization:" << cost << "ms" << std::endl;
 
 			for (int i = 0; i < RxOFDM.InBufSz; i++)
 			{
 				pRxOFDMInp[i] = pRxSyncOut[i];
 			}
 
+			//	start = clock();
 			RxOFDM.demodulating(pRxOFDMInp, pRxOFDMOut);
+			//	end = clock();
+			//	cost = ((end - start) / CLOCKS_PER_SEC) * 1000;
+
+			//	std::cout <<"OFDM Demod:" << cost << "ms" << std::endl;
+
 
 			for (int i = 0; i < RxResMap.InBufSz; i++)
 			{
 				pRxResMapInp[i] = pRxOFDMOut[i];
 			}
 
+			//	start = clock();
 			RxResMap.SubCarrierDemapping(pRxResMapInp, pRxResMapOut);
+			//	end = clock();
+			//	cost = ((end - start) / CLOCKS_PER_SEC) * 1000;
+
+			//	std::cout <<"Res Demap:" << cost << "ms" << std::endl;
 
 			// RxE.Equalizing(RxTD.pInpBuf,TxCRx.GetpPCSI(),TxCRx.GetAWGNNo());
 			
@@ -202,14 +223,24 @@ int main(int argc, char *argv[])
 				pRxEqInp[i] = pRxResMapOut[i];
 			}
 			
+			//	start = clock();
 			RxEq.Equalizing(pRxEqInp, pRxEqOut);
+			//	end = clock();
+			//	cost = ((end - start) / CLOCKS_PER_SEC) * 1000;
+
+			//	std::cout <<"Equalizing:" << cost << "ms" << std::endl;
 
 			for (int i = 0; i < RxTransPre.InBufSz; i++)
 			{
 				pRxTransPreInp[i] = pRxEqOut[i];
 			}
 			
+			//	start = clock();
 			RxTransPre.TransformDecoding(pRxTransPreInp, pRxTransPreOut);
+			//	end = clock();
+			//	cost = ((end - start) / CLOCKS_PER_SEC) * 1000;
+
+			//	std::cout <<"DFT:" << cost << "ms" << std::endl;
 
 			//	cout << "Modulating Rx Input" << endl;
 			for (int i = 0; i < RxMod.InBufSz; i++)
@@ -219,8 +250,15 @@ int main(int argc, char *argv[])
 			}
 			//	cout << endl;
 			
-			// RxD.Demodulating(RxDSCRB.pInpBuf,RxE.GetpEqW(),RxE.GetpHdm(),(AWGNSigmaArray[nsnr]));			
+			// RxD.Demodulating(RxDSCRB.pInpBuf,RxE.GetpEqW(),RxE.GetpHdm(),(AWGNSigmaArray[nsnr]));
+			//	start = clock();
 			RxMod.Demodulating(pRxModInp, pRxModOut, (AWGNSigmaArray[nsnr]));
+			//	end = clock();
+			//	cost = ((end - start) / CLOCKS_PER_SEC) * 1000;
+
+			//	std::cout <<"Demodulation:" << cost << "ms" << std::endl;
+
+
 			//	RxMod.Demodulating(pRxModInp, pRxModHD);
 
 			//	cout << "Scrambling Rx Input" << endl;
@@ -232,8 +270,13 @@ int main(int argc, char *argv[])
 				//		cout << pRxSCRBInp[i] << "\t";
 			}
 			//	cout << endl;
-			
+
+			//	start = clock();
 			RxSCRB.Descrambling(pRxSCRBInp, pRxSCRBOut);
+			//	end = clock();
+			//	cost = ((end - start) / CLOCKS_PER_SEC) * 1000;
+
+			//	std::cout <<"Descrambling:" << cost << "ms" << std::endl;
 
 			//	cout << "RateMatching Rx Input" << endl;
 			for (int i = 0; i < RxRM.InBufSz; i++)
@@ -243,8 +286,12 @@ int main(int argc, char *argv[])
 			}
 			//	cout << endl;
 		   
+			//	start = clock();
 			RxRM.RxRateMatching(pRxRMInp, pRxRMOut, pRxRMHard);
+			//	end = clock();
+			//	cost = ((end - start) / CLOCKS_PER_SEC) * 1000;
 
+			//	std::cout <<"Rate Dematch:" << cost << "ms" << std::endl;
 
 			//	cout << "Turbo Rx Input" << endl;
 			for (int i = 0; i < RxTurbo.InBufSz; i++)
@@ -254,9 +301,14 @@ int main(int argc, char *argv[])
 			}
 			//	cout << endl;
 			//	RxTbD.TurboDecoding(&RxFileSink);
-			RxTurbo.TurboDecoding(pRxTbInp, pRxTbOut);
 
-			//	cout << "Turbo Rx Output" << endl;
+			//	start = clock();
+			RxTurbo.TurboDecoding(pRxTbInp, pRxTbOut);
+			//	end = clock();
+			//	cost = ((end - start) / CLOCKS_PER_SEC) * 1000;
+
+			//	std::cout <<"Turbo:" << cost << "ms" << std::endl;
+			
 			for (int i = 0; i < RxTurbo.OutBufSz; i++)
 			{
 				pRxTbOut[i] = (1 - pRxTbOut[i]) / 2;
@@ -287,6 +339,10 @@ int main(int argc, char *argv[])
 			////////////////////////// END Run Subframe/////////////////////////////////
 		}
 	}
+
+	end = clock();
+
+	std::cout << (end - start) * 1000 / CLOCKS_PER_SEC << std::endl;
 
 	delete[] AWGNSigmaArray;
 

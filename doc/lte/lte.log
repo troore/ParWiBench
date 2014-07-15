@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.5-0.9999.3 (TeX Live 2013) (format=xelatex 2013.8.21)  6 JUN 2014 01:19
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (TeX Live 2013) (format=xelatex 2013.8.21)  10 JUL 2014 10:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -255,21 +255,6 @@ Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
 \rot@float@box=\box29
 \rot@mess@toks=\toks20
 )
-(/home/troore/Public/texlive/2013/texmf-dist/tex/latex/algorithms/algorithm.sty
-Invalid UTF-8 byte or sequence at line 11 replaced by U+FFFD.
-Package: algorithm 2009/08/24 v0.1 Document Style `algorithm' - floating enviro
-nment
-(/home/troore/Public/texlive/2013/texmf-dist/tex/latex/float/float.sty
-Package: float 2001/11/08 v1.3d Float enhancements (AL)
-\c@float@type=\count113
-\float@exts=\toks21
-\float@box=\box30
-\@float@everytoks=\toks22
-\@floatcapt=\box31
-)
-\@float@every@algorithm=\toks23
-\c@algorithm=\count114
-)
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/algorithmicx/algpseudoco
 de.sty
 Package: algpseudocode 
@@ -279,19 +264,60 @@ x.sty
 Package: algorithmicx 2005/04/27 v1.2 Algorithmicx
 
 Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
-\c@ALG@line=\count115
-\c@ALG@rem=\count116
-\c@ALG@nested=\count117
+\c@ALG@line=\count113
+\c@ALG@rem=\count114
+\c@ALG@nested=\count115
 \ALG@tlm=\skip49
 \ALG@thistlm=\skip50
-\c@ALG@Lnr=\count118
-\c@ALG@blocknr=\count119
-\c@ALG@storecount=\count120
-\c@ALG@tmpcounter=\count121
+\c@ALG@Lnr=\count116
+\c@ALG@blocknr=\count117
+\c@ALG@storecount=\count118
+\c@ALG@tmpcounter=\count119
 \ALG@tmplength=\skip51
 )
 Document Style - pseudocode environments for use with the `algorithmicx' style
-) (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/comment/comment.sty
+)
+(/home/troore/Public/texlive/2013/texmf-dist/tex/latex/algorithms/algorithm.sty
+Invalid UTF-8 byte or sequence at line 11 replaced by U+FFFD.
+Package: algorithm 2009/08/24 v0.1 Document Style `algorithm' - floating enviro
+nment
+(/home/troore/Public/texlive/2013/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count120
+\float@exts=\toks21
+\float@box=\box30
+\@float@everytoks=\toks22
+\@floatcapt=\box31
+)
+\@float@every@algorithm=\toks23
+\c@algorithm=\count121
+)
+(/home/troore/Public/texlive/2013/texmf-dist/tex/latex/listings/listings.sty
+\lst@mode=\count122
+\lst@gtempboxa=\box32
+\lst@token=\toks24
+\lst@length=\count123
+\lst@currlwidth=\dimen118
+\lst@column=\count124
+\lst@pos=\count125
+\lst@lostspace=\dimen119
+\lst@width=\dimen120
+\lst@newlines=\count126
+\lst@lineno=\count127
+\lst@maxwidth=\dimen121
+
+(/home/troore/Public/texlive/2013/texmf-dist/tex/latex/listings/lstmisc.sty
+File: lstmisc.sty 2007/02/22 1.4 (Carsten Heinz)
+\c@lstnumber=\count128
+\lst@skipnumbers=\count129
+\lst@framebox=\box33
+)
+(/home/troore/Public/texlive/2013/texmf-dist/tex/latex/listings/listings.cfg
+File: listings.cfg 2007/02/22 1.4 listings configuration
+))
+Package: listings 2007/02/22 1.4 (Carsten Heinz)
+
+(/home/troore/Public/texlive/2013/texmf-dist/tex/latex/comment/comment.sty
 \CommentStream=\write3
 
 Excluding comment 'comment')
@@ -304,7 +330,7 @@ Package: l3bootstrap 2013/01/08 v4420 L3 Experimental bootstrap code
 Package: l3names 2012/12/07 v4346 L3 Namespace for primitives
 ) (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/etex-pkg/etex.sty
 Package: etex 1998/03/26 v2.0 eTeX basic definition package (PEB)
-\et@xins=\count122
+\et@xins=\count130
 )
 Package: expl3 2013/03/14 v4469 L3 Experimental code bundle wrapper
 
@@ -322,18 +348,18 @@ Package: l3seq 2013/01/12 v4434 L3 Sequences and stacks
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3int.sty
 Package: l3int 2013/01/13 v4444 L3 Integers
-\c_max_int=\count123
-\l_tmpa_int=\count124
-\l_tmpb_int=\count125
-\g_tmpa_int=\count126
-\g_tmpb_int=\count127
+\c_max_int=\count131
+\l_tmpa_int=\count132
+\l_tmpb_int=\count133
+\g_tmpa_int=\count134
+\g_tmpb_int=\count135
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3quark.sty
 Package: l3quark 2012/11/04 v4268 L3 Quarks
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3prg.sty
 Package: l3prg 2013/02/13 v4459 L3 Control structures
-\g__prg_map_int=\count128
+\g__prg_map_int=\count136
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3clist.sty
 Package: l3clist 2013/01/08 v4414 L3 Comma separated lists
@@ -349,20 +375,20 @@ Package: l3msg 2013/01/08 v4412 L3 Messages
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3file.sty
 Package: l3file 2013/01/14 v4446 L3 File and I/O operations
-\l_iow_line_count_int=\count129
-\l__iow_target_count_int=\count130
-\l__iow_current_line_int=\count131
-\l__iow_current_word_int=\count132
-\l__iow_current_indentation_int=\count133
+\l_iow_line_count_int=\count137
+\l__iow_target_count_int=\count138
+\l__iow_current_line_int=\count139
+\l__iow_current_word_int=\count140
+\l__iow_current_indentation_int=\count141
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3skip.sty
 Package: l3skip 2013/01/13 v4444 L3 Dimensions and skips
-\c_zero_dim=\dimen118
-\c_max_dim=\dimen119
-\l_tmpa_dim=\dimen120
-\l_tmpb_dim=\dimen121
-\g_tmpa_dim=\dimen122
-\g_tmpb_dim=\dimen123
+\c_zero_dim=\dimen122
+\c_max_dim=\dimen123
+\l_tmpa_dim=\dimen124
+\l_tmpb_dim=\dimen125
+\g_tmpa_dim=\dimen126
+\g_tmpb_dim=\dimen127
 \c_zero_skip=\skip52
 \c_max_skip=\skip53
 \l_tmpa_skip=\skip54
@@ -378,78 +404,78 @@ Package: l3skip 2013/01/13 v4444 L3 Dimensions and skips
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3keys.sty
 Package: l3keys 2013/02/24 v4461 L3 Experimental key-value interfaces
-\g__keyval_level_int=\count134
-\l_keys_choice_int=\count135
+\g__keyval_level_int=\count142
+\l_keys_choice_int=\count143
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3fp.sty
 Package: l3fp 2013/01/19 v4449 L3 Floating points
-\c__fp_leading_shift_int=\count136
-\c__fp_middle_shift_int=\count137
-\c__fp_trailing_shift_int=\count138
-\c__fp_big_leading_shift_int=\count139
-\c__fp_big_middle_shift_int=\count140
-\c__fp_big_trailing_shift_int=\count141
-\c__fp_Bigg_leading_shift_int=\count142
-\c__fp_Bigg_middle_shift_int=\count143
-\c__fp_Bigg_trailing_shift_int=\count144
+\c__fp_leading_shift_int=\count144
+\c__fp_middle_shift_int=\count145
+\c__fp_trailing_shift_int=\count146
+\c__fp_big_leading_shift_int=\count147
+\c__fp_big_middle_shift_int=\count148
+\c__fp_big_trailing_shift_int=\count149
+\c__fp_Bigg_leading_shift_int=\count150
+\c__fp_Bigg_middle_shift_int=\count151
+\c__fp_Bigg_trailing_shift_int=\count152
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3box.sty
 Package: l3box 2013/01/08 v4411 L3 Experimental boxes
-\c_empty_box=\box32
-\l_tmpa_box=\box33
-\l_tmpb_box=\box34
-\g_tmpa_box=\box35
-\g_tmpb_box=\box36
+\c_empty_box=\box34
+\l_tmpa_box=\box35
+\l_tmpb_box=\box36
+\g_tmpa_box=\box37
+\g_tmpb_box=\box38
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3coffins.sty
 Package: l3coffins 2012/09/09 v4212 L3 Coffin code layer
-\l__coffin_internal_box=\box37
-\l__coffin_internal_dim=\dimen124
-\l__coffin_offset_x_dim=\dimen125
-\l__coffin_offset_y_dim=\dimen126
-\l__coffin_x_dim=\dimen127
-\l__coffin_y_dim=\dimen128
-\l__coffin_x_prime_dim=\dimen129
-\l__coffin_y_prime_dim=\dimen130
-\c_empty_coffin=\box38
-\l__coffin_aligned_coffin=\box39
-\l__coffin_aligned_internal_coffin=\box40
-\l_tmpa_coffin=\box41
-\l_tmpb_coffin=\box42
-\l__coffin_display_coffin=\box43
-\l__coffin_display_coord_coffin=\box44
-\l__coffin_display_pole_coffin=\box45
-\l__coffin_display_offset_dim=\dimen131
-\l__coffin_display_x_dim=\dimen132
-\l__coffin_display_y_dim=\dimen133
+\l__coffin_internal_box=\box39
+\l__coffin_internal_dim=\dimen128
+\l__coffin_offset_x_dim=\dimen129
+\l__coffin_offset_y_dim=\dimen130
+\l__coffin_x_dim=\dimen131
+\l__coffin_y_dim=\dimen132
+\l__coffin_x_prime_dim=\dimen133
+\l__coffin_y_prime_dim=\dimen134
+\c_empty_coffin=\box40
+\l__coffin_aligned_coffin=\box41
+\l__coffin_aligned_internal_coffin=\box42
+\l_tmpa_coffin=\box43
+\l_tmpb_coffin=\box44
+\l__coffin_display_coffin=\box45
+\l__coffin_display_coord_coffin=\box46
+\l__coffin_display_pole_coffin=\box47
+\l__coffin_display_offset_dim=\dimen135
+\l__coffin_display_x_dim=\dimen136
+\l__coffin_display_y_dim=\dimen137
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3color.sty
 Package: l3color 2012/08/29 v4156 L3 Experimental color support
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3luatex.sty
 Package: l3luatex 2012/08/03 v4049 L3 Experimental LuaTeX-specific functions
-\g__cctab_allocate_int=\count145
-\g__cctab_stack_int=\count146
+\g__cctab_allocate_int=\count153
+\g__cctab_stack_int=\count154
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3kernel/l3candidates.st
 y
 Package: l3candidates 2013/03/14 v4468 L3 Experimental additions to l3kernel
-\l__box_top_dim=\dimen134
-\l__box_bottom_dim=\dimen135
-\l__box_left_dim=\dimen136
-\l__box_right_dim=\dimen137
-\l__box_top_new_dim=\dimen138
-\l__box_bottom_new_dim=\dimen139
-\l__box_left_new_dim=\dimen140
-\l__box_right_new_dim=\dimen141
-\l__box_internal_box=\box46
-\l__coffin_bounding_shift_dim=\dimen142
-\l__coffin_left_corner_dim=\dimen143
-\l__coffin_right_corner_dim=\dimen144
-\l__coffin_bottom_corner_dim=\dimen145
-\l__coffin_top_corner_dim=\dimen146
-\l__coffin_scaled_total_height_dim=\dimen147
-\l__coffin_scaled_width_dim=\dimen148
+\l__box_top_dim=\dimen138
+\l__box_bottom_dim=\dimen139
+\l__box_left_dim=\dimen140
+\l__box_right_dim=\dimen141
+\l__box_top_new_dim=\dimen142
+\l__box_bottom_new_dim=\dimen143
+\l__box_left_new_dim=\dimen144
+\l__box_right_new_dim=\dimen145
+\l__box_internal_box=\box48
+\l__coffin_bounding_shift_dim=\dimen146
+\l__coffin_left_corner_dim=\dimen147
+\l__coffin_right_corner_dim=\dimen148
+\l__coffin_bottom_corner_dim=\dimen149
+\l__coffin_top_corner_dim=\dimen150
+\l__coffin_scaled_total_height_dim=\dimen151
+\l__coffin_scaled_width_dim=\dimen152
 ))
 Package: xeCJK 2013/05/29 v3.2.1 Typesetting CJK scripts with XeLaTeX
 
@@ -457,8 +483,8 @@ Package: xeCJK 2013/05/29 v3.2.1 Typesetting CJK scripts with XeLaTeX
 mplate.sty
 Package: xtemplate 2013/03/12 v4467 L3 Experimental prototype document function
 s
-\l__xtemplate_tmp_dim=\dimen149
-\l__xtemplate_tmp_int=\count147
+\l__xtemplate_tmp_dim=\dimen153
+\l__xtemplate_tmp_int=\count155
 \l__xtemplate_tmp_muskip=\muskip18
 \l__xtemplate_tmp_skip=\skip58
 Variant \prop_get:NoNTF already defined; not changing it on line 106
@@ -468,23 +494,23 @@ Variant \prop_get:NoNF already defined; not changing it on line 108
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3packages/xparse/xparse
 .sty
 Package: xparse 2013/03/12 v4467 L3 Experimental document command parser
-\l__xparse_current_arg_int=\count148
-\l__xparse_m_args_int=\count149
-\l__xparse_mandatory_args_int=\count150
-\l__xparse_processor_int=\count151
-\l__xparse_v_nesting_int=\count152
+\l__xparse_current_arg_int=\count156
+\l__xparse_m_args_int=\count157
+\l__xparse_mandatory_args_int=\count158
+\l__xparse_processor_int=\count159
+\l__xparse_v_nesting_int=\count160
 )
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/l3packages/l3keys2e/l3ke
 ys2e.sty
 Package: l3keys2e 2013/03/12 v4467 LaTeX2e option processing using LaTeX3 keys
 )
-\l__xeCJK_tmpa_int=\count153
-\l__xeCJK_tmpb_int=\count154
-\l__xeCJK_tmpc_int=\count155
-\l__xeCJK_tmp_box=\box47
-\l__xeCJK_tmp_dim=\dimen150
+\l__xeCJK_tmpa_int=\count161
+\l__xeCJK_tmpb_int=\count162
+\l__xeCJK_tmpc_int=\count163
+\l__xeCJK_tmp_box=\box49
+\l__xeCJK_tmp_dim=\dimen154
 \l__xeCJK_tmp_skip=\skip59
-\g__xeCJK_spacefactor_int=\count156
+\g__xeCJK_spacefactor_int=\count164
 .................................................
 . LaTeX info: "xparse/define-command"
 . 
@@ -529,10 +555,10 @@ Package: l3keys2e 2013/03/12 v4467 LaTeX2e option processing using LaTeX3 keys
 . Defining document command \xeCJKResetCharClass with arg. spec. '' on line
 . 515.
 .................................................
-\c__xeCJK_CJK_node_dim=\dimen151
-\c__xeCJK_CJK-space_node_dim=\dimen152
-\c__xeCJK_default_node_dim=\dimen153
-\c__xeCJK_default-space_node_dim=\dimen154
+\c__xeCJK_CJK_node_dim=\dimen155
+\c__xeCJK_CJK-space_node_dim=\dimen156
+\c__xeCJK_default_node_dim=\dimen157
+\c__xeCJK_default-space_node_dim=\dimen158
 \l__xeCJK_ccglue_skip=\skip60
 \l__xeCJK_ecglue_skip=\skip61
 .................................................
@@ -574,18 +600,18 @@ Package: l3keys2e 2013/03/12 v4467 LaTeX2e option processing using LaTeX3 keys
 . Declaring object type 'xeCJK/punctuation' taking \c_three  argument(s) on
 . line 1415.
 .................................................
-\l__xeCJK_fixed_punct_width_dim=\dimen155
-\l__xeCJK_mixed_punct_width_dim=\dimen156
-\l__xeCJK_middle_punct_width_dim=\dimen157
-\l__xeCJK_fixed_margin_width_dim=\dimen158
-\l__xeCJK_mixed_margin_width_dim=\dimen159
-\l__xeCJK_middle_margin_width_dim=\dimen160
-\l__xeCJK_margin_minimum_dim=\dimen161
-\l__xeCJK_kerning_total_width_dim=\dimen162
-\l__xeCJK_same_align_margin_dim=\dimen163
-\l__xeCJK_different_align_margin_dim=\dimen164
-\l__xeCJK_kerning_margin_width_dim=\dimen165
-\l__xeCJK_kerning_margin_minimum_dim=\dimen166
+\l__xeCJK_fixed_punct_width_dim=\dimen159
+\l__xeCJK_mixed_punct_width_dim=\dimen160
+\l__xeCJK_middle_punct_width_dim=\dimen161
+\l__xeCJK_fixed_margin_width_dim=\dimen162
+\l__xeCJK_mixed_margin_width_dim=\dimen163
+\l__xeCJK_middle_margin_width_dim=\dimen164
+\l__xeCJK_margin_minimum_dim=\dimen165
+\l__xeCJK_kerning_total_width_dim=\dimen166
+\l__xeCJK_same_align_margin_dim=\dimen167
+\l__xeCJK_different_align_margin_dim=\dimen168
+\l__xeCJK_kerning_margin_width_dim=\dimen169
+\l__xeCJK_kerning_margin_minimum_dim=\dimen170
 .................................................
 . LaTeX info: "xparse/define-command"
 . 
@@ -604,7 +630,7 @@ Package: l3keys2e 2013/03/12 v4467 LaTeX2e option processing using LaTeX3 keys
 . Defining document command \setCJKfallbackfamilyfont with arg. spec. 'mO{}m'
 . on line 1899.
 .................................................
-\g__xeCJK_family_int=\count157
+\g__xeCJK_family_int=\count165
 .................................................
 . LaTeX info: "xparse/define-command"
 . 
@@ -669,7 +695,7 @@ Package: l3keys2e 2013/03/12 v4467 LaTeX2e option processing using LaTeX3 keys
 . Defining document command \setCJKmathfont with arg. spec. 'O{}m' on line
 . 2610.
 .................................................
-\l__xeCJK_verb_case_int=\count158
+\l__xeCJK_verb_case_int=\count166
 .................................................
 . LaTeX info: "xparse/define-command"
 . 
@@ -679,12 +705,12 @@ Package: l3keys2e 2013/03/12 v4467 LaTeX2e option processing using LaTeX3 keys
 
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/fontspec/fontspec.sty
 Package: fontspec 2013/05/20 v2.3c Font selection for XeLaTeX and LuaLaTeX
-\l_fontspec_script_int=\count159
-\l_fontspec_language_int=\count160
-\l_fontspec_strnum_int=\count161
-\l_fontspec_tmpa_dim=\dimen167
-\l_fontspec_tmpb_dim=\dimen168
-\l_fontspec_tmpc_dim=\dimen169
+\l_fontspec_script_int=\count167
+\l_fontspec_language_int=\count168
+\l_fontspec_strnum_int=\count169
+\l_fontspec_tmpa_dim=\dimen171
+\l_fontspec_tmpb_dim=\dimen172
+\l_fontspec_tmpc_dim=\dimen173
 Variant \tl_gset:cV already defined; not changing it on line 69
 
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/fontspec/fontspec-patche
@@ -739,9 +765,9 @@ LaTeX Font Info:    Try loading font information for EU1+lmss on input line 357
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/euenc/eu1lmss.fd
 File: eu1lmss.fd 2009/10/30 v1.6 Font defs for Latin Modern
 ))
-\tipaTiiicode=\count162
-\tipasavetokens=\toks24
-\tipachecktokens=\toks25
+\tipaTiiicode=\count170
+\tipasavetokens=\toks25
+\tipachecktokens=\toks26
 )
 .................................................
 . LaTeX info: "xparse/define-command"
@@ -849,7 +875,7 @@ File: eu1lmss.fd 2009/10/30 v1.6 Font defs for Latin Modern
 .................................................
 Variant \prop_gput:cnV already defined; not changing it on line 582
 Variant \prop_gput:cnx already defined; not changing it on line 583
-\l_fontspec_tmp_int=\count163
+\l_fontspec_tmp_int=\count171
 LaTeX Info: Redefining \itshape on input line 2087.
 LaTeX Info: Redefining \slshape on input line 2092.
 LaTeX Info: Redefining \scshape on input line 2097.
@@ -954,7 +980,7 @@ File: xeCJK.cfg 2013/05/29 v3.2.1 Configuration file for xeCJK package
 * Font 'WenQuanYi Micro Hei Mono' does not contain script 'CJK'.
 * 'Latin' script used instead.
 *************************************************
-\g_fontspec_family_WenQuanYi Micro Hei Mono_int=\count164
+\g_fontspec_family_WenQuanYi Micro Hei Mono_int=\count172
 .................................................
 . fontspec info: "defining-font"
 . 
@@ -986,33 +1012,33 @@ BoldSlantedFont={*}].
 (./lte.aux)
 \openout1 = `lte.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for EU1/lmr/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for T3/cmr/m/n on input line 42.
-LaTeX Font Info:    Try loading font information for T3+cmr on input line 42.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for EU1/lmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for T3/cmr/m/n on input line 44.
+LaTeX Font Info:    Try loading font information for T3+cmr on input line 44.
 
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/tipa/t3cmr.fd
 File: t3cmr.fd 2001/12/31 TIPA font definitions
 )
-LaTeX Font Info:    ... okay on input line 42.
-\AtBeginShipoutBox=\box48
-Package hyperref Info: Link coloring OFF on input line 42.
+LaTeX Font Info:    ... okay on input line 44.
+\AtBeginShipoutBox=\box50
+Package hyperref Info: Link coloring OFF on input line 44.
 
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
@@ -1021,15 +1047,16 @@ Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
 g.sty
 Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
-\c@section@level=\count165
+\c@section@level=\count173
 )
-LaTeX Info: Redefining \ref on input line 42.
-LaTeX Info: Redefining \pageref on input line 42.
-LaTeX Info: Redefining \nameref on input line 42.
+LaTeX Info: Redefining \ref on input line 44.
+LaTeX Info: Redefining \pageref on input line 44.
+LaTeX Info: Redefining \nameref on input line 44.
  (./lte.out) (./lte.out)
 \@outlinefile=\write4
 \openout4 = `lte.out'.
 
+\c@lstlisting=\count174
 .................................................
 . fontspec info: "setup-math"
 . 
@@ -1037,60 +1064,60 @@ LaTeX Info: Redefining \nameref on input line 42.
 .................................................
 \symlegacymaths=\mathgroup4
 LaTeX Font Info:    Overwriting symbol font `legacymaths' in version `bold'
-(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 42.
-LaTeX Font Info:    Redeclaring math accent \acute on input line 42.
-LaTeX Font Info:    Redeclaring math accent \grave on input line 42.
-LaTeX Font Info:    Redeclaring math accent \ddot on input line 42.
-LaTeX Font Info:    Redeclaring math accent \tilde on input line 42.
-LaTeX Font Info:    Redeclaring math accent \bar on input line 42.
-LaTeX Font Info:    Redeclaring math accent \breve on input line 42.
-LaTeX Font Info:    Redeclaring math accent \check on input line 42.
-LaTeX Font Info:    Redeclaring math accent \hat on input line 42.
-LaTeX Font Info:    Redeclaring math accent \dot on input line 42.
-LaTeX Font Info:    Redeclaring math accent \mathring on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \Delta on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \Theta on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \Xi on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \Pi on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \Phi on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \Psi on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \Omega on input line 42.
-LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 42.
-LaTeX Font Info:    Redeclaring symbol font `operators' on input line 42.
+(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 44.
+LaTeX Font Info:    Redeclaring math accent \acute on input line 44.
+LaTeX Font Info:    Redeclaring math accent \grave on input line 44.
+LaTeX Font Info:    Redeclaring math accent \ddot on input line 44.
+LaTeX Font Info:    Redeclaring math accent \tilde on input line 44.
+LaTeX Font Info:    Redeclaring math accent \bar on input line 44.
+LaTeX Font Info:    Redeclaring math accent \breve on input line 44.
+LaTeX Font Info:    Redeclaring math accent \check on input line 44.
+LaTeX Font Info:    Redeclaring math accent \hat on input line 44.
+LaTeX Font Info:    Redeclaring math accent \dot on input line 44.
+LaTeX Font Info:    Redeclaring math accent \mathring on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \Delta on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \Theta on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \Xi on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \Pi on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \Phi on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \Psi on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \Omega on input line 44.
+LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 44.
+LaTeX Font Info:    Redeclaring symbol font `operators' on input line 44.
 LaTeX Font Info:    Encoding `OT1' has changed to `EU1' for symbol font
-(Font)              `operators' in the math version `normal' on input line 42.
+(Font)              `operators' in the math version `normal' on input line 44.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  OT1/cmr/m/n --> EU1/lmr/m/n on input line 42.
+(Font)                  OT1/cmr/m/n --> EU1/lmr/m/n on input line 44.
 LaTeX Font Info:    Encoding `OT1' has changed to `EU1' for symbol font
-(Font)              `operators' in the math version `bold' on input line 42.
+(Font)              `operators' in the math version `bold' on input line 44.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  OT1/cmr/bx/n --> EU1/lmr/m/n on input line 42.
+(Font)                  OT1/cmr/bx/n --> EU1/lmr/m/n on input line 44.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  EU1/lmr/m/n --> EU1/lmr/m/n on input line 42.
+(Font)                  EU1/lmr/m/n --> EU1/lmr/m/n on input line 44.
 LaTeX Font Info:    Overwriting math alphabet `\mathrm' in version `normal'
-(Font)                  EU1/lmr/m/n --> EU1/lmr/m/n on input line 42.
+(Font)                  EU1/lmr/m/n --> EU1/lmr/m/n on input line 44.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
-(Font)                  OT1/cmr/m/it --> EU1/lmr/m/it on input line 42.
+(Font)                  OT1/cmr/m/it --> EU1/lmr/m/it on input line 44.
 LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
-(Font)                  OT1/cmr/bx/n --> EU1/lmr/bx/n on input line 42.
+(Font)                  OT1/cmr/bx/n --> EU1/lmr/bx/n on input line 44.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
-(Font)                  OT1/cmss/m/n --> EU1/lmss/m/n on input line 42.
+(Font)                  OT1/cmss/m/n --> EU1/lmss/m/n on input line 44.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
-(Font)                  OT1/cmtt/m/n --> EU1/lmtt/m/n on input line 42.
+(Font)                  OT1/cmtt/m/n --> EU1/lmtt/m/n on input line 44.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  EU1/lmr/m/n --> EU1/lmr/bx/n on input line 42.
+(Font)                  EU1/lmr/m/n --> EU1/lmr/bx/n on input line 44.
 LaTeX Font Info:    Overwriting math alphabet `\mathrm' in version `bold'
-(Font)                  EU1/lmr/m/n --> EU1/lmr/bx/n on input line 42.
+(Font)                  EU1/lmr/m/n --> EU1/lmr/bx/n on input line 44.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
-(Font)                  OT1/cmr/bx/it --> EU1/lmr/bx/it on input line 42.
+(Font)                  OT1/cmr/bx/it --> EU1/lmr/bx/it on input line 44.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
-(Font)                  OT1/cmss/bx/n --> EU1/lmss/bx/n on input line 42.
+(Font)                  OT1/cmss/bx/n --> EU1/lmss/bx/n on input line 44.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
-(Font)                  OT1/cmtt/m/n --> EU1/lmtt/bx/n on input line 42.
+(Font)                  OT1/cmtt/m/n --> EU1/lmtt/bx/n on input line 44.
 
 (/home/troore/Public/texlive/2013/texmf-dist/tex/generic/oberdiek/se-ascii-prin
 t.def
@@ -1098,7 +1125,11 @@ File: se-ascii-print.def 2011/12/02 v1.10 stringenc: Printable ASCII characters
 
 ) [1
 
-] [1]
+]
+
+LaTeX Warning: Citation `erik' on page 1 undefined on input line 56.
+
+[1]
 *************************************************
 * xeCJK warning: "CJKfamily-Unknown"
 * 
@@ -1106,7 +1137,7 @@ File: se-ascii-print.def 2011/12/02 v1.10 stringenc: Printable ASCII characters
 * 
 * Try to use `\setCJKmonofont[...]{...}' to define it.
 *************************************************
-LaTeX Font Info:    Try loading font information for EU1+lmtt on input line 91.
+LaTeX Font Info:    Try loading font information for EU1+lmtt on input line 94.
 
 (/home/troore/Public/texlive/2013/texmf-dist/tex/latex/euenc/eu1lmtt.fd
 File: eu1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
@@ -1114,15 +1145,21 @@ File: eu1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 
 Package amsmath Warning: Foreign command \over;
 (amsmath)                \frac or \genfrac should be used instead
-(amsmath)                 on input line 114.
+(amsmath)                 on input line 117.
 
-[2] [3]
+[2]
+
+LaTeX Warning: Citation `erik' on page 3 undefined on input line 147.
+
+[3]
 File: ./fig/FDM.png Graphic file (type QTm)
  <use  "./fig/FDM.png" >
 File: ./fig/OFDM.png Graphic file (type QTm)
  <use  "./fig/OFDM.png" > [4] [5]
-File: ./fig/turbo.png Graphic file (type QTm)
 
+LaTeX Warning: Citation `36series-212' on page 6 undefined on input line 208.
+
+File: ./fig/turbo.png Graphic file (type QTm)
 <use  "./fig/turbo.png" >
 File: ./fig/DLCH.png Graphic file (type QTm)
  <use  "./fig/DLCH.png" >
@@ -1131,31 +1168,119 @@ File: ./fig/ULCH.png Graphic file (type QTm)
 [6] [7]
 File: ./fig/res-grid.png Graphic file (type QTm)
  <use  "./fig/res-grid.png" >
-File: ./fig/ofdm-params.png Graphic file (type QTm)
- <use  "./fig/ofdm-params.png" >
-File: ./fig/DL-PHY-RES.png Graphic file (type QTm)
 
+LaTeX Warning: Citation `36series-211' on page 8 undefined on input line 264.
+
+File: ./fig/phy-params.png Graphic file (type QTm)
+<use  "./fig/phy-params.png" >
+
+LaTeX Warning: Citation `nutshell' on page 8 undefined on input line 270.
+
+File: ./fig/DL-PHY-RES.png Graphic file (type QTm)
 <use  "./fig/DL-PHY-RES.png" >
 File: ./fig/DL-Frequency.png Graphic file (type QTm)
  <use  "./fig/DL-Frequency.png" >
 File: ./fig/DL-Time.png Graphic file (type QTm)
 
-<use  "./fig/DL-Time.png" > (./lte.bbl [8] [9] [10])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 313.
- [11]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 313.
+<use  "./fig/DL-Time.png" >
+
+LaTeX Warning: Reference `fig:res-block' on page 8 undefined on input line 309.
+
+
+[8] [9] [10] [11] [12]
+Overfull \hbox (211.50592pt too wide) in paragraph at lines 405--405
+[]\EU1/lmtt/m/n/10 OutBufSz: (NIFFT + SpecialCPLen) * 2 + (NIFFT + NormalCPLen)
+ * (NumULSymbSF - 2) = (2048 + 160) * 2 + (2048 + 144) * 12 = 30720(Complex)[] 
+ 
+ []
+
+
+Overfull \hbox (162.50592pt too wide) in paragraph at lines 419--419
+[]\EU1/lmtt/m/n/10 InBufSz: (NIFFT + SpecialCPLen) * 2 +  (NIFFT + NormalCPLen)
+ * (NumULSymbSF - 2) = (2048 + 160) * 2 + (2048 + 144) * 12 = 30720[]  
+ []
+
+[13] [14]
+
+LaTeX Warning: Reference `fig:802.11 frame' on page 15 undefined on input line 
+492.
+
+
+LaTeX Warning: Reference `eq:C' on page 15 undefined on input line 502.
+
+
+LaTeX Warning: Reference `eq:P' on page 15 undefined on input line 502.
+
+[15]
+
+LaTeX Warning: Reference `eq:M' on page 16 undefined on input line 512.
+
+
+LaTeX Warning: Reference `eq:MF' on page 16 undefined on input line 522.
+
+
+LaTeX Warning: Reference `eq:MF' on page 16 undefined on input line 528.
+
+
+LaTeX Warning: Reference `eq:M' on page 16 undefined on input line 532.
+
+
+LaTeX Warning: Reference `eq:MF' on page 16 undefined on input line 532.
+
+
+LaTeX Warning: Reference `eq:M' on page 16 undefined on input line 534.
+
+
+LaTeX Warning: Reference `eq:MF' on page 16 undefined on input line 534.
+
+[16]
+
+LaTeX Warning: Reference `eq:Mth' on page 17 undefined on input line 552.
+
+
+LaTeX Warning: Reference `eq:2bit' on page 17 undefined on input line 566.
+
+
+LaTeX Warning: Reference `eq:MF' on page 17 undefined on input line 566.
+
+
+LaTeX Warning: Reference `MF' on page 17 undefined on input line 566.
+
+
+LaTeX Warning: Reference `MF' on page 17 undefined on input line 566.
+
+
+LaTeX Warning: Reference `eq:MFth' on page 17 undefined on input line 568.
+
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
+put line 583.
+[17]
+Overfull \vbox (52.78023pt too high) has occurred while \output is active []
+
+
+[18] [19] [20] (./lte.bbl [21])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 734.
+ [22]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 734.
  (./lte.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 313.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 313.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 313.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 734.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 734.
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 734.
  ) 
 Here is how much of TeX's memory you used:
- 23415 strings out of 493938
- 470727 string characters out of 6145347
- 487487 words of memory out of 5000000
- 26482 multiletter control sequences out of 15000+600000
+ 24627 strings out of 493938
+ 488742 string characters out of 6145347
+ 510081 words of memory out of 5000000
+ 27682 multiletter control sequences out of 15000+600000
  8000 words of font info for 46 fonts, out of 8000000 for 9000
  1144 hyphenation exceptions out of 8191
- 42i,12n,46p,640b,472s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 42i,12n,46p,640b,776s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on lte.pdf (12 pages).
+Output written on lte.pdf (23 pages).

@@ -1,6 +1,13 @@
 
 #include "LTEUplink.h"
 
+#include <ctime>
+
+#define TIME_MEASURE_WRAPPER(BODY, i)				\
+	start = clock(); \
+	BODY; \
+	end = clock(); \
+	cost[i] += (end - start);
 
 using namespace std;
 
@@ -12,7 +19,7 @@ void SendToChannel(complex<float> *pTxSend, int n)
 int main(int argc, char *argv[])
 {
 //	int SNRArrayLen = 1;
-	int numSFrames = 1/*MAX_SFRAMES*/;
+	int numSFrames = 100/*MAX_SFRAMES*/;
 	
 	BSPara BS;
 	BS.initBSPara();
@@ -107,6 +114,9 @@ int main(int argc, char *argv[])
 
 	int *pTxDS = new int[DataK];
 	int *pRxFS = new int[DataK];
+
+	double start, end;
+	double cost[10] = {0.0};
 	
 	for (int nsf = 0; nsf < numSFrames; nsf++)
 	{
@@ -126,8 +136,14 @@ int main(int argc, char *argv[])
 		*/
 			
 
+		TIME_MEASURE_WRAPPER(TxTurbo.TurboEncoding(pTxTbInp, pTxTbOut), 0);
+//		start = clock();
 		//	TxTbE.TurboEncoding(TxRM.pInpBuf);
-		TxTurbo.TurboEncoding(pTxTbInp, pTxTbOut);
+//		TxTurbo.TurboEncoding(pTxTbInp, pTxTbOut);
+
+//		end = clock();
+//		cost[0] += (end - start);
+//		std::cout << "Turbo:" << (cost[0] * 1000) / CLOCKS_PER_SEC << "ms" << std::endl;
 
 		//	cout << "RateMatching Tx Input" << endl;
 		for (int i = 0; i < TxRM.InBufSz; i++)
@@ -137,7 +153,8 @@ int main(int argc, char *argv[])
 		}
 		//	cout << endl;
 
-		TxRM.TxRateMatching(pTxRMInp, pTxRMOut);
+		TIME_MEASURE_WRAPPER(TxRM.TxRateMatching(pTxRMInp, pTxRMOut), 1);
+			//	TxRM.TxRateMatching(pTxRMInp, pTxRMOut);
 
 		//	cout << "Scrambling Tx Input" << endl;
 		for (int i = 0; i < TxSCRB.InBufSz; i++)
@@ -146,8 +163,9 @@ int main(int argc, char *argv[])
 			//		cout << pTxSCRBInp[i] << "\t";
 		}
 		//	cout << endl;
-			
-		TxSCRB.Scrambling(pTxSCRBInp, pTxSCRBOut);
+
+		TIME_MEASURE_WRAPPER(TxSCRB.Scrambling(pTxSCRBInp, pTxSCRBOut), 2);
+//		TxSCRB.Scrambling(pTxSCRBInp, pTxSCRBOut);
 
 		//	cout << "Modulating Tx Input" << endl;
 		for (int i = 0; i < TxMod.InBufSz; i++)
@@ -157,28 +175,32 @@ int main(int argc, char *argv[])
 		}
 		//	cout << endl;
 
-		TxMod.Modulating(pTxModInp, pTxModOut);
+		TIME_MEASURE_WRAPPER(TxMod.Modulating(pTxModInp, pTxModOut), 3);
+		//	TxMod.Modulating(pTxModInp, pTxModOut);
 
 		for (int i = 0; i < TxTransPre.InBufSz; i++)
 		{
 			pTxTransPreInp[i] = pTxModOut[i];
 		}
 
-		TxTransPre.TransformPrecoding(pTxTransPreInp, pTxTransPreOut);
+		TIME_MEASURE_WRAPPER(TxTransPre.TransformPrecoding(pTxTransPreInp, pTxTransPreOut), 4);
+		//	TxTransPre.TransformPrecoding(pTxTransPreInp, pTxTransPreOut);
 
 		for (int i = 0; i < TxResMap.InBufSz; i++)
 		{
 			pTxResMapInp[i] = pTxTransPreOut[i];
 		}
 
-		TxResMap.SubCarrierMapping(pTxResMapInp, pTxResMapOut);
+		TIME_MEASURE_WRAPPER(TxResMap.SubCarrierMapping(pTxResMapInp, pTxResMapOut), 5);
+		//	TxResMap.SubCarrierMapping(pTxResMapInp, pTxResMapOut);
 			
 		for (int i = 0; i < TxOFDM.InBufSz; i++)
 		{
 			pTxOFDMInp[i] = pTxResMapOut[i];
 		}
 
-		TxOFDM.modulating(pTxOFDMInp, pTxOFDMOut);
+		TIME_MEASURE_WRAPPER(TxOFDM.modulating(pTxOFDMInp, pTxOFDMOut), 6);
+//		TxOFDM.modulating(pTxOFDMInp, pTxOFDMOut);
 
 		for (int i = 0; i < TxSync.InBufSz; i++)
 		{
@@ -192,6 +214,11 @@ int main(int argc, char *argv[])
 
 
 		////////////////////////// END Run Subframe/////////////////////////////////
+	}
+
+	for (int i = 0; i < 7; i++)
+	{
+		std::cout << (cost[i] * 1000) / CLOCKS_PER_SEC << "ms" << std::endl; 
 	}
 
 	delete[] pTxDS;

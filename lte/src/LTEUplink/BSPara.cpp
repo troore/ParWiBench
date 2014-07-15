@@ -7,7 +7,7 @@ BSPara::BSPara()
 void BSPara::initBSPara(void)
 {
 	NumULSymbSF=14;
-	NIFFT = 128;
+	NIFFT = 2048;
 	CPLen=9;
 	RSU=0;
 	RSV=0;
@@ -16,15 +16,15 @@ void BSPara::initBSPara(void)
 	DMRSSymbPos[1]=10;
 
 	SCLocPattern=1;
-	MDFTPerUser = 75;
+	MDFTPerUser = 1200;
 	MQAMPerUser=16;
-	NumLayerPerUser=2;
+	NumLayerPerUser=1;
 	
-	BlkSize = 2368;
-	DataLengthPerUser = 2368;
+	BlkSize = 6144;
+	DataLengthPerUser = 18432;
 
 	EstimationMethod=0;
-	NumRxAntenna=2;
+	NumRxAntenna=1;
 
 	ProcessingStatusFlag=false;
 	BSParameterPrintFlag=false;

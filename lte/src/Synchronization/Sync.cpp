@@ -582,7 +582,7 @@ int Sync::TryDetectPreamble(complex<float> *input_buffer, int in_buf_len, comple
 		}
 		else if (1 == syn_state)
 		{
-			std::cout << "1111111111" << std::endl;
+//			std::cout << "1111111111" << std::endl;
 			/*
 			 * '320' ranges from the fifth short trainings to end of SIGNAL field
 			 */
@@ -616,7 +616,7 @@ int Sync::TryDetectPreamble(complex<float> *input_buffer, int in_buf_len, comple
 		}
 		else if (2 == syn_state)
 		{
-			std::cout << "2222222222" << std::endl;
+//			std::cout << "2222222222" << std::endl;
 			// FIXME: Is OutBufSz a right boundry?
 			if (n_data_output + in_buf_len - n_in < OutBufSz)
 			{
