@@ -2,64 +2,14 @@
 #ifndef __SCRAMBLER_H_
 #define __SCRAMBLER_H_
 
-//#pragma once
-#include <cmath>
-#include "BSPara.h"
-#include "UserPara.h"
-#include "FIFO.h"
-#include <iostream>
-#include <string>
-#include <fstream>
+#include "lte_phy.h"
 
-using namespace std;
+#define N_SCRAMB_IN_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_30_72MHZ * (LTE_PHY_N_SYMB_PER_SUBFR - 2) * QAM64_BITS_PER_SAMP)
+#define N_SCRAMB_OUT_MAX (N_SCRAMB_IN_MAX)
 
-template <class T>
-class Scrambler
-{
- private:
-	bool PSFlag;
-	bool BufFlag;
-	int NInfoBits;
-	int NumLayer;
+void GenScrambInt(int *pScrambInt, int n);
+void Scrambling(int *pInpSeq, int n_inp, int *pOutSeq, int n_out);
 
-	int NumULSymbSF;
-	int MDFT;
-	int MQAM;
-
-	//	int n_init[31];
-
-	/*
-	int* pInpSeq;
-	int* pScrambSeq;
-	int* pOutSeq;
-	*/
-	//	T *pInpSeq;
-	//	T *pScrambSeq;
-	//	T *pOutSeq;
-	int *pScrambInt;
-
- public:
-	//	int InBufSz[2];
-	int InBufSz;
-	//Scrambler's FIFO
-	//	FIFO<int> *pInpBuf;
-	//	FIFO<T> *pInpBuf;
-	//	int OutBufSz[2];
-	int OutBufSz;
-
-	// Default constructor
-	Scrambler() {}
-	Scrambler(BSPara* pBS);
-	Scrambler(UserPara* pUser);
-	~Scrambler();
-
-	void GenScrambInt();
-	
-	//  void Scrambling(FIFO<int> *pInpBuf, FIFO<int> *pOutBuf);
-	//	void Scrambling(FIFO<T> *pOutBuf);
-	void Scrambling(T *pInpSeq, T *pOutSeq);
-	//	void Descrambling(FIFO<T> *pOutBuf);
-	void Descrambling(T *pInpSeq, T *pOutBuf);
-};
+void Descrambling(float *pInpSeq, int n_inp, float *pOutBuf, int n_out);
 
 #endif

@@ -669,7 +669,7 @@ void WriteOutputToFiles(int *pOut, int Sz, const char *name)
 	fptr = fopen(name,"w+");
 	for(int i=0;i<Sz;i++)
 	{
-		fprintf(fptr,"%d\n",*(pOut+i));
+		fprintf(fptr,"%d\t",*(pOut+i));
 	}
 	fclose(fptr);
 }
