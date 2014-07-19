@@ -13,17 +13,9 @@
 #include <stdexcept>
 #include "gauss.h"
 //#include "FIFO.h"
-#include "BSPara.h"
-#include "UserPara.h"
 #include "matrix.h"
 #include "GeneralFunc.h"
 
-//#include "fsm.h"
-//#include "Interleaver_lte.h"
 #include "Turbo.h"
-
-#define NSTD 2
-#define MAXRUN 4
-#define MaxInfoPktSz 6144
 
 #endif

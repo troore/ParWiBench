@@ -5,16 +5,39 @@
 
 #define LOG_INFINITY 1e30
 
-//! Constant definition to speed up trunc_log() and trunc_exp()
-const double log_double_max = log(numeric_limits<double>::max());
-//! Constant definition to speed up trunc_log(), trunc_exp() and log_add()
-const double log_double_min = log(numeric_limits<double>::min());
+/**************Global variables*****************/
 
+int InpBlockShift;
+int OutBlockShift;
+int NumBlock;
+int DataLength;
+int LastBlockLength;
+	
+/* Turbo specific parameters */
+int g_gens[N_GENS] = {013, 015};
+
+int g_gen_pols[N_GENS];
+int g_rev_gen_pols[N_GENS];
+int g_state_trans[N_STATES * 2];
+int g_rev_state_trans[N_STATES * 2];
+int g_output_parity[N_STATES * (N_GENS - 1) * 2];
+int g_rev_output_parity[N_STATES * (N_GENS - 1) * 2];
+
+float Lc;
+
+std::string metric;
+float (*com_log)(float, float);
+
+//! Constant definition to speed up trunc_log() and trunc_exp()
+const double log_double_max = log(std::numeric_limits<double>::max());
+//! Constant definition to speed up trunc_log(), trunc_exp() and log_add()
+const double log_double_min = log(std::numeric_limits<double>::min());
+
+/*****************End of globals*****************/
 
 // Turbo Internal Interleaver from 3GPP TS 36.212 v10.0.0 table 5.1.3-3
-#define TURBO_INT_K_TABLE_SIZE 188
 
-int TURBO_INT_K_TABLE[TURBO_INT_K_TABLE_SIZE] = {  40/*4*/,  48,  56,  64,  72,  80,  88,  96, 104, 112,
+int TURBO_INT_K_TABLE[TURBO_INT_K_TABLE_SIZE] = {  40,  48,  56,  64,  72,  80,  88,  96, 104, 112,
 														120, 128, 136, 144, 152, 160, 168, 176, 184, 192,
 														200, 208, 216, 224, 232, 240, 248, 256, 264, 272,
 														280, 288, 296, 304, 312, 320, 328, 336, 344, 352,
@@ -31,7 +54,7 @@ int TURBO_INT_K_TABLE[TURBO_INT_K_TABLE_SIZE] = {  40/*4*/,  48,  56,  64,  72, 
 												   3136,3200,3264,3328,3392,3456,3520,3584,3648,3712,
 												   3776,3840,3904,3968,4032,4096,4160,4224,4288,4352,
 												   4416,4480,4544,4608,4672,4736,4800,4864,4928,4992,
-												   5056,5120,5184,5248,5312,5376,5440,5504/*5504*/,5568,5632,
+												   5056,5120,5184,5248,5312,5376,5440,5504,5568,5632,
 												   5696,5760,5824,5888,5952,6016,6080,6144};
 
 int TURBO_INT_F1_TABLE[TURBO_INT_K_TABLE_SIZE] = {  3,  7, 19,  7,  7, 11,  5, 11,  7, 41,103, 15,  9,
@@ -74,121 +97,87 @@ float max_log(float a, float b)
 
 float add_log(float a, float b)
 {
+	float negdelta;
+	
 	if (a < b)
 	{
-		double tmp = a;
+		float tmp = a;
+		
 		a = b;
 		b = tmp;
 	}
-	float negdelta = b - a;
+	
+	negdelta = b - a;
 	if ((negdelta < log_double_min) || isnan(negdelta))
 		return a;
 	else
 		return (a + log1p(exp(negdelta)));
 }
 
-Turbo::Turbo(UserPara* pUser)
+void turbo_init(int DataLength)
 {
-	PSFlag = (*pUser).ProcessingStatusFlag;
-	BufFlag=(*pUser).BufferSizeFlag;
+//	Rate = RATE;
+//	DataLength=(*pUser).DataLength;
+
+//	m_n_gens = N_GENS;
+//	m_gens[0] = 013, m_gens[1] = 015;
+//	m_cst_len = CST_LEN;
+//	m_block_size = BLOCK_SIZE;
+//	m_n_iters = MAX_ITERATIONS;
+
+
+
+	set_generator_polynomials(g_gens, N_GENS, CST_LEN);
 	
-	Rate=3;
-	DataLength=(*pUser).DataLength;
-
-	m_n_gens = pUser->n_gens;
-	for (int i = 0; i < m_n_gens; i++)
-	{
-		m_gens[i] = pUser->gens[i];
-	}
-	m_cst_len = pUser->constraint_length;
-	m_block_size = pUser->BlkSize;
-	m_n_iters = pUser->n_iterations;
-
-	NumBlock = ((DataLength + m_block_size - 1) / m_block_size);
-	if (DataLength % m_block_size)
-	{
-		LastBlockLength = (DataLength % m_block_size);
-	}
-	else
-	{
-		LastBlockLength = m_block_size;
-	}
-	
-
-	/*
-	  piSeq=new int[DataLength];
-	  pcSeq=new int*[Rate];
-	  for(int r=0;r<Rate;r++)
-	  {
-	  *(pcSeq+r)=new int[((NumBlock-1)*(6144+4)+1*((*(pLengthSet+NumBlock-1))+4))];
-	  }
-	*/
-	///////////////Calc In/Out buffer size/////////////////
-//	InBufSz[0]=1;    InBufSz[1] = DataLength;
-	InBufSz = DataLength;
-//	OutBufSz[0]=Rate;OutBufSz[1]= ((NumBlock-1)*(6144+4)+1*((*(pLengthSet+NumBlock-1))+4));
-	OutBufSz = Rate * ((NumBlock - 1) * (m_block_size + 4) + 1 * (LastBlockLength + 4));
-	
-	set_parameters(pUser->gens, pUser->n_gens, pUser->constraint_length,
-				   pUser->BlkSize, pUser->n_iterations);
-
-	/*
-	  if(BufFlag)
-	  {
-	  cout<<"TurboEncoder"<<endl;
-	  cout<<"Input buffer size is "<<"{"<<InBufSz[0]<<" , "<<InBufSz[1]<<"}"<<"  int"<<endl;
-	  cout<<"Output buffer size is"<<"{"<<OutBufSz[0]<<" , "<<OutBufSz[1]<<"}"<<"  int"<<endl; 
-	  }
-	  else
-	  {}
-	*/
-	////////////////End clac in/out buffer size///////////////
-	////////////////////// Initialize its own Input Buffer //////////////////////////
-//	pInpBuf =new FIFO<int>[1];
-//	(*pInpBuf).initFIFO(1,InBufSz);
-	//////////////////End of initialization of its own input buffer//////////////////
-}
-
-
-void Turbo::set_parameters(int *gens, int n_gens, int constraint_length, int block_size, int n_iters)
-{
-	
-	m_n_gens = n_gens;
-	m_cst_len = constraint_length;
-	m_block_size = block_size;
-	m_n_iters = n_iters;
-	m_n_states = (1 << (m_cst_len - 1));
-	m_n_tail = m_cst_len - 1;
-
-	m_n_uncoded = block_size;
-	m_n_coded = (1 + (n_gens - 1) * 2) * m_n_uncoded + 2 * (1 + m_n_gens - 1) * m_n_tail;
-
-	m_gen_pols = new int[m_n_gens];
-	m_rev_gen_pols = new int[m_n_gens];
-
-
-	/*
-	  for (uint32_T i = 0; i < m_n_gens; i++)
-	  {
-	  m_gen_pols[i] = gens[i];
-	  }*/
-		
-	m_state_trans = new int[m_n_states * 2];
-	m_rev_state_trans = new int[m_n_states * 2];
-	m_output_parity = new int[m_n_states * (m_n_gens - 1) * 2];
-	m_rev_output_parity = new int[m_n_states * (m_n_gens - 1) * 2];
-	
-	set_generator_polynomials(gens, n_gens, constraint_length);
-	
-//	m_trellis = new int8_T[m_n_states * m_n_states * (1 + m_n_gens)];
-
 	Lc = 1.0;
 	com_log = max_log;
-//	com_log = add_log;
+}
+
+void set_generator_polynomials(int gens[], int n_gens, int constraint_length)
+{
+	int i, j;
+	int K = constraint_length;
+	int m = K - 1;
+	int n_states = (1 << m);
+	int s0, s1, s_prim;
+	
+	int p0[N_GENS - 1];
+	int p1[N_GENS - 1];
+
+	for (i = 0; i < n_gens; i++)
+	{
+		g_gen_pols[i] = gens[i];
+		g_rev_gen_pols[i] = reverse_int(K, gens[i]);
+	}
+
+	for (s_prim = 0; s_prim < N_STATES; s_prim++)
+	{
+//		std::cout << s_prim << std::endl;
+		s0 = calc_state_transition(s_prim, 0, p0);
+//		std::cout << s0 << "\t";
+		g_state_trans[s_prim * 2 + 0] = s0;
+		g_rev_state_trans[s0 * 2 + 0] = s_prim;
+		for (j = 0; j < (n_gens - 1); j++)
+		{
+			g_output_parity[s_prim * (n_gens - 1) * 2 + 2 * j + 0] = p0[j];
+			g_rev_output_parity[s0 * (n_gens - 1) * 2 + 2 * j + 0] = p0[j];
+		}
+
+		s1 = calc_state_transition(s_prim, 1, p1);
+//		std::cout << s1 << std::endl;
+		g_state_trans[s_prim * 2 + 1] = s1;
+		g_rev_state_trans[s1 * 2 + 1] = s_prim;
+		for (j = 0; j < (n_gens - 1); j++)
+		{
+			g_output_parity[s_prim * (n_gens - 1) * 2 + 2 * j + 1] = p1[j];
+			g_rev_output_parity[s1 * (n_gens - 1) * 2 + 2 * j + 1] = p1[j];
+		}
+//		std::cout << (int)p0[0] << "\t" << (int)p1[0] << std::endl;
+	}
 }
 
 template <typename T>
-void Turbo::internal_interleaver(T *in, T *out, int m)
+void internal_interleaver(T *in, T *out, int m)
 {
     int i;
     int f1 = 0;
@@ -214,6 +203,10 @@ void Turbo::internal_interleaver(T *in, T *out, int m)
 		}
 		else
 		{
+			/*
+			* There might be a integer overflow error for the calculation of
+			* f1 * i + f2 * i * i
+			*/
 			//	idx = ((f1 * i + f2 * i * i) % m);
 			idx = (((f1 % m) * (i % m)) % m + ((((f2 % m) * (i % m)) % m) * (i % m)) % m) % m; 
 		}
@@ -222,7 +215,7 @@ void Turbo::internal_interleaver(T *in, T *out, int m)
 }
 
 template <typename T>
-void Turbo::internal_deinterleaver(T *in, T *out, int m)
+void internal_deinterleaver(T *in, T *out, int m)
 {
     int i;
     int f1 = 0;
@@ -245,7 +238,6 @@ void Turbo::internal_deinterleaver(T *in, T *out, int m)
 		if ((0 == f1) && (0 == f2))
 		{
 			idx = i;
-
 		}
 		else
 		{
@@ -256,24 +248,25 @@ void Turbo::internal_deinterleaver(T *in, T *out, int m)
     }
 }
 
-void Turbo::constituent_encoder(int *input, int input_len, int *tail, int *parity)
+void constituent_encoder(int *input, int input_len, int *tail, int *parity)
 {
+	int i, j;
 	int encoder_state = 0, target_state;
 
-	for (int i = 0; i < input_len; i++)
+	for (i = 0; i < input_len; i++)
 	{
-		for (int j = 0; j < (m_n_gens - 1); j++)
+		for (j = 0; j < (N_GENS - 1); j++)
 		{
-			parity[i * (m_n_gens - 1) + j] = m_output_parity[encoder_state * (m_n_gens - 1) * 2 + j * 2 + input[i]];
+			parity[i * (N_GENS - 1) + j] = g_output_parity[encoder_state * (N_GENS - 1) * 2 + j * 2 + input[i]];
 		}
-		encoder_state = m_state_trans[encoder_state * 2 + input[i]];
+		encoder_state = g_state_trans[encoder_state * 2 + input[i]];
 	}
 	// add tail bits to make target_state to be 0
-	for (int i = 0; i < m_cst_len - 1; i++)
+	for (i = 0; i < CST_LEN - 1; i++)
 	{
 		// Attend the shift direction!!!
-		target_state = (encoder_state >> 1) & ((1 << (m_cst_len - 1)) - 1);
-		if (m_state_trans[encoder_state * 2 + 0] == target_state)
+		target_state = (encoder_state >> 1) & ((1 << (CST_LEN - 1)) - 1);
+		if (g_state_trans[encoder_state * 2 + 0] == target_state)
 		{
 			tail[i] = 0;
 		}
@@ -281,80 +274,73 @@ void Turbo::constituent_encoder(int *input, int input_len, int *tail, int *parit
 		{
 			tail[i] = 1;
 		}
-		for (int j = 0; j < (m_n_gens - 1); j++)
+		for (j = 0; j < (N_GENS - 1); j++)
 		{
-			parity[(i + input_len) * (m_n_gens - 1) + j] = m_output_parity[encoder_state * (m_n_gens - 1) * 2 + j * 2 + tail[i]];
+			parity[(i + input_len) * (N_GENS - 1) + j] = g_output_parity[encoder_state * (N_GENS - 1) * 2 + j * 2 + tail[i]];
 		}
 		encoder_state = target_state;
 	}
 }
 
-
-//void Turbo::TurboEncoding(FIFO<int> *pOutBuf)
-void Turbo::TurboEncoding(int *piSeq, int *pcSeq)
+void turbo_encoding(int *piSeq, int input_data_length, int *pcSeq)
 {
-	int n_blocks = NumBlock;
-	int *pLengthSet;
-	int iSeqLength, InpBlockShift, OutBitShift;
-
-	n_blocks = NumBlock;
+	int n_blocks;
+	int last_block_length;
+	int cur_blk_len;
+	int inp_blk_offset, out_bit_offset;
+	int i, j, k;
 	
-	pLengthSet = new int[n_blocks];
-	for(int i = 0; i < n_blocks - 1; i++)
+	int input_bits[N_UNCODED];
+	int interleaved_input_bits[N_UNCODED];
+	int syst1[N_UNCODED + N_TAIL];
+	int syst2[N_UNCODED + N_TAIL];
+	int tail1[N_TAIL];
+	int tail2[N_TAIL];
+	int parity1[(N_UNCODED + N_TAIL) * (N_GENS - 1)];
+	int parity2[(N_UNCODED + N_TAIL) * (N_GENS - 1)];
+
+	n_blocks = ((input_data_length + BLOCK_SIZE - 1) / BLOCK_SIZE);
+	if (input_data_length % BLOCK_SIZE)
 	{
-		pLengthSet[i] = m_n_uncoded;
+		last_block_length = (input_data_length % BLOCK_SIZE);
+	}
+	else
+	{
+		last_block_length = BLOCK_SIZE;
 	}
 
-	pLengthSet[n_blocks - 1] = (DataLength % m_n_uncoded) ? (DataLength % m_n_uncoded) : m_n_uncoded;
-	/*
-	if (DataLength % m_n_uncoded)
-		pLengthSet[n_blocks - 1] = (1 == n_blocks) ? DataLength : (DataLength % m_n_uncoded);
-	else
-		pLengthSet[n_blocks - 1] = m_n_uncoded;
-	*/
-
-	int *input_bits = new int[m_n_uncoded];
-	int *interleaved_input_bits = new int[m_n_uncoded];
-	int *syst1 = new int[m_n_uncoded + m_n_tail];
-	int *syst2 = new int[m_n_uncoded + m_n_tail];
-	int *tail1 = new int[m_n_tail];
-	int *tail2 = new int[m_n_tail];
-	int *parity1 = new int[(m_n_uncoded + m_n_tail) * (m_n_gens - 1)];
-	int *parity2 = new int[(m_n_uncoded + m_n_tail) * (m_n_gens - 1)];
-	
-	OutBitShift = 0;
-	InpBlockShift = 0;
+	inp_blk_offset = 0;
+	out_bit_offset = 0;
 
 	// encode all code blocks
-	for (int i = 0; i < n_blocks; i++)
+	for (i = 0; i < n_blocks; i++)
 	{
-		iSeqLength = pLengthSet[i];
+		cur_blk_len = (i != (n_blocks - 1)) ? BLOCK_SIZE : last_block_length;
 
 		// encode one code block
-		for (int j = 0; j < iSeqLength; j++)
+		for (j = 0; j < cur_blk_len; j++)
 		{
-			input_bits[j] = piSeq[InpBlockShift + j];
+			input_bits[j] = piSeq[inp_blk_offset + j];
 		}
-
 		
 		// the first encoder
-		constituent_encoder(input_bits, iSeqLength, tail1, parity1);
+		constituent_encoder(input_bits, cur_blk_len, tail1, parity1);
 
 		// the interleaver
-		internal_interleaver(input_bits, interleaved_input_bits, iSeqLength);
+		internal_interleaver(input_bits, interleaved_input_bits, cur_blk_len);
 
 		/*
-		for (int k = 0; k < (m_n_uncoded); k++)
-			cout << interleaved_input_bits[k];
-		cout << endl;
+		for (k = 0; k < N_UNCODED; k++)
+			std::cout << interleaved_input_bits[k];
+		std::cout << std::endl;
 		*/
 
 		// the second encoder
-		constituent_encoder(interleaved_input_bits, iSeqLength, tail2, parity2);
+		constituent_encoder(interleaved_input_bits, cur_blk_len, tail2, parity2);
 
 //		memcpy(syst1, input_bits, sizeof(uint8_T) * m_n_uncoded);
 //		memcpy(syst2, interleaved_input_bits, sizeof(uint8_T) * m_n_uncoded);
-		for (int j = 0; j < iSeqLength; j++)
+		for (j = 0; j < cur_blk_len; j++)
 		{
 			syst1[j] = input_bits[j];
 			syst2[j] = interleaved_input_bits[j];
@@ -362,89 +348,82 @@ void Turbo::TurboEncoding(int *piSeq, int *pcSeq)
 //		memcpy(syst1 + m_n_uncoded, tail1, sizeof(uint8_T) * m_n_tail);
 //		memcpy(syst2 + m_n_uncoded, tail2, sizeof(uint8_T) * m_n_tail);
 
-		for (int j = iSeqLength; j < iSeqLength + m_n_tail; j++)
+		for (j = cur_blk_len; j < cur_blk_len + N_TAIL; j++)
 		{
-			syst1[j] = tail1[j - iSeqLength];
-			syst2[j] = tail2[j - iSeqLength];
+			syst1[j] = tail1[j - cur_blk_len];
+			syst2[j] = tail2[j - cur_blk_len];
 		}
 		
 		// the data part
-		for (int j = 0; j < iSeqLength; j++)
+		for (j = 0; j < cur_blk_len; j++)
 		{
 			// systematic bits
-			pcSeq[OutBitShift++] = syst1[j];
+			pcSeq[out_bit_offset++] = syst1[j];
 			// first parity bits
-			for (int k = 0; k < m_n_gens - 1; k++)
+			for (k = 0; k < N_GENS - 1; k++)
 			{
-				pcSeq[OutBitShift++] = parity1[j * (m_n_gens - 1) + k];
+				pcSeq[out_bit_offset++] = parity1[j * (N_GENS - 1) + k];
 			}
 			// second parity bits
-			for (int k = 0; k < (m_n_gens - 1); k++)
+			for (k = 0; k < (N_GENS - 1); k++)
 			{
-				pcSeq[OutBitShift++] = parity2[j * (m_n_gens - 1) + k];
+				pcSeq[out_bit_offset++] = parity2[j * (N_GENS - 1) + k];
 			}
 		}
 		
 		// the first tail
-		for (int j = 0; j < m_n_tail; j++)
+		for (j = 0; j < N_TAIL; j++)
 		{
 			// first systematic tail bits
-			pcSeq[OutBitShift++] = syst1[iSeqLength + j];
+			pcSeq[out_bit_offset++] = syst1[cur_blk_len + j];
 			// first parity tail bits
-			for (int k = 0; k < (m_n_gens - 1); k++)
+			for (k = 0; k < (N_GENS - 1); k++)
 			{
-				pcSeq[OutBitShift++] = parity1[(iSeqLength + j) * (m_n_gens - 1) + k];
+				pcSeq[out_bit_offset++] = parity1[(cur_blk_len + j) * (N_GENS - 1) + k];
 			}
 		}
 
 		// the second tail
-		for (int j = 0; j < m_n_tail; j++)
+		for (j = 0; j < N_TAIL; j++)
 		{
 			// second systematic tail bits
-			pcSeq[OutBitShift++] = syst2[iSeqLength + j];
+			pcSeq[out_bit_offset++] = syst2[cur_blk_len + j];
 			// second parity tail bits
-			for (int k = 0; k < (m_n_gens - 1); k++)
+			for (k = 0; k < (N_GENS - 1); k++)
 			{
-				pcSeq[OutBitShift++] = parity2[(iSeqLength + j) * (m_n_gens - 1) + k];
+				pcSeq[out_bit_offset++] = parity2[(cur_blk_len + j) * (N_GENS - 1) + k];
 			}
 		}
 
-		InpBlockShift += iSeqLength;
+		inp_blk_offset += cur_blk_len;
 	}
-	
-	delete[] input_bits;
-	delete[] interleaved_input_bits;
-	delete[] syst1;
-	delete[] syst2;
- 	delete[] tail1;
-	delete[] tail2;
-	delete[] parity1;
-	delete[] parity2;
-
-	delete[] pLengthSet;
 }
 
+/*
+ * TODO: Separate encoding of a single block from @turbo_encoding
+ */
+void encode_block()
+{}
 
-int Turbo::calc_state_transition(int instate, int input, int *parity)
+
+int calc_state_transition(int instate, int input, int *parity)
 {
 	int in = 0;
-//	int temp = (m_rev_gen_pols[0] & (instate << 1)), parity_temp, parity_bit;
-	int temp = (m_gen_pols[0] & instate), parity_temp, parity_bit;
+	int temp = (g_gen_pols[0] & instate), parity_temp, parity_bit;
+	int i, j;
 
-	for (int i = 0; i < m_cst_len; i++)
+	for (i = 0; i < CST_LEN; i++)
 	{
 		in = (temp & 1) ^ in;
 		temp = temp >> 1;
 	}
 	in = in ^ input;
 
-//	parity.set_size(n - 1, false);
-	for (int j = 0; j < (m_n_gens - 1); j++)
+	for (j = 0; j < (N_GENS - 1); j++)
 	{
-//		parity_temp = ((instate << 1) + in) & m_rev_gen_pols[j + 1];
-		parity_temp = (instate | (in << (m_cst_len - 1))) & m_gen_pols[j + 1];
+		parity_temp = (instate | (in << (CST_LEN - 1))) & g_gen_pols[j + 1];
 		parity_bit = 0;
-		for (int i = 0; i < m_cst_len; i++)
+		for (i = 0; i < CST_LEN; i++)
 		{
 			parity_bit = (parity_temp & 1) ^ parity_bit;
 			parity_temp = parity_temp >> 1;
@@ -452,11 +431,10 @@ int Turbo::calc_state_transition(int instate, int input, int *parity)
 		parity[j] = parity_bit;
 	}
 	
-//	return in + ((instate << 1) & ((1 << (m_cst_len - 1)) - 1));
-	return (in << (m_cst_len - 2) | (instate >> 1)) & ((1 << (m_cst_len - 1)) - 1);
+	return (in << (CST_LEN - 2) | (instate >> 1)) & ((1 << (CST_LEN - 1)) - 1);
 }
 
-int Turbo::reverse_int(int length, int in)
+int reverse_int(int length, int in)
 {
 	int out = 0;
 	int i, j;
@@ -473,212 +451,99 @@ int Turbo::reverse_int(int length, int in)
 	return out;
 }
 
-void Turbo::set_generator_polynomials(int gens[], int n_gens, int constraint_length)
-{
-//	int j;
-//	gen_pol = gen;
-//	n = gen.size();
-	int K = constraint_length;
-	int m = K - 1;
-	int n_states = (1 << m);
-//	rate = 1.0 / n;
-	int s0, s1, s_prim;
-	
-	int *p0 = new int[n_gens - 1];
-	int *p1 = new int[n_gens - 1];
-
-//	uint32_T *rev_gen_pols = m_rev_gen_pols;
-	
-	for (int i = 0; i < n_gens; i++)
-	{
-		m_gen_pols[i] = gens[i];
-		m_rev_gen_pols[i] = reverse_int(K, gens[i]);
-	}
-
-//	state_trans.set_size(Nstates, 2, false);
-//	rev_state_trans.set_size(Nstates, 2, false);
-//	output_parity.set_size(Nstates, 2*(n - 1), false);
-//	rev_output_parity.set_size(Nstates, 2*(n - 1), false);
-
-	for (s_prim = 0; s_prim < m_n_states; s_prim++)
-	{
-//		std::cout << s_prim << std::endl;
-		s0 = calc_state_transition(s_prim, 0, p0);
-//		std::cout << s0 << "\t";
-		m_state_trans[s_prim * 2 + 0] = s0;
-		m_rev_state_trans[s0 * 2 + 0] = s_prim;
-		for (int j = 0; j < (n_gens - 1); j++)
-		{
-			m_output_parity[s_prim * (n_gens - 1) * 2 + 2 * j + 0] = p0[j];
-			m_rev_output_parity[s0 * (n_gens - 1) * 2 + 2 * j + 0] = p0[j];
-		}
-
-		s1 = calc_state_transition(s_prim, 1, p1);
-//		std::cout << s1 << std::endl;
-		m_state_trans[s_prim * 2 + 1] = s1;
-		m_rev_state_trans[s1 * 2 + 1] = s_prim;
-		for (int j = 0; j < (n_gens - 1); j++)
-		{
-			m_output_parity[s_prim * (n_gens - 1) * 2 + 2 * j + 1] = p1[j];
-			m_rev_output_parity[s1 * (n_gens - 1) * 2 + 2 * j + 1] = p1[j];
-		}
-//		std::cout << (int)p0[0] << "\t" << (int)p1[0] << std::endl;
-	}
-
-	delete[] p0;
-	delete[] p1;
-}
-
-
-Turbo::Turbo(BSPara* pBS)
-{
-	PSFlag = (*pBS).ProcessingStatusFlag;
-	BufFlag=(*pBS).BufferSizeFlag;
-	DataLength = (*pBS).DataLengthPerUser;
-
-	Rate=3;
-
-	m_n_gens = pBS->n_gens;
-	for (int i = 0; i < m_n_gens; i++)
-	{
-		m_gens[i] = pBS->gens[i];
-	}
-	m_cst_len = pBS->constraint_length;
-	m_block_size = pBS->BlkSize;
-	m_n_iters = pBS->n_iterations;
-
-	NumBlock = ((DataLength + m_block_size - 1) / m_block_size);
-	if (DataLength % m_block_size)
-	{
-		LastBlockLength = (DataLength % m_block_size);
-	}
-	else
-	{
-		LastBlockLength = m_block_size;
-	}
-
-//	pLLR = new float[(NumBlock-1)*(6144*Rate+12)+1*(LastBlockLen*Rate+12)];
-//	pData = new int[DataLength];
-
-//////////////////////// Calc In/Out buffer size//////////////////////////
-//	InBufSz[0]=1;InBufSz[1]=(NumBlock-1)*(6144*Rate+12)+1*(LastBlockLen*Rate+12);
-	InBufSz = Rate * ((NumBlock - 1) * (m_block_size + 4) + 1 * ((LastBlockLength) + 4));
-//	OutBufSz[0]=1;OutBufSz[1]=DataLength;
-	OutBufSz = DataLength;
-	
-	set_parameters(pBS->gens, pBS->n_gens, pBS->constraint_length,
-				   pBS->BlkSize, pBS->n_iterations);
-	/*
-	if(BufFlag)
-	{
-		cout<<"Turbo Decoder"<<endl;
-		cout<<"Input buffer size is "<<"{"<<InBufSz[0]<<" , "<<InBufSz[1]<<"}"<<"  float"<<endl;
-		cout<<"Output buffer size is "<<"{"<<OutBufSz[0]<<" , "<<OutBufSz[1]<<"}"<<"  int"<<endl; 
-	}
-	else
-	{}
-	*/
-//////////////////////End of clac in/out buffer size//////////////////////
-////////////////////// Initialize its own Input Buffer //////////////////////////
-//	pInpBuf =new FIFO<float>[1];
-//	(*pInpBuf).initFIFO(1,InBufSz);
-//////////////////End of initialization of its own input buffer//////////////////
-}
-
-void Turbo::TurboDecoding(float *pInpData, int *pOutBits)
+/*
+ * FIXME: How to determine output buffer size from
+ * input buffer size?
+ */
+void turbo_decoding(float *pInpData, int *pOutBits, int out_data_length)
 {
 	int n_blocks;
-	int OutBitShift, OutBlockShift;
-	int *pLengthSet;
-	int iSeqLength;
+	int last_block_length;
+	int out_bit_offset, out_block_offset;
+	int cur_blk_len;
+	
+	float recv_syst1[N_UNCODED + N_TAIL];
+	float recv_syst2[N_UNCODED + N_TAIL];
+	float recv_parity1[(N_UNCODED + N_TAIL) * (N_GENS - 1)];
+	float recv_parity2[(N_UNCODED + N_TAIL) * (N_GENS - 1)];
 
-	n_blocks = NumBlock;
-	
-	pLengthSet = new int[n_blocks];
-	for(int i = 0; i < n_blocks - 1; i++)
+	int i, j, k;
+
+	n_blocks = ((out_data_length + BLOCK_SIZE - 1) / BLOCK_SIZE);
+	if (out_data_length % BLOCK_SIZE)
 	{
-		pLengthSet[i] = m_n_uncoded;
+		last_block_length = (out_data_length % BLOCK_SIZE);
 	}
-	pLengthSet[n_blocks - 1] = (DataLength % m_n_uncoded) ? (DataLength % m_n_uncoded) : m_n_uncoded;
-	
-	float *recv_syst1 = new float[m_n_uncoded + m_n_tail];
-	float *recv_syst2 = new float[m_n_uncoded + m_n_tail];
-	float *recv_parity1 = new float[(m_n_uncoded + m_n_tail) * (m_n_gens - 1)];
-	float *recv_parity2 = new float[(m_n_uncoded + m_n_tail) * (m_n_gens - 1)];
+	else
+	{
+		last_block_length = BLOCK_SIZE;
+	}
 
 	// Clear data part of recv_syst2
-	for (int i = 0; i < m_n_uncoded; i++)
+	for (i = 0; i < N_UNCODED; i++)
 	{
 		recv_syst2[i] = 0.0;
 	}
 
-	OutBitShift = 0;
-	OutBlockShift = 0;
+	out_bit_offset = 0;
+	out_block_offset = 0;
 
-	for (int i = 0; i < n_blocks; i++)
+	for (i = 0; i < n_blocks; i++)
 	{
-		iSeqLength = pLengthSet[i];
+		cur_blk_len = (i != (n_blocks - 1)) ? BLOCK_SIZE : last_block_length;
 		// data part
-		for (int j = 0; j < iSeqLength; j++)
+		for (j = 0; j < cur_blk_len; j++)
 		{
-			recv_syst1[j] = pInpData[OutBitShift++];
-			for (int k = 0; k < m_n_gens - 1; k++)
+			recv_syst1[j] = pInpData[out_bit_offset++];
+			for (k = 0; k < N_GENS - 1; k++)
 			{
-				recv_parity1[j * (m_n_gens - 1) + k] = pInpData[OutBitShift++];
+				recv_parity1[j * (N_GENS - 1) + k] = pInpData[out_bit_offset++];
 			}
-			for (int k = 0; k < m_n_gens - 1; k++)
+			for (k = 0; k < N_GENS - 1; k++)
 			{
-				recv_parity2[j * (m_n_gens - 1) + k] = pInpData[OutBitShift++];
+				recv_parity2[j * (N_GENS - 1) + k] = pInpData[out_bit_offset++];
 			}
 		}
 		// first tail
-		for (int j = 0; j < m_n_tail; j++)
+		for (j = 0; j < N_TAIL; j++)
 		{
-			recv_syst1[iSeqLength + j] = pInpData[OutBitShift++];
-			for (int k = 0; k < m_n_gens - 1; k++)
+			recv_syst1[cur_blk_len + j] = pInpData[out_bit_offset++];
+			for (k = 0; k < N_GENS - 1; k++)
 			{
-				recv_parity1[(iSeqLength + j) * (m_n_gens - 1) + k] = pInpData[OutBitShift++];
+				recv_parity1[(cur_blk_len + j) * (N_GENS - 1) + k] = pInpData[out_bit_offset++];
 			}
 		}
 		// second tail
-		for (int j = 0; j < m_n_tail; j++)
+		for (j = 0; j < N_TAIL; j++)
 		{
-			recv_syst2[iSeqLength + j] = pInpData[OutBitShift++];
-			for (int k = 0; k < m_n_gens - 1; k++)
+			recv_syst2[cur_blk_len + j] = pInpData[out_bit_offset++];
+			for (k = 0; k < N_GENS - 1; k++)
 			{
-				recv_parity2[(iSeqLength + j) * (m_n_gens - 1) + k] = pInpData[OutBitShift++];
+				recv_parity2[(cur_blk_len + j) * (N_GENS - 1) + k] = pInpData[out_bit_offset++];
 			}
 		}
-		decode_block(recv_syst1, recv_syst2, recv_parity1, recv_parity2, pOutBits + OutBlockShift, iSeqLength);
-		OutBlockShift += iSeqLength;
+		decode_block(recv_syst1, recv_syst2, recv_parity1, recv_parity2, pOutBits + out_block_offset, cur_blk_len);
+		out_block_offset += cur_blk_len;
 	}
-
-	delete[] recv_syst1;
-	delete[] recv_syst2;
-	delete[] recv_parity1;
-	delete[] recv_parity2;
-
-	delete[] pLengthSet;
 }
 
 
-void Turbo::decode_block(float *recv_syst1, float *recv_syst2,
+void decode_block(float *recv_syst1, float *recv_syst2,
 						 float *recv_parity1, float *recv_parity2, int *decoded_bits_i, int interleaver_size)
 {
-	int n_tailed = interleaver_size + m_n_tail;
+	int n_tailed = interleaver_size + N_TAIL;
+	int i;
 	
-//	float_point *apriori = new float_point[n_tailed];
-//	float_point *extrinsic = new float_point[n_tailed];
-	float *Le12 = new float[n_tailed];
-	float *Le12_int = new float[n_tailed];
-	float *Le21 = new float[n_tailed];
-	float *Le21_int = new float[n_tailed];
-	float *L = new float[n_tailed];
+	float Le12[BLOCK_SIZE + N_TAIL];
+	float Le12_int[BLOCK_SIZE + N_TAIL];
+	float Le21[BLOCK_SIZE + N_TAIL];
+	float Le21_int[BLOCK_SIZE + N_TAIL];
+	float L[BLOCK_SIZE + N_TAIL];
 
-	float *int_recv_syst1 = new float[n_tailed];
-	float *deint_recv_syst2 = new float[n_tailed];
-	float *recv_syst = new float[n_tailed];
-	float *int_recv_syst = new float[n_tailed];
+	float int_recv_syst1[BLOCK_SIZE + N_TAIL];
+	float deint_recv_syst2[BLOCK_SIZE + N_TAIL];
+	float recv_syst[BLOCK_SIZE + N_TAIL];
+	float int_recv_syst[BLOCK_SIZE + N_TAIL];
 
 	memset(Le21, 0, n_tailed * sizeof(float));
 
@@ -686,37 +551,38 @@ void Turbo::decode_block(float *recv_syst1, float *recv_syst2,
 	internal_deinterleaver(recv_syst2, deint_recv_syst2, interleaver_size);
 
 	// Combine the results from recv_syst1 and recv_syst2 (in case some bits are transmitted several times)
-	for (int i = 0; i < interleaver_size; i++)
+	for (i = 0; i < interleaver_size; i++)
 	{
 		recv_syst[i] = recv_syst1[i] + deint_recv_syst2[i];
 	}
-	for (int i = 0; i < interleaver_size; i++)
+	for (i = 0; i < interleaver_size; i++)
 	{
 		int_recv_syst[i] = recv_syst2[i] + int_recv_syst1[i];
 	}
-	for (int i = interleaver_size; i < n_tailed; i++)
+	for (i = interleaver_size; i < n_tailed; i++)
 	{
 		recv_syst[i] = recv_syst1[i];
 		int_recv_syst[i] = recv_syst2[i];
 	}
 
 	// do the iterative decoding
-	for (int i = 0; i < m_n_iters; i++)
+	for (i = 0; i < MAX_ITERATIONS; i++)
 	{
 	//	map_decoder(recv_syst1, recv_parity1, Le21, Le12, interleaver_size);
 		log_decoder(recv_syst, recv_parity1, Le21, Le12, interleaver_size);
 		/*
 		for (int j = 0; j < interleaver_size; j++)
 			std::cout << Le21[j] << "\t" << Le12[j] << std::endl;
-			*/
+		*/
+			
 		internal_interleaver(Le12, Le12_int, interleaver_size);
 		/*
 		for (int j = 0; j < interleaver_size; j++)
 			std::cout << Le12[j] << "\t" << Le12_int[j] << std::endl;
 			*/
-		memset(Le12_int + interleaver_size, 0, m_n_tail * sizeof(float));
+		memset(Le12_int + interleaver_size, 0, N_TAIL * sizeof(float));
 	//	map_decoder(recv_syst2, recv_parity2, Le12_int, Le21_int, interleaver_size);
-		log_decoder(int_recv_syst, recv_parity2, Le12_int, Le21_int, interleaver_size);
+	//	log_decoder(int_recv_syst, recv_parity2, Le12_int, Le21_int, interleaver_size);
 		/*
 		for (int j = 0; j < interleaver_size; j++)
 		{
@@ -725,46 +591,28 @@ void Turbo::decode_block(float *recv_syst1, float *recv_syst2,
 		}
 		*/
 		internal_deinterleaver(Le21_int, Le21, interleaver_size);
-		memset(Le21 + interleaver_size, 0, m_n_tail);
+		memset(Le21 + interleaver_size, 0, N_TAIL);
 	}
 
-	for (int i = 0; i < interleaver_size; i++)
+	for (i = 0; i < interleaver_size; i++)
 	{
 		L[i] = recv_syst[i] + Le21[i] + Le12[i];
 	//	std::cout << recv_syst1[i] << "\t" << Le21[i] << "\t" << Le12[i] << std::endl;
 		decoded_bits_i[i] = (L[i] > 0.0) ? 1 : -1;
 	//	decoded_bits_i[i] = (L[i] >= 0.0) ? 1 : 0;
 	}
-
-//	delete[] apriori;
-//	delete[] extrinsic;
-	delete[] Le12;
-	delete[] Le12_int;
-	delete[] Le21;
-	delete[] Le21_int;
-	delete[] L;
-
-	delete[] int_recv_syst1;
-	delete[] deint_recv_syst2;
-	delete[] recv_syst;
-	delete[] int_recv_syst;
 }
 
-void Turbo::map_decoder(float *recv_syst, float *recv_parity, float *apriori, float *extrinsic, int interleaver_size)
+void map_decoder(float *recv_syst, float *recv_parity, float *apriori, float *extrinsic, int interleaver_size)
 {
 	float gamma_k_e, nom, den, temp0, temp1, exp_temp0, exp_temp1;
-	int j, s0, s1, k, kk, s, s_prim, s_prim0, s_prim1;
-	int block_length = (interleaver_size + m_n_tail);
-//	ivec p0, p1;
+	int i, j, s0, s1, k, kk, s, s_prim, s_prim0, s_prim1;
+	int block_length = (interleaver_size + N_TAIL);
 
-//	mat alpha(Nstates, block_length + 1);
-	float *alpha = new float[m_n_states * (block_length + 1)];
-//	mat beta(Nstates, block_length + 1);
-	float *beta = new float[m_n_states * (block_length + 1)];
-//	mat gamma(2*Nstates, block_length + 1);
-	float *gamma = new float[m_n_states * 2 * (block_length + 1)];
-//	vec denom(block_length + 1);
-	float *denom = new float[block_length + 1];
+	float alpha[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
+	float beta[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
+	float gamma[N_STATES * 2 * (BLOCK_SIZE + N_TAIL + 1)];
+	float denom[BLOCK_SIZE + N_TAIL + 1];
 
 	//Calculate gamma
 //	std::cout << "gamma" << std::endl;
@@ -773,15 +621,15 @@ void Turbo::map_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 	{
 //		std::cout << "k=" << k << std::endl;
 		kk = k - 1;
-		for (s_prim = 0; s_prim < m_n_states; s_prim++)
+		for (s_prim = 0; s_prim < N_STATES; s_prim++)
 		{
 			exp_temp0 = 0.0;
 			exp_temp1 = 0.0;
 			
-			for (j = 0; j < (m_n_gens - 1); j++)
+			for (j = 0; j < (N_GENS - 1); j++)
 			{
-				exp_temp0 += 0.5 * Lc * recv_parity[kk * (m_n_gens - 1) + j] * (float)(1 - 2 * m_output_parity[s_prim * (m_n_gens - 1) * 2 + j * 2 + 0]); /* Is this OK? */
-				exp_temp1 += 0.5 * Lc * recv_parity[kk * (m_n_gens - 1) + j] * (float)(1 - 2 * m_output_parity[s_prim * (m_n_gens - 1) * 2 + j * 2 + 1]);
+				exp_temp0 += 0.5 * Lc * recv_parity[kk * (N_GENS - 1) + j] * (float)(1 - 2 * g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0]); /* Is this OK? */
+				exp_temp1 += 0.5 * Lc * recv_parity[kk * (N_GENS - 1) + j] * (float)(1 - 2 * g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1]);
 			}
 			// gamma(2*s_prim+0,k) = std::exp( 0.5*(extrinsic_input(kk) + Lc*rec_systematic(kk))) * std::exp( exp_temp0 );
 			// gamma(2*s_prim+1,k) = std::exp(-0.5*(extrinsic_input(kk) + Lc*rec_systematic(kk))) * std::exp( exp_temp1 );
@@ -815,7 +663,7 @@ void Turbo::map_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 
 	// initiate alpha
 //	alpha.set_col(0, zeros(Nstates));
-	for (int i = 0; i < m_n_states; i++)
+	for (int i = 0; i < N_STATES; i++)
 	{
 		alpha[i * (block_length + 1) + 0] = 0.0;
 	}
@@ -828,11 +676,11 @@ void Turbo::map_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 	for (k = 1; k <= block_length; k++)
 	{
 //		std::cout << "k=" << k << std::endl;
-		for (s = 0; s < m_n_states; s++)
+		for (s = 0; s < N_STATES; s++)
 		{
 //			std::cout << s << std::endl;
-			s_prim0 = m_rev_state_trans[s * 2 + 0];
-			s_prim1 = m_rev_state_trans[s * 2 + 1];
+			s_prim0 = g_rev_state_trans[s * 2 + 0];
+			s_prim1 = g_rev_state_trans[s * 2 + 1];
 //			std::cout << s_prim0 << "\t" << s_prim1 << std::endl;
 			temp0 = alpha[s_prim0 * (block_length + 1) + k - 1] * gamma[(2 * s_prim0 + 0) * (block_length + 1) + k];
 			temp1 = alpha[s_prim1 * (block_length + 1) + k - 1] * gamma[(2 * s_prim1 + 1) * (block_length + 1) + k];
@@ -843,7 +691,7 @@ void Turbo::map_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 //		std::cout << "denom[" << k << "]=" << denom[k] << std::endl;
 		
 //		alpha.set_col(k, alpha.get_col(k) / denom(k));
-		for (s = 0; s < m_n_states; s++)
+		for (s = 0; s < N_STATES; s++)
 		{
 			alpha[s * (block_length + 1) + k] /= denom[k];
 		}
@@ -852,7 +700,7 @@ void Turbo::map_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 	// initiate beta
 //	beta.set_col(block_length, zeros(Nstates));
 //	beta(0, block_length) = 1.0;
-	for (int i = 0; i < m_n_states; i++)
+	for (int i = 0; i < N_STATES; i++)
 	{
 		beta[i * (block_length + 1) + block_length] = 0.0;
 	}
@@ -863,17 +711,17 @@ void Turbo::map_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 	for (k = block_length; k >= 2; k--)
 	{
 //		std::cout << "k=" << k << std::endl;
-		for (s_prim = 0; s_prim < m_n_states; s_prim++)
+		for (s_prim = 0; s_prim < N_STATES; s_prim++)
 		{
-			s0 = m_state_trans[s_prim * 2 + 0];
-			s1 = m_state_trans[s_prim * 2 + 1];
+			s0 = g_state_trans[s_prim * 2 + 0];
+			s1 = g_state_trans[s_prim * 2 + 1];
 			temp0 = beta[s0 * (block_length + 1) + k] * gamma[(2 * s_prim + 0) * (block_length + 1) + k];
 			temp1 = beta[s1 * (block_length + 1) + k] * gamma[(2 * s_prim + 1) * (block_length + 1) + k];
 			beta[s_prim * (block_length + 1) + k - 1] = temp0 + temp1;
 //			std::cout << beta[s_prim * (block_length + 1) + k - 1] << std::endl;
 		}
 //		beta.set_col(k - 1, beta.get_col(k - 1) / denom(k));
-		for (s_prim = 0; s_prim < m_n_states; s_prim++)
+		for (s_prim = 0; s_prim < N_STATES; s_prim++)
 		{
 			beta[s_prim * (block_length + 1) + k - 1] /= denom[k];
 		}
@@ -887,18 +735,18 @@ void Turbo::map_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 		kk = k - 1;
 		nom = 0.0;
 		den = 0.0;
-		for (s_prim = 0; s_prim < m_n_states; s_prim++)
+		for (s_prim = 0; s_prim < N_STATES; s_prim++)
 		{
 //			std::cout << s_prim << std::endl;
-			s0 = m_state_trans[s_prim * 2 + 0];
-			s1 = m_state_trans[s_prim * 2 + 1];
+			s0 = g_state_trans[s_prim * 2 + 0];
+			s1 = g_state_trans[s_prim * 2 + 1];
 //			std::cout << s0 << "\t" << s1 << std::endl;
 			exp_temp0 = 0.0;
 			exp_temp1 = 0.0;
-			for (j = 0; j < (m_n_gens - 1); j++)
+			for (j = 0; j < (N_GENS - 1); j++)
 			{
-				exp_temp0 += 0.5 * Lc * recv_parity[kk * (m_n_gens - 1) + j] * (float)(1 - 2 * m_output_parity[s_prim * (m_n_gens - 1) * 2 + j * 2 + 0]);
-				exp_temp1 += 0.5 * Lc * recv_parity[kk * (m_n_gens - 1) + j] * (float)(1 - 2 * m_output_parity[s_prim * (m_n_gens - 1) * 2 + j * 2 + 1]);
+				exp_temp0 += 0.5 * Lc * recv_parity[kk * (N_GENS - 1) + j] * (float)(1 - 2 * g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0]);
+				exp_temp1 += 0.5 * Lc * recv_parity[kk * (N_GENS - 1) + j] * (float)(1 - 2 * g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1]);
 			}
 			// gamma_k_e = std::exp( exp_temp0 );
 			gamma_k_e = exp(exp_temp0);
@@ -918,18 +766,17 @@ void Turbo::map_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 }
 
 
-void Turbo::log_decoder(float *recv_syst, float *recv_parity, float *apriori, float *extrinsic, int interleaver_size)
+void log_decoder(float *recv_syst, float *recv_parity, float *apriori, float *extrinsic, int interleaver_size)
 {
 
 	float nom, den, temp0, temp1, exp_temp0, exp_temp1, rp;
-	int j, s0, s1, k, kk, l, s, s_prim, s_prim0, s_prim1;
-	int block_length = (interleaver_size + m_n_tail);
-
-	float *alpha = new float[m_n_states * (block_length + 1)];
-	float *beta = new float[m_n_states * (block_length + 1)];
-	float *gamma = new float[m_n_states * 2 * (block_length + 1)];
-
-	float *denom = new float[block_length + 1];
+	int i, j, s0, s1, k, kk, l, s, s_prim, s_prim0, s_prim1;
+	int block_length = (interleaver_size + N_TAIL);
+	
+	float alpha[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
+	float beta[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
+	float gamma[N_STATES * 2 * (BLOCK_SIZE + N_TAIL + 1)];
+	float denom[BLOCK_SIZE + N_TAIL + 1];
 
 	for (k = 0; k <= block_length; k++)
 	{
@@ -941,15 +788,15 @@ void Turbo::log_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 	{
 		kk = k - 1;
 
-		for (s_prim = 0; s_prim < m_n_states; s_prim++)
+		for (s_prim = 0; s_prim < N_STATES; s_prim++)
 		{
 			exp_temp0 = 0.0;
 			exp_temp1 = 0.0;
 
-			for (j = 0; j < (m_n_gens - 1); j++)
+			for (j = 0; j < (N_GENS - 1); j++)
 			{
-				rp = recv_parity[kk * (m_n_gens - 1) + j];
-				if (0 == m_output_parity[s_prim * (m_n_gens - 1) * 2 + j * 2 + 0])
+				rp = recv_parity[kk * (N_GENS - 1) + j];
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
 				{
 					exp_temp0 += rp;
 				}
@@ -957,7 +804,7 @@ void Turbo::log_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 				{ 
 					exp_temp0 -= rp;
 				}
-				if (0 == m_output_parity[s_prim * (m_n_gens - 1) * 2 + j * 2 + 1])
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
 				{
 					exp_temp1 += rp;
 				}
@@ -968,12 +815,14 @@ void Turbo::log_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 			}
 
 			gamma[(2 * s_prim + 0) * (block_length + 1) + k] =  0.5 * ((apriori[kk] + recv_syst[kk]) + exp_temp0);
+			//	std::cout << gamma[(2 * s_prim + 0) * (block_length + 1) + k] << "\t";
 			gamma[(2 * s_prim + 1) * (block_length + 1) + k] = -0.5 * ((apriori[kk] + recv_syst[kk]) - exp_temp1);
+			//	std::cout << gamma[(2 * s_prim + 1) * (block_length + 1) + k] << std::endl;
 		}
 	}
 
 	// Initiate alpha
-	for (int i = 1; i < m_n_states; i++)
+	for (int i = 1; i < N_STATES; i++)
 	{
 		alpha[i * (block_length + 1) + 0] = -LOG_INFINITY;
 	}
@@ -982,10 +831,10 @@ void Turbo::log_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 	// Calculate alpha, going forward through the trellis
 	for (k = 1; k <= block_length; k++)
 	{
-		for (s = 0; s < m_n_states; s++)
+		for (s = 0; s < N_STATES; s++)
 		{
-			s_prim0 = m_rev_state_trans[s * 2 + 0];
-			s_prim1 = m_rev_state_trans[s * 2 + 1];
+			s_prim0 = g_rev_state_trans[s * 2 + 0];
+			s_prim1 = g_rev_state_trans[s * 2 + 1];
 			temp0 = alpha[s_prim0 * (block_length + 1) + k - 1] + gamma[(2 * s_prim0 + 0) * (block_length + 1) + k];
 			temp1 = alpha[s_prim1 * (block_length + 1) + k - 1] + gamma[(2 * s_prim1 + 1) * (block_length + 1) + k];
 			alpha[s * (block_length + 1) + k] = com_log(temp0, temp1);
@@ -993,14 +842,14 @@ void Turbo::log_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 		}
 
 		// Normalization of alpha
-		for (l = 0; l < m_n_states; l++)
+		for (l = 0; l < N_STATES; l++)
 		{
 			alpha[l * (block_length + 1) + k] -= denom[k];
 		}
 	}
 
 	// Initiate beta
-	for (int i = 1; i < m_n_states; i++)
+	for (i = 1; i < N_STATES; i++)
 	{
 		beta[i * (block_length + 1) + block_length] = -LOG_INFINITY;
 	}
@@ -1009,14 +858,14 @@ void Turbo::log_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 	// Calculate beta going backward in the trellis
 	for (k = block_length; k >= 2; k--)
 	{
-		for (s_prim = 0; s_prim < m_n_states; s_prim++)
+		for (s_prim = 0; s_prim < N_STATES; s_prim++)
 		{
-			s0 = m_state_trans[s_prim * 2 + 0];
-			s1 = m_state_trans[s_prim * 2 + 1];
+			s0 = g_state_trans[s_prim * 2 + 0];
+			s1 = g_state_trans[s_prim * 2 + 1];
 			beta[s_prim * (block_length + 1) + k - 1] = com_log(beta[s0 * (block_length + 1) + k] + gamma[(2 * s_prim + 0) * (block_length + 1) + k], beta[s1 * (block_length + 1) + k] + gamma[(2 * s_prim + 1) * (block_length + 1) + k]);
 		}
 		// Normalization of beta
-		for (l = 0; l < m_n_states; l++)
+		for (l = 0; l < N_STATES; l++)
 		{
 			beta[l * (block_length + 1) + k - 1] -= denom[k];
 		}
@@ -1028,16 +877,16 @@ void Turbo::log_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 		kk = k - 1;
 		nom = -LOG_INFINITY;
 		den = -LOG_INFINITY;
-		for (s_prim = 0; s_prim < m_n_states; s_prim++)
+		for (s_prim = 0; s_prim < N_STATES; s_prim++)
 		{
-			s0 = m_state_trans[s_prim * 2 + 0];
-			s1 = m_state_trans[s_prim * 2 + 1];
+			s0 = g_state_trans[s_prim * 2 + 0];
+			s1 = g_state_trans[s_prim * 2 + 1];
 			exp_temp0 = 0.0;
 			exp_temp1 = 0.0;
-			for (j = 0; j < (m_n_gens - 1); j++)
+			for (j = 0; j < (N_GENS - 1); j++)
 			{
-				rp = recv_parity[kk * (m_n_gens - 1) + j];
-				if (0 == m_output_parity[s_prim * (m_n_gens - 1) * 2 + j * 2 + 0])
+				rp = recv_parity[kk * (N_GENS - 1) + j];
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
 				{
 					exp_temp0 += rp;
 				}
@@ -1045,7 +894,7 @@ void Turbo::log_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 				{
 					exp_temp0 -= rp; 
 				}
-				if (0 == m_output_parity[s_prim * (m_n_gens - 1) * 2 + j * 2 + 1])
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
 				{ 
 					exp_temp1 += rp;
 				}
@@ -1058,22 +907,7 @@ void Turbo::log_decoder(float *recv_syst, float *recv_parity, float *apriori, fl
 			den = com_log(den, alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp1 + beta[s1 * (block_length + 1) + k]);
 		}
 		extrinsic[kk] = nom - den;
-	//	std::cout << extrinsic[kk] << endl;
+		std::cout << nom << "\t" << den << std::endl;
+		std::cout << extrinsic[kk] << std::endl;
 	}
-	
-	delete[] alpha;
-	delete[] beta;
-	delete[] gamma;
-	delete[] denom;
 }
-
-Turbo::~Turbo()
-{
-	delete[] m_gen_pols;
-	delete[] m_rev_gen_pols;
-	delete[] m_state_trans;
-	delete[] m_rev_state_trans;
-	delete[] m_output_parity;
-	delete[] m_rev_output_parity;
-}
-

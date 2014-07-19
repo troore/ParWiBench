@@ -34,7 +34,7 @@ DEFINES
 #define LTE_PHY_N_SC_RB_UL 12
 
 // N_ant
-#define LTE_PHY_N_ANT_MAX 1
+#define LTE_PHY_N_ANT_MAX 4
 
 // Symbol, CP, Slot, Subframe, and Frame timing
 // Generic
@@ -81,6 +81,7 @@ enum modem_type_t {
 #define QAM16_BITS_PER_SAMP 4
 #define QAM64_BITS_PER_SAMP 6
 
+#define BLOCK_SIZE 6144
 
 typedef struct
 {

@@ -8,4 +8,6 @@
 
 [4] [itpp library](itpp.sourceforge.net)
 
-[5] [LTE Uplink Receiver PHY Benchmark](http://sourceforge.net/projects/lte-benchmark/)
+[5] [libLTE](https://github.com/libLTE/libLTE)
+
+[6] [LTE Uplink Receiver PHY Benchmark](http://sourceforge.net/projects/lte-benchmark/)

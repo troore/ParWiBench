@@ -3,8 +3,7 @@ include ../../../common/makefile.config
 SRC = TurboMain.cpp Turbo.cpp
 SRC += $(UTIL_DIR)/FIFO.cpp $(UTIL_DIR)/gauss.cpp $(UTIL_DIR)/matrix.cpp $(UTIL_DIR)/GeneralFunc.cpp 
 
-SRC += $(LTE_DIR)/src/LTEUplink/BSPara.cpp $(LTE_DIR)/src/LTEUplink/UserPara.cpp
-
+SRC += $(LTE_DIR)/src/LTEUplink/lte_phy.cpp
 INC_FLAGS += -I. -I$(LTE_DIR)/include
 
 TARGETS = Turbo.out
