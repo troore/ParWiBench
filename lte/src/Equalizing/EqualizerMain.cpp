@@ -3,36 +3,47 @@
 
 //int RANDOMSEED;
 
-int main()
+LTE_PHY_PARAMS lte_phy_params;
+
+void test_equalizer(LTE_PHY_PARAMS *lte_phy_params)
 {
-	cout<<"Equalizing starts"<<endl;
-	
-	BSPara BS;
-	BS.initBSPara();
-	UserPara User(&BS);
-	Equalizer Eq(&BS,&User);
+	std::cout << "Equalizing starts" << std::endl;
 
-//FIFO<complex<float> > EqIn(1,Eq.InBufSz);
-//	FIFO<complex<float> > EqOut(1,Eq.OutBufSz);
-	complex<float> *pInpData = new complex<float>[Eq.InBufSz];
-	complex<float> *pOutData = new complex<float>[Eq.OutBufSz];
+	Equalizer_init(lte_phy_params);
 
-//	ReadInputFromFiles(Eq.pInpBuf,(Eq.InBufSz),"LSCELSEqInputReal","LSCELSEqInputImag");
-	ReadInputFromFiles(pInpData, (Eq.InBufSz), "LSCELSEqInputReal", "LSCELSEqInputImag");
-//GeneRandomInput(Eq.pInpBuf,Eq.InBufSz,"LSCELSEqRandomInputReal","LSCELSEqRandomInputImag");
-//GeneRandomInput(Eq.pInpBuf,Eq.InBufSz);
-//	Eq.Equalizing(&EqOut);
-	Eq.Equalizing(pInpData, pOutData);
-	
-//	WriteOutputToFiles(&EqOut,(Eq.OutBufSz),"testLSCELSEqOutputReal","testLSCELSEqOutputImag");
-	WriteOutputToFiles(pOutData, (Eq.OutBufSz), "testLSCELSEqOutputReal", "testLSCELSEqOutputImag");
-//WriteOutputToFiles(&EqOut,(Eq.OutBufSz),"LSCELSEqRandomOutputReal","LSCELSEqRandomOutputImag");
-//ReadOutput(&EqOut,(Eq.OutBufSz));
+	ReadInputFromFiles(lte_phy_params->eq_in, lte_phy_params->eq_in_buf_sz, "LSCELSEqInputReal", "LSCELSEqInputImag");
 
-	delete[] pInpData;
-	delete[] pOutData;
+	Equalizing(lte_phy_params, lte_phy_params->eq_in, lte_phy_params->eq_out);
 	
-	cout<<"Equalizing ends"<<endl;
+	WriteOutputToFiles(lte_phy_params->eq_out, lte_phy_params->eq_out_buf_sz, "testLSCELSEqOutputReal", "testLSCELSEqOutputImag");
+
+	Equalizer_cleanup(lte_phy_params);
+	
+	std::cout << "Equalizing ends" << std::endl;
+
+}
+
+int main(int argc, char *argv[])
+{
+    int enum_fs;
+	int n_tx_ant, n_rx_ant;
+	int mod_type;
+
+	if (argc != 5)
+	{
+		printf("Usage: ./a.out enum_fs mod_type n_tx_ant n_rx_ant\n");
+		
+		return 1;
+	}
+	
+	enum_fs = atoi(argv[1]);
+	mod_type = atoi(argv[2]);
+	n_tx_ant = atoi(argv[3]);
+	n_rx_ant = atoi(argv[4]);
+	
+	lte_phy_init(&lte_phy_params, enum_fs, mod_type, n_tx_ant, n_rx_ant);
+
+	test_equalizer(&lte_phy_params);
 
 	return 0;
 }

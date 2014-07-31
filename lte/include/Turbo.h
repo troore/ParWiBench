@@ -11,25 +11,19 @@
 
 #define TURBO_INT_K_TABLE_SIZE 188
 
-#define RATE 3
-#define N_GENS 2 // number of generators
-#define CST_LEN 4 // constraint length
-#define N_TAIL (CST_LEN - 1)
-#define N_STATES (1 << N_TAIL)
-#define N_UNCODED (BLOCK_SIZE)
-#define N_CODED (1 + (N_GENS - 1) * 2) * N_UNCODED + 2 * N_GENS * N_TAIL
-#define MAX_ITERATIONS 1 // turbo decoder maximum interation times
+//void turbo_init();
 
-#define N_TURBO_OUT_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_30_72MHZ * (LTE_PHY_N_SYMB_PER_SUBFR - 2) * QAM64_BITS_PER_SAMP)
-#define N_TURBO_IN_MAX (N_TURBO_OUT_MAX / RATE)
+void turbo_encoding(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq);
 
-void turbo_init(int data_length);
+void encode_block(int *input_bits,
+		int *interleaved_input_bits,
+		int *parity1,
+		int *tail1,
+		int *parity2,
+		int *tail2,
+		int blk_len);
 
-void turbo_encoding(int *piSeq, int input_data_length, int *pcSeq);
-
-void encode_block();
-
-void turbo_decoding(float *pInpData, int *pOutBits, int out_data_length);
+void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, int *pOutBits);
 
 int reverse_int(int length, int in);
 

@@ -1,71 +1,70 @@
 
 #include "TransformPreMain.h"
 
-int RANDOMSEED;
-
 //#define TransformPre
 
-int main()
+int RANDOMSEED;
+
+LTE_PHY_PARAMS lte_phy_params;
+
+void test_encoder(LTE_PHY_PARAMS *lte_phy_params)
 {
+
+	std::cout << "Transform Precoder starts" << std::endl;
+
+	ReadInputFromFiles(lte_phy_params->trans_encoder_in, lte_phy_params->trans_encoder_in_buf_sz, "TransformPrecoderInputReal", "TransformPrecoderInputImag");
+
+	TransformPrecoding(lte_phy_params, lte_phy_params->trans_encoder_in, lte_phy_params->trans_encoder_out);
+
+	WriteOutputToFiles(lte_phy_params->trans_encoder_out, lte_phy_params->trans_encoder_out_buf_sz, "testTransformPrecoderOutputReal", "testTransformPrecoderOutputImag");
+
+	std::cout << "Transform Precoder ends" << std::endl;
+	
+}
+
+void test_decoder(LTE_PHY_PARAMS *lte_phy_params)
+{
+	std::cout << "Transform Decoder starts" << std::endl;
+	
+//	ReadInputFromFiles(rx_decoder_in, in_buf_sz, "TransformDecoderInputReal","TransformDecoderInputImag");
+	ReadInputFromFiles(lte_phy_params->trans_decoder_in, lte_phy_params->trans_decoder_in_buf_sz, "testTransformPrecoderOutputReal", "testTransformPrecoderOutputImag");
+
+	TransformDecoding(lte_phy_params, lte_phy_params->trans_decoder_in, lte_phy_params->trans_decoder_out);
+	
+	WriteOutputToFiles(lte_phy_params->trans_decoder_out, lte_phy_params->trans_decoder_out_buf_sz, "testTransformDecoderOutputReal", "testTransformDecoderOutputImag");
+	
+	std::cout << "Transform Decoder ends" << std::endl;
+
+}
+
+int main(int argc, char *argv[])
+{
+	int enum_fs;
+    int n_tx_ant, n_rx_ant;
+	int mod_type;
+	
+
+	if (argc != 5)
+	{
+		printf("Usage: ./a.out enum_fs mod_type n_tx_ant n_rx_ant\n");
+		
+		return 1;
+	}
+	
+	enum_fs = atoi(argv[1]);
+	mod_type = atoi(argv[2]);
+	n_tx_ant = atoi(argv[3]);
+	n_rx_ant = atoi(argv[4]);
+	
+	lte_phy_init(&lte_phy_params, enum_fs, mod_type, n_tx_ant, n_rx_ant);
+	
 	#ifdef TransformPre
-	
-	cout<<"Transform Precoder starts"<<endl;
-	
-	BSPara BS;
-	BS.initBSPara();
-	UserPara User(&BS);
-	TransformPrecoder TP(&User);
-//FIFO<complex<float> > TPIn(1,TP.InBufSz);
-//	FIFO<complex<float> > TPOut(1,TP.OutBufSz);
-	complex<float> *pQAMSeq = new complex<float>[TP.InBufSz];
-	complex<float> *pDataMatrix = new complex<float>[TP.OutBufSz];
-	
-//	ReadInputFromFiles(TP.pInpBuf,(TP.InBufSz),"TransformPrecoderInputReal","TransformPrecoderInputImag");
-	ReadInputFromFiles(pQAMSeq, (TP.InBufSz),"TransformPrecoderInputReal","TransformPrecoderInputImag");
-//GeneRandomInput(TP.pInpBuf,TP.InBufSz,"TransformPrecoderRandomInputReal","TransformPrecoderRandomInputImag");
-//GeneRandomInput(TP.pInpBuf,TP.InBufSz);
-//	TP.TransformPrecoding(&TPOut);
-	TP.TransformPrecoding(pQAMSeq, pDataMatrix);
-	
-//	WriteOutputToFiles(&TPOut,(TP.OutBufSz),"testTransformPrecoderOutputReal","testTransformPrecoderOutputImag");
-	WriteOutputToFiles(pDataMatrix,(TP.OutBufSz),"testTransformPrecoderOutputReal","testTransformPrecoderOutputImag");
-//WriteOutputToFiles(&TPOut,(TP.OutBufSz),"TransformPrecoderRandomOutputReal","TransformPrecoderRandomOutputImag");
-//ReadOutput(&TPOut,(TP.OutBufSz));
 
-	delete[] pQAMSeq;
-	delete[] pDataMatrix;
-
-	cout<<"Transform Precoder ends"<<endl;
-
+	test_encoder(&lte_phy_params);
+	
 	#else
 
-	cout<<"Transform Decoder starts"<<endl;
-	
-	BSPara BS;
-	BS.initBSPara();
-	UserPara User(&BS);
-	TransformPrecoder TD(&BS);
-//FIFO<complex<float> > TDIn(1,TD.InBufSz);
-//	FIFO<complex<float> > TDOut(1,TD.OutBufSz);
-	complex<float> *pDataMatrix = new complex<float>[TD.InBufSz];
-	complex<float> *pDecQAMSeq = new complex<float>[TD.OutBufSz];
-	
-//	ReadInputFromFiles(TD.pInpBuf,(TD.InBufSz),"TransformDecoderInputReal","TransformDecoderInputImag");
-	ReadInputFromFiles(pDataMatrix, (TD.InBufSz), "TransformDecoderInputReal","TransformDecoderInputImag");
-//GeneRandomInput(TD.pInpBuf,TD.InBufSz,"TransformDecoderRandomInputReal","TransformDecoderRandomInputImag");
-//GeneRandomInput(TD.pInpBuf,TD.InBufSz);
-//	TD.TransformDecoding(&TDOut);
-	TD.TransformDecoding(pDataMatrix, pDecQAMSeq);
-	
-//	WriteOutputToFiles(&TDOut,(TD.OutBufSz),"testTransformDecoderOutputReal","testTransformDecoderOutputImag");
-	WriteOutputToFiles(pDecQAMSeq, (TD.OutBufSz), "testTransformDecoderOutputReal", "testTransformDecoderOutputImag");
-//WriteOutputToFiles(&TDOut,(TD.OutBufSz),"TransformDecoderRandomOutputReal","TransformDecoderRandomOutputImag");
-//ReadOutput(&TDOut,(TD.OutBufSz));
-
-	delete[] pDataMatrix;
-	delete[] pDecQAMSeq;
-	
-	cout<<"Transform Decoder ends"<<endl;
+	test_decoder(&lte_phy_params);
 
 	#endif
 

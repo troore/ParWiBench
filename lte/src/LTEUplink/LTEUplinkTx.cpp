@@ -3,117 +3,22 @@
 
 #include <ctime>
 
-#define TIME_MEASURE_WRAPPER(BODY, i)				\
-	start = clock(); \
-	BODY; \
-	end = clock(); \
-	cost[i] += (end - start);
+LTE_PHY_PARAMS lte_phy_params;
 
-using namespace std;
-
-void SendToChannel(complex<float> *pTxSend, int n)
+void SendToChannel(std::complex<float> *pTxSend, int n)
 {
 	WriteOutputToFiles(pTxSend, n, "TxImag.dat", "TxReal.dat");
 }
 
-int main(int argc, char *argv[])
+void lte_phy_tx_sim(LTE_PHY_PARAMS *lte_phy_params)
 {
-//	int SNRArrayLen = 1;
-	int numSFrames = 100/*MAX_SFRAMES*/;
+	//	int SNRArrayLen = 1;
+	int numSFrames = 1/*MAX_SFRAMES*/;
 	
-	BSPara BS;
-	BS.initBSPara();
-	UserPara User(&BS);
-
-	int DataK = BS.DataLengthPerUser;
-	int LastK = DataK % (BS.BlkSize);
-	int NumBlock = (DataK - LastK) / (BS.BlkSize) + 1;
-
-	///////////////////// construct the kernels ////////////////////
-	Turbo TxTurbo(&User);
-	RateMatcher TxRM(&User);
-	Scrambler<int> TxSCRB(&User);
-	Modulation TxMod(&User);
-	TransformPrecoder TxTransPre(&User);
-	ResMapper TxResMap(&User);
-	OFDM TxOFDM(&User);
-	Sync TxSync(&User);
-//	Channel TxCRx(&BS);
-	/*
-	  OFDM RxOFDM(&BS);
-	  ResMapper RxResMap(&BS);
-	  Equalizer RxEq(&BS, &User);
-	  TransformPrecoder RxTransPre(&BS);
-	  Modulation RxMod(&BS);
-	  Scrambler<float> RxSCRB(&BS);
-	  RateMatcher RxRM(&BS);
-	  Turbo RxTurbo(&BS);
-	*/
-	//////////////////// Completed construction of the kernels/////////////////
-
-	////////////////// allocate the FIFOs /////////////////////////
-//	FIFO<int> RxFileSink(1,RxTbD.OutBufSz);
-	//////////////////End of allocation of FIFOs /////////////////////////
-	
-	/** Allocate inputs and outputs **/
-	// Turbo
-	int *pTxTbInp = new int[TxTurbo.InBufSz];
-	int *pTxTbOut = new int[TxTurbo.OutBufSz];
-//	float *pRxTbInp = new float[RxTurbo.InBufSz];
-//	int *pRxTbOut = new int[RxTurbo.OutBufSz];
-
-	// Rate matching
-	int *pTxRMInp = new int[TxRM.InBufSz];
-	int *pTxRMOut = new int[TxRM.OutBufSz];
-//	float *pRxRMInp = new float[RxRM.InBufSz];
-//	float *pRxRMOut = new float[RxRM.OutBufSz];
-//	int *pRxRMHard = new int[RxRM.OutBufSz];
-
-	// Scrambling
-	int *pTxSCRBInp = new int[TxSCRB.InBufSz];
-	int *pTxSCRBOut = new int[TxSCRB.OutBufSz];
-//	float *pRxSCRBInp = new float[RxSCRB.InBufSz];
-//	float *pRxSCRBOut = new float[RxSCRB.OutBufSz];
-
-	// Modulation
-	int *pTxModInp = new int[TxMod.InBufSz];
-	complex<float> *pTxModOut = new complex<float>[TxMod.OutBufSz];
-//	complex<float> *pRxModInp = new complex<float>[RxMod.InBufSz];
-//	float *pRxModOut = new float[RxMod.OutBufSz];
-//	int *pRxModHD = new int[RxMod.OutBufSz];
-
-	// Transform precoding
-	complex<float> *pTxTransPreInp = new complex<float>[TxTransPre.InBufSz];
-	complex<float> *pTxTransPreOut = new complex<float>[TxTransPre.OutBufSz];
-//	complex<float> *pRxTransPreInp = new complex<float>[RxTransPre.InBufSz];
-//	complex<float> *pRxTransPreOut = new complex<float>[RxTransPre.OutBufSz];
-	
-	// Resource mapping
-	complex<float> *pTxResMapInp = new complex<float>[TxResMap.InBufSz];
-	complex<float> *pTxResMapOut = new complex<float>[TxResMap.OutBufSz];
-//	complex<float> *pRxResMapInp = new complex<float>[RxResMap.InBufSz];
-//	complex<float> *pRxResMapOut = new complex<float>[RxResMap.OutBufSz];
-
-	// Equalizing
-//	complex<float> *pRxEqInp = new complex<float>[RxEq.InBufSz];
-//	complex<float> *pRxEqOut = new complex<float>[RxEq.OutBufSz];
-
-	// OFDM
-	complex<float> *pTxOFDMInp = new complex<float>[TxOFDM.InBufSz];
-	complex<float> *pTxOFDMOut = new complex<float>[TxOFDM.OutBufSz];
-//	complex<float> *pRxOFDMInp = new complex<float>[RxOFDM.InBufSz];
-//	complex<float> *pRxOFDMOut = new complex<float>[RxOFDM.OutBufSz];
-
-	// Synchronization
-	complex<float> *pTxSyncInp = new complex<float>[TxSync.InBufSz];
-	complex<float> *pTxSyncOut = new complex<float>[TxSync.OutBufSz];
-	
-	/** End of allocations **/
-
 	FILE *fptr = NULL;
 
-	int *pTxDS = new int[DataK];
-	int *pRxFS = new int[DataK];
+	int* pTxDS = new int[lte_phy_params->data_len_per_subfr];
+	int* pRxFS = new int[lte_phy_params->data_len_per_subfr];
 
 	double start, end;
 	double cost[10] = {0.0};
@@ -124,9 +29,9 @@ int main(int argc, char *argv[])
 		int RANDOMSEED = (nsf + 1) * (/*nsnr*/1 + 2);
 
 		//	GenerateLTEChainInput(TxTbE.pInpBuf,DataK,pTxDS);
-		GenerateLTEChainInput(pTxTbInp, DataK, pTxDS, RANDOMSEED);
+		GenerateLTEChainInput(lte_phy_params->te_in, lte_phy_params->te_in_buf_sz, pTxDS, RANDOMSEED);
 
-		WriteOutputToFiles(pTxTbInp, DataK, "TxBitStream.dat");
+		WriteOutputToFiles(lte_phy_params->te_in, lte_phy_params->te_in_buf_sz, "TxBitStream.dat");
 
 		/*
 		  cout << "Turbo Tx Input" << endl;
@@ -136,81 +41,22 @@ int main(int argc, char *argv[])
 		*/
 			
 
-		TIME_MEASURE_WRAPPER(TxTurbo.TurboEncoding(pTxTbInp, pTxTbOut), 0);
-//		start = clock();
-		//	TxTbE.TurboEncoding(TxRM.pInpBuf);
-//		TxTurbo.TurboEncoding(pTxTbInp, pTxTbOut);
+		TIME_MEASURE_WRAPPER(turbo_encoding(lte_phy_params, lte_phy_params->te_in, lte_phy_params->te_out), 0);
 
-//		end = clock();
-//		cost[0] += (end - start);
-//		std::cout << "Turbo:" << (cost[0] * 1000) / CLOCKS_PER_SEC << "ms" << std::endl;
+		TIME_MEASURE_WRAPPER(TxRateMatching(lte_phy_params, lte_phy_params->te_out, lte_phy_params->rm_out), 1);
 
-		//	cout << "RateMatching Tx Input" << endl;
-		for (int i = 0; i < TxRM.InBufSz; i++)
-		{
-			pTxRMInp[i] = pTxTbOut[i];
-			//	cout << pTxRMInp[i] << "\t";
-		}
-		//	cout << endl;
+		TIME_MEASURE_WRAPPER(Scrambling(lte_phy_params, lte_phy_params->rm_out, lte_phy_params->scramb_out), 2);
 
-		TIME_MEASURE_WRAPPER(TxRM.TxRateMatching(pTxRMInp, pTxRMOut), 1);
-			//	TxRM.TxRateMatching(pTxRMInp, pTxRMOut);
+		TIME_MEASURE_WRAPPER(Modulating(lte_phy_params, lte_phy_params->scramb_out, lte_phy_params->mod_out, lte_phy_params->mod_type), 3);
 
-		//	cout << "Scrambling Tx Input" << endl;
-		for (int i = 0; i < TxSCRB.InBufSz; i++)
-		{
-			pTxSCRBInp[i] = pTxRMOut[i];
-			//		cout << pTxSCRBInp[i] << "\t";
-		}
-		//	cout << endl;
+		TIME_MEASURE_WRAPPER(TransformPrecoding(lte_phy_params, lte_phy_params->mod_out, lte_phy_params->trans_encoder_out), 4);
 
-		TIME_MEASURE_WRAPPER(TxSCRB.Scrambling(pTxSCRBInp, pTxSCRBOut), 2);
-//		TxSCRB.Scrambling(pTxSCRBInp, pTxSCRBOut);
-
-		//	cout << "Modulating Tx Input" << endl;
-		for (int i = 0; i < TxMod.InBufSz; i++)
-		{
-			pTxModInp[i] = pTxSCRBOut[i];
-			//		cout << pTxModInp[i] << "\t";
-		}
-		//	cout << endl;
-
-		TIME_MEASURE_WRAPPER(TxMod.Modulating(pTxModInp, pTxModOut), 3);
-		//	TxMod.Modulating(pTxModInp, pTxModOut);
-
-		for (int i = 0; i < TxTransPre.InBufSz; i++)
-		{
-			pTxTransPreInp[i] = pTxModOut[i];
-		}
-
-		TIME_MEASURE_WRAPPER(TxTransPre.TransformPrecoding(pTxTransPreInp, pTxTransPreOut), 4);
-		//	TxTransPre.TransformPrecoding(pTxTransPreInp, pTxTransPreOut);
-
-		for (int i = 0; i < TxResMap.InBufSz; i++)
-		{
-			pTxResMapInp[i] = pTxTransPreOut[i];
-		}
-
-		TIME_MEASURE_WRAPPER(TxResMap.SubCarrierMapping(pTxResMapInp, pTxResMapOut), 5);
-		//	TxResMap.SubCarrierMapping(pTxResMapInp, pTxResMapOut);
+		TIME_MEASURE_WRAPPER(SubCarrierMapping(lte_phy_params, lte_phy_params->trans_encoder_out, lte_phy_params->resm_out), 5);
 			
-		for (int i = 0; i < TxOFDM.InBufSz; i++)
-		{
-			pTxOFDMInp[i] = pTxResMapOut[i];
-		}
-
-		TIME_MEASURE_WRAPPER(TxOFDM.modulating(pTxOFDMInp, pTxOFDMOut), 6);
-//		TxOFDM.modulating(pTxOFDMInp, pTxOFDMOut);
-
-		for (int i = 0; i < TxSync.InBufSz; i++)
-		{
-			pTxSyncInp[i] = pTxOFDMOut[i];
-		}
-
-		TxSync.AddPreamble(pTxSyncInp, pTxSyncOut);
-
+		TIME_MEASURE_WRAPPER(ofmodulating(lte_phy_params, lte_phy_params->resm_out, lte_phy_params->ofmod_out), 6);
+		
 		// Send modulated data to air channel
-		SendToChannel(pTxSyncOut, TxSync.OutBufSz);
+		SendToChannel(lte_phy_params->ofmod_out, lte_phy_params->ofmod_out_buf_sz);
 
 
 		////////////////////////// END Run Subframe/////////////////////////////////
@@ -220,59 +66,32 @@ int main(int argc, char *argv[])
 	{
 		std::cout << (cost[i] * 1000) / CLOCKS_PER_SEC << "ms" << std::endl; 
 	}
-
+	
 	delete[] pTxDS;
 	delete[] pRxFS;
+}
 
-	/** Deallocation **/
-	// Turbo
-	delete[] pTxTbInp;
-	delete[] pTxTbOut;
-//	delete[] pRxTbInp;
-//	delete[] pRxTbOut;
-
-	// Rate matching
-	delete[] pTxRMInp;
-	delete[] pTxRMOut;
-//	delete[] pRxRMInp;
-//	delete[] pRxRMOut;
-//	delete[] pRxRMHard;
-
-	// Scrambling
-	delete[] pTxSCRBInp;
-	delete[] pTxSCRBOut;
-//	delete[] pRxSCRBInp;
-//	delete[] pRxSCRBOut;
-
-	// Modulation
-	delete[] pTxModInp;
-	delete[] pTxModOut;
-//	delete[] pRxModInp;
-//	delete[] pRxModOut;
-
-	// Transform precoding
-	delete[] pTxTransPreInp;
-	delete[] pTxTransPreOut;
-//	delete[] pRxTransPreInp;
-//	delete[] pRxTransPreOut;
+int main(int argc, char *argv[])
+{
+	int enum_fs;
+	int n_tx_ant, n_rx_ant;
+	int mod_type;
 	
-	// Resouce mapping
-	delete[] pTxResMapInp;
-	delete[] pTxResMapOut;
-//	delete[] pRxResMapInp;
-//	delete[] pRxResMapOut;
+	if (argc != 5)
+	{
+		printf("Usage: ./a.out enum_fs mod_type n_tx_ant n_rx_ant\n");
+		
+		return -1;
+	}
+	
+	enum_fs = atoi(argv[1]);
+	mod_type = atoi(argv[2]);
+	n_tx_ant = atoi(argv[3]);
+	n_rx_ant = atoi(argv[4]);
+	
+	lte_phy_init(&lte_phy_params, enum_fs, mod_type, n_tx_ant, n_rx_ant);
 
-	// OFDM
-	delete[] pTxOFDMInp;
-	delete[] pTxOFDMOut;
-
-	// Sycnronization
-	delete[] pTxSyncInp;
-	delete[] pTxSyncOut;
-//	delete[] pRxSyncInp;
-//	delete[] pRxSyncOut;
-
-	/** End of deallocation**/
+	lte_phy_tx_sim(&lte_phy_params);
 
 	return 0;
 }

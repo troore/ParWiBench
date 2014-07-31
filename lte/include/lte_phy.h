@@ -1,6 +1,9 @@
 #ifndef __LTE_PHY_H_
 #define __LTE_PHY_H_
 
+#include <iostream>
+#include <complex>
+
 /******************************************
 DEFINES
 *******************************************/
@@ -12,6 +15,7 @@ DEFINES
 #define LTE_PHY_FFT_SIZE_15_36MHZ 1024
 #define LTE_PHY_FFT_SIZE_23_04MHZ 1536
 #define LTE_PHY_FFT_SIZE_30_72MHZ 2048
+#define LTE_PHY_FFT_SIZE_MAX (LTE_PHY_FFT_SIZE_30_72MHZ)
 
 // DFT sizes
 #define LTE_PHY_DFT_SIZE_1_92MHZ  75
@@ -20,6 +24,7 @@ DEFINES
 #define LTE_PHY_DFT_SIZE_15_36MHZ 600
 #define LTE_PHY_DFT_SIZE_23_04MHZ 900
 #define LTE_PHY_DFT_SIZE_30_72MHZ 1200
+#define LTE_PHY_DFT_SIZE_MAX (LTE_PHY_DFT_SIZE_30_72MHZ)
 
 // N_rb_ul
 #define LTE_PHY_N_RB_UL_1_4MHZ 6
@@ -68,26 +73,49 @@ typedef enum{
     LTE_PHY_FS_N_ITEMS,
 }LTE_PHY_FS_ENUM;
 
-enum modem_type_t {
-	LTE_BPSK,
+/*
+ * Modulation parameters
+ */
+enum {
+	LTE_BPSK = 0,
 	LTE_QPSK,
 	LTE_QAM16,
 	LTE_QAM64
 };
+
+// Table length
+#define BPSK_TABLE_LEN 2
+#define QPSK_TABLE_LEN 4
+#define	QAM16_TABLE_LEN 16
+#define QAM64_TABLE_LEN 64
+#define MAX_MOD_TABLE_LEN (QAM64_TABLE_LEN)
 
 // Modulation type and number of bits mapping
 #define BPSK_BITS_PER_SAMP 1
 #define QPSK_BITS_PER_SAMP 2
 #define QAM16_BITS_PER_SAMP 4
 #define QAM64_BITS_PER_SAMP 6
+#define MAX_MOD_BITS_PER_SAMP (QAM64_BITS_PER_SAMP)
 
+// Turbo
 #define BLOCK_SIZE 6144
+#define RATE 3
+#define N_GENS 2 // number of generators
+#define CST_LEN 4 // constraint length
+#define N_TAIL (CST_LEN - 1)
+#define N_STATES (1 << N_TAIL)
+#define N_UNCODED (BLOCK_SIZE)
+#define N_CODED (1 + (N_GENS - 1) * 2) * N_UNCODED + 2 * N_GENS * N_TAIL
+#define MAX_ITERATIONS 4 // turbo decoder maximum interation times
+
 
 typedef struct
 {
+	// General parameters
 	int fs; /* sampling rate */
 	int N_samps_per_symb; /* FFT size */
 	int N_dft_sz; /* DFT size for uplink SC-FDMA */
+	int N_fft_sz; /* DFT size for uplink SC-FDMA */
 	int N_samps_cp_l_0; /* cyclic prefix length for the 1st OFDM symbol per slot */
  	int N_samps_cp_l_else; /* normal cyclic prefix length */
 	int N_samps_per_slot;
@@ -99,6 +127,116 @@ typedef struct
 
 	int N_tx_ant;
 	int N_rx_ant;
+
+  int mod_type;
+
+	int sc_loc;
+	int dmrs_symb_pos[2];
+
+	// input/output length
+	int data_len_per_subfr; // should be determined by the capacity of a single sub-frame
+	// Turbo
+#define N_TURBO_OUT_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_30_72MHZ * (LTE_PHY_N_SYMB_PER_SUBFR - 2) * QAM64_BITS_PER_SAMP)
+#define N_TURBO_IN_MAX (N_TURBO_OUT_MAX / RATE)
+	int te_in[N_TURBO_IN_MAX];
+	int te_out[N_TURBO_OUT_MAX];
+	float td_in[N_TURBO_OUT_MAX];
+	int td_out[N_TURBO_IN_MAX];
+	int te_in_buf_sz;
+	int te_out_buf_sz;
+	int td_in_buf_sz;
+	int td_out_buf_sz;
+
+	// Rate matching
+#define N_RM_OUT_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_30_72MHZ * (LTE_PHY_N_SYMB_PER_SUBFR - 2) * QAM64_BITS_PER_SAMP)
+#define N_RM_IN_MAX (N_RM_OUT_MAX)
+  int rm_in[N_RM_IN_MAX];
+  int rm_out[N_RM_OUT_MAX];
+  float rdm_in[N_RM_OUT_MAX];
+  float rdm_out[N_RM_IN_MAX];
+  int rdm_hard[N_RM_IN_MAX];
+  int rm_in_buf_sz;
+  int rm_out_buf_sz;
+  int rdm_in_buf_sz;
+  int rdm_out_buf_sz;
+
+  // Scrambling
+#define N_SCRAMB_IN_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_30_72MHZ * (LTE_PHY_N_SYMB_PER_SUBFR - 2) * QAM64_BITS_PER_SAMP)
+#define N_SCRAMB_OUT_MAX (N_SCRAMB_IN_MAX)
+  int scramb_in[N_SCRAMB_IN_MAX];
+  int scramb_out[N_SCRAMB_OUT_MAX];
+  float descramb_in[N_SCRAMB_IN_MAX];
+  float descramb_out[N_SCRAMB_OUT_MAX];
+  int scramb_in_buf_sz;
+  int scramb_out_buf_sz;
+  int descramb_in_buf_sz;
+  int descramb_out_buf_sz;
+
+  // Modulation
+#define N_MOD_IN_MAX (LTE_PHY_DFT_SIZE_MAX * (LTE_PHY_N_SYMB_PER_SUBFR - 2) * MAX_MOD_BITS_PER_SAMP)
+#define N_MOD_OUT_MAX (LTE_PHY_DFT_SIZE_MAX * (LTE_PHY_N_SYMB_PER_SUBFR - 2))
+  int mod_in[N_MOD_IN_MAX];
+  std::complex<float> mod_out[N_MOD_OUT_MAX];
+  std::complex<float> demod_in[N_MOD_IN_MAX];
+  float demod_LLR[N_MOD_IN_MAX];
+  int demod_HD[N_MOD_IN_MAX];
+  int mod_in_buf_sz;
+  int mod_out_buf_sz;
+  int demod_in_buf_sz;
+  int demod_out_buf_sz;
+
+  // Transform precoding
+#define N_TRANS_ENCODER_IN_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX * (LTE_PHY_N_SYMB_PER_SUBFR - 2))
+#define N_TRANS_ENCODER_OUT_MAX (N_TRANS_ENCODER_IN_MAX)
+#define N_TRANS_DECODER_IN_MAX (N_TRANS_ENCODER_IN_MAX)
+#define N_TRANS_DECODER_OUT_MAX (N_TRANS_ENCODER_IN_MAX)
+  std::complex<float> trans_encoder_in[N_TRANS_ENCODER_IN_MAX];
+  std::complex<float> trans_encoder_out[N_TRANS_ENCODER_OUT_MAX];
+  std::complex<float> trans_decoder_in[N_TRANS_DECODER_IN_MAX];
+  std::complex<float> trans_decoder_out[N_TRANS_DECODER_OUT_MAX];
+  int trans_encoder_in_buf_sz;
+  int trans_encoder_out_buf_sz;
+  int trans_decoder_in_buf_sz;
+  int trans_decoder_out_buf_sz;
+
+  // Resource mapping
+#define N_RESMAPPER_IN_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_30_72MHZ * (LTE_PHY_N_SYMB_PER_SUBFR - 2))
+#define N_RESMAPPER_OUT_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_FFT_SIZE_30_72MHZ * LTE_PHY_N_SYMB_PER_SUBFR)
+#define N_RESDEMAPPER_IN_MAX (N_RESMAPPER_OUT_MAX)
+#define N_RESDEMAPPER_OUT_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_30_72MHZ * LTE_PHY_N_SYMB_PER_SUBFR)
+  std::complex<float> resm_in[N_RESMAPPER_IN_MAX];
+  std::complex<float> resm_out[N_RESMAPPER_OUT_MAX];
+  std::complex<float> resdm_in[N_RESDEMAPPER_IN_MAX];
+  std::complex<float> resdm_out[N_RESDEMAPPER_OUT_MAX];
+  int resm_in_buf_sz;
+  int resm_out_buf_sz;
+  int resdm_in_buf_sz;
+  int resdm_out_buf_sz;
+
+  // Equalizing
+#define N_EQ_IN_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_N_SYMB_PER_SUBFR * LTE_PHY_DFT_SIZE_MAX)
+#define N_EQ_OUT_MAX (LTE_PHY_N_ANT_MAX * (LTE_PHY_N_SYMB_PER_SUBFR - 2) * LTE_PHY_DFT_SIZE_MAX)
+  std::complex<float> eq_in[N_EQ_IN_MAX];
+  std::complex<float> eq_out[N_EQ_OUT_MAX];
+  int eq_in_buf_sz;
+  int eq_out_buf_sz;
+
+  // OFDM
+#define N_OFMOD_IN_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_FFT_SIZE_MAX * LTE_PHY_N_SYMB_PER_SUBFR)
+#define N_OFMOD_OUT_MAX (LTE_PHY_N_ANT_MAX * (LTE_PHY_FFT_SIZE_MAX + LTE_PHY_N_SAMPS_CP_L_0_30_72MHZ) * LTE_PHY_N_SYMB_PER_SUBFR)
+#define N_OFDEMOD_IN_MAX (N_OFMOD_OUT_MAX)
+#define N_OFDEMOD_OUT_MAX (N_OFMOD_IN_MAX)
+  std::complex<float> ofmod_in[N_OFMOD_IN_MAX];
+  std::complex<float> ofmod_out[N_OFMOD_OUT_MAX];
+  std::complex<float> ofdemod_in[N_OFDEMOD_IN_MAX];
+  std::complex<float> ofdemod_out[N_OFDEMOD_OUT_MAX];
+  int ofmod_in_buf_sz;
+  int ofmod_out_buf_sz;
+  int ofdemod_in_buf_sz;
+  int ofdemod_out_buf_sz;
+
+
+
 
 }LTE_PHY_PARAMS;
 

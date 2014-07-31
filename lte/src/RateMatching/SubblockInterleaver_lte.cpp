@@ -2,8 +2,6 @@
 #include "SubblockInterleaver_lte.h"
 #include <iostream>
 
-using namespace std;
-
 template<class U, class T>
 SubblockInterleaver_lte<U,T>::SubblockInterleaver_lte(void)
 {

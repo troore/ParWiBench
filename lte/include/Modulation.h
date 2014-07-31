@@ -1,92 +1,28 @@
 
 #ifndef __MODULATION_H_
 #define __MODULATION_H_
-//#pragma once
+
 #include <complex>
 #include <cmath>
 #include <iostream>
 #include <string>
 #include <fstream>
 
-#include "BSPara.h"
-#include "UserPara.h"
-#include "FIFO.h"
+#include "lte_phy.h"
 
-using namespace std;
+typedef float (*p_a)[2];
 
-class Modulation
-{
- private:
-	bool PSFlag;
-	bool BufFlag;
-	bool SCFDMAFlag;
-	
-	float** pBPSKtable;
-	float** pQPSKtable;
-	float** pQAM16table;
-	float** pQAM64table;
+float vecmin(float* pV,int len);
+float eudist(float a, float b, float c, float d);
+void dec2bits(int i, int n, int *bvec);
 
-	int NumLayer;
-	int NInfoBits;
-	int QAMLen;
+void set_mod_params(p_a *pp_table, int *bits_per_samp, int *mod_table_len, int mod_type);
+void init_mod_tables();
 
+void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex<float> *pQAMSeq, int mod_type);
 
-	int BitsPerSymb;
-	
-	float** pTable;
-	
-	//	int* pBitsSeq;
-	//	complex<float>* pQAMSeq;
+void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecQAMSeq, float *pLLR, int mod_type, float awgnSigma);
 
-	int NumULSymbSF;
-	int NumRxAntenna;
-
-	int MDFT;
-	int MQAM;
-
-	//	int *bitmap;
-
-	//	complex<float>* pDecQAMSeq;
-	//	float* pLLR;
-
-	//	complex<float> ***VpEqW;
-	//	complex<float> ***VpHdm;
-	//	complex<float> ***pW;
-	//	float *pSCFactor;
-	//	complex<float> *pSC_Cntx;
-	float vecmin(float* pV,int len);
-	float eudist(float a, float b, float c, float d);
-	void dec2bits(int i, int n, int *bvec);
-	//	void InitBitMap(int m);
-	void InitModTables();
-
- public:
-	//	int InBufSz[2];
-	int InBufSz;
-	//Modulation's FIFO
-	//	FIFO<int> *pInpBuf;
-	// FIFO<float> *pInpBuf;
-	//int OutBufSz[2];
-	int OutBufSz;
-
-	// Default constructor
-	Modulation() {}
-	Modulation(BSPara* pBS);
-    Modulation(UserPara* pUser);
-	// Destructor
-	~Modulation(void);
-	//    void Modulating(FIFO<int> *pInpBuf, FIFO<complex<float> > *pOutBuf);
-	//    void Modulating(FIFO<complex<float> > *pOutBuf);
-	void Modulating(int *pBitsSeq, complex<float> *pQAMSeq);
-	//  void Demodulating(FIFO<complex<float> >* pInpBuf,FIFO<float>* pOutBuf,float awgnSigma);
-	//	void Demodulating(FIFO<float>* pOutBuf,float awgnSigma);
-	void Demodulating(complex<float> *pDecQAMSeq, float *pLLR, float awgnSigma);
-	//  void Demodulating(FIFO<complex<float> >* pInpBuf,FIFO<float>* pOutBuf,complex<float>*** pEqW,complex<float>*** pHdm,float awgnSigma);
-	//	void Demodulating(FIFO<float>* pOutBuf,complex<float>*** pEqW,complex<float>*** pHdm,float awgnSigma);
-	void Demodulating(complex<float> *pDecQAMSeq, float *pLLR, complex<float>***pEqW, complex<float>***pHdm, float awgnSigma);
-
-	void Demodulating(complex<float> *pDecQAMSeq, int *pHD);
-
-};
+void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecQAMSeq, int *pHD, int mod_type);
 
 #endif

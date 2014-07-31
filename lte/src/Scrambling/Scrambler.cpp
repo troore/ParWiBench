@@ -1,10 +1,14 @@
 
 #include "Scrambler.h"
 
-void Scrambling(int *pInpSeq, int n_inp, int *pOutSeq, int n_out)
+void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 {
-	int i;
+	int n_inp;
 	int scramb_seq_int[N_SCRAMB_IN_MAX];
+
+	int i;
+
+	n_inp = lte_phy_params->scramb_in_buf_sz;
 
 	GenScrambInt(scramb_seq_int, n_inp);
 
@@ -17,12 +21,15 @@ void Scrambling(int *pInpSeq, int n_inp, int *pOutSeq, int n_out)
 }
 
 
-void Descrambling(float *pInpSeq, int n_inp, float *pOutSeq, int n_out)
+void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq)
 {
-	int i;
+	int n_inp;
 	float scramb_seq_float[N_SCRAMB_IN_MAX];
 	int scramb_seq_int[N_SCRAMB_IN_MAX];
 
+	int i;
+
+	n_inp = lte_phy_params->scramb_in_buf_sz;
 	// Generate integer scrambling sequence
 	GenScrambInt(scramb_seq_int, n_inp);
 

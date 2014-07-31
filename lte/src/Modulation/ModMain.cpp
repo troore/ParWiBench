@@ -3,74 +3,72 @@
 
 //#define Mod
 
-int RANDOMSEED;
+//int RANDOMSEED;
 
-using namespace std;
+LTE_PHY_PARAMS lte_phy_params;
 
-int main()
+
+void test_mod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 {
+	std::cout << "Modulation starts" << std::endl;
+
+	ReadInputFromFiles(lte_phy_params->mod_in, lte_phy_params->mod_in_buf_sz, "ModulationInput");
+
+	Modulating(lte_phy_params, lte_phy_params->mod_in, lte_phy_params->mod_out, mod_type);
+	
+	WriteOutputToFiles(lte_phy_params->mod_out, lte_phy_params->mod_out_buf_sz, "testModulationRandomOutputReal", "testModulationRandomOutputImag");
+
+	std::cout << "Modulation ends" << std::endl;
+
+}
+
+void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
+{
+		
+	std::cout << "Demodulation starts" << std::endl;
+
+	float awgn_sigma = 0.193649; //this value is for the standard input  see "AWGNSigma"
+	
+//	ReadInputFromFiles(rx_demod_in, in_buf_sz, "testModulationRandomOutputReal", "testModulationRandomOutputImag");
+	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
+
+	Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
+
+	WriteOutputToFiles(lte_phy_params->demod_LLR, lte_phy_params->demod_out_buf_sz, "testDemodulationOutput");
+
+	std::cout << "Demodulation ends" << std::endl;
+
+
+}
+
+int main(int argc, char *argv[])
+{
+
+	int enum_fs;
+	int n_tx_ant, n_rx_ant;
+	int mod_type;
+	
+	if (argc != 5)
+	{
+		printf("Usage: ./a.out enum_fs mod_type n_tx_ant n_rx_ant\n");
+		
+		return 1;
+	}
+	
+	enum_fs = atoi(argv[1]);
+	mod_type = atoi(argv[2]);
+	n_tx_ant = atoi(argv[3]);
+	n_rx_ant = atoi(argv[4]);
+	
+	lte_phy_init(&lte_phy_params, enum_fs, mod_type, n_tx_ant, n_rx_ant);
+
 #ifdef Mod
-	
-	cout<<"Modulation starts"<<endl;
-	
-	BSPara BS;
-	BS.initBSPara();
-	UserPara User(&BS);
-	Modulation Md(&User);
-//FIFO<int> MdIn(1,Md.InBufSz);
-//	FIFO<complex<float> > MdOut(1,Md.OutBufSz);
-	int *pBitsSeq = new int[Md.InBufSz];
-	complex<float> *pQAMSeq = new complex<float>[Md.OutBufSz];
-	
-//	ReadInputFromFiles(Md.pInpBuf,(Md.InBufSz),"ModulationInput");
-	ReadInputFromFiles(pBitsSeq, (Md.InBufSz), "ModulationInput");
-//GeneRandomInput(Md.pInpBuf,Md.InBufSz,"ModulationRandomInput");
-//GeneRandomInput(Md.pInpBuf,Md.InBufSz);
-//	Md.Modulating(&MdOut);
-	Md.Modulating(pBitsSeq, pQAMSeq);
-	
-//	WriteOutputToFiles(&MdOut,(Md.OutBufSz),"testModulationRandomOutputReal","testModulationRandomOutputImag");
-	WriteOutputToFiles(pQAMSeq, (Md.OutBufSz), "testModulationRandomOutputReal","testModulationRandomOutputImag");
-//ReadOutput(&MdOut,(Md.OutBufSz));
 
-	delete[] pBitsSeq;
-	delete[] pQAMSeq;
-
-	cout<<"Modulation ends"<<endl;
+	test_mod(&lte_phy_params, mod_type);
 	
 	#else
-	
-	cout<<"Demodulation starts"<<endl;
-	
-	BSPara BS;
-	BS.initBSPara();
-//	UserPara User(&BS);
-	Modulation Dmd(&BS);
-//FIFO<complex<float> > DmdIn(1,Dmd.InBufSz);
-//	FIFO<float> DmdOut(1,Dmd.OutBufSz);
-	complex<float> *pDecQAMSeq = new complex<float>[Dmd.InBufSz];
-	float *pLLR = new float[Dmd.OutBufSz];
-	int *pHD = new int[Dmd.OutBufSz];
-	float awgn_sigma = 0.193649;//this value is for the standard input  see "AWGNSigma"
-//	ReadInputFromFiles(Dmd.pInpBuf,(Dmd.InBufSz),"DemodulationInputReal","DemodulationInputImag");
-//	ReadInputFromFiles(pDecQAMSeq, (Dmd.InBufSz), "DemodulationInputReal", "DemodulationInputImag");
-	ReadInputFromFiles(pDecQAMSeq, (Dmd.InBufSz), "testModulationRandomOutputReal", "testModulationRandomOutputImag");
-//GeneRandomInput(Dmd.pInpBuf,Dmd.InBufSz,"DemodulationRandomInputReal","DemodulationRandomInputImag");
-//GeneRandomInput(Dmd.pInpBuf,Dmd.InBufSz);
-//	Dmd.Demodulating(&DmdOut,awgn_sigma);
-	Dmd.Demodulating(pDecQAMSeq, pLLR, awgn_sigma);
-//	Dmd.Demodulating(pDecQAMSeq, pHD);
-	
-//	WriteOutputToFiles(&DmdOut,(Dmd.OutBufSz),"testDemodulationOutput");
-	WriteOutputToFiles(pLLR, (Dmd.OutBufSz), "testDemodulationOutput");
-//	WriteOutputToFiles(pHD, (Dmd.OutBufSz), "testDemodulationOutput");
-//ReadOutput(&DmdOut,(Dmd.OutBufSz));
 
-	delete[] pDecQAMSeq;
-	delete[] pLLR;
-	
-	cout<<"Demodulation ends"<<endl;
-
+	test_demod(&lte_phy_params, mod_type);
 
 	#endif
 	

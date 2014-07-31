@@ -12,7 +12,6 @@
 #include <fstream>
 #include <stdexcept>
 #include "gauss.h"
-//#include "FIFO.h"
 #include "matrix.h"
 #include "GeneralFunc.h"
 

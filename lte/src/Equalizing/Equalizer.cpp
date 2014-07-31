@@ -1,87 +1,54 @@
 
 #include "Equalizer.h"
 
-Equalizer::Equalizer(BSPara* pBS,UserPara* pUser)
+//std::complex<float> ***VpCSI;
+std::complex<float> ***pEqW;
+std::complex<float> ***pHdm;
+
+void Equalizer_init(LTE_PHY_PARAMS *lte_phy_params)
 {
-	PSFlag = (*pBS).ProcessingStatusFlag;
-	BufFlag=(*pBS).BufferSizeFlag;
-
-	NumULSymbSF=(*pBS).NumULSymbSF;
-	MDFTPerUser=(*pBS).MDFTPerUser;
-	NumLayerPerUser=(*pBS).NumLayerPerUser;
-
-	NumRxAntenna = (*pBS).NumRxAntenna;
-	EstimationMethod = (*pBS).EstimationMethod;
-
-	VpUser = pUser;
-
-	pEqW=new complex<float>**[MDFTPerUser];
+	int MDFTPerUser = lte_phy_params->N_dft_sz;
+	int NumLayerPerUser = lte_phy_params->N_tx_ant;
+	int NumRxAntenna = lte_phy_params->N_rx_ant;
+	
+	pEqW = new std::complex<float>**[MDFTPerUser];
+	
 	for(int m=0;m<MDFTPerUser;m++)
 	{
-		*(pEqW+m)=new complex<float>*[NumLayerPerUser];
+		*(pEqW+m) = new std::complex<float>*[NumLayerPerUser];
 		for(int l=0;l<NumLayerPerUser;l++)
 		{
-			*(*(pEqW+m)+l)=new complex<float>[NumRxAntenna];
+			*(*(pEqW+m)+l) = new std::complex<float>[NumRxAntenna];
 		}
 	}
 
-
-	pHdm=new complex<float> **[MDFTPerUser];
+	pHdm = new std::complex<float> **[MDFTPerUser];
 	for(int m=0;m<MDFTPerUser;m++)
 	{
-		*(pHdm+m)=new complex<float> *[NumRxAntenna];
+		*(pHdm+m) = new std::complex<float> *[NumRxAntenna];
 		for(int nrx=0;nrx<NumRxAntenna;nrx++)
 		{
-			*(*(pHdm+m)+nrx)=new complex<float>[NumLayerPerUser];
+			*(*(pHdm+m)+nrx) = new std::complex<float>[NumLayerPerUser];
 		}
 	}
-
-/*
-	pInpData = new complex<float>* [NumULSymbSF*NumLayerPerUser];
-	pOutData = new complex<float>* [(NumULSymbSF-2)*NumLayerPerUser];
-	for(int s=0;s<NumULSymbSF*NumLayerPerUser;s++){*(pInpData+s)=new complex<float>[MDFTPerUser];}
-	for(int s=0;s<(NumULSymbSF-2)*NumLayerPerUser;s++){*(pOutData+s)=new complex<float>[MDFTPerUser];}
-*/
-
-//////////////////////// Calc In/Out buffer size//////////////////////////
-//	InBufSz[0]=NumULSymbSF*NumLayerPerUser;InBufSz[1]=MDFTPerUser;
-	InBufSz = NumULSymbSF * NumLayerPerUser * MDFTPerUser;
-//	OutBufSz[0]=(NumULSymbSF-2)*NumLayerPerUser;OutBufSz[1]=MDFTPerUser;
-	OutBufSz = (NumULSymbSF - 2) * NumLayerPerUser * MDFTPerUser;
-
-	/*
-	if(BufFlag)
-	{
-		cout<<"Equalizer"<<endl;
-		cout<<"Input buffer size is "<<"{"<<InBufSz[0]<<" , "<<InBufSz[1]<<"}"<<"  complex<float>"<<endl;
-		cout<<"Output buffer size is "<<"{"<<OutBufSz[0]<<" , "<<OutBufSz[1]<<"}"<<"  complex<float>"<<endl; 
-	}
-	else
-	{}
-	*/
-//////////////////////End of clac in/out buffer size//////////////////////
-////////////////////// Initialize its own Input Buffer //////////////////////////
-//	pInpBuf =new FIFO<complex<float> >[1];
-//	(*pInpBuf).initFIFO(1,InBufSz);
-//////////////////End of initialization of its own input buffer//////////////////
 }
 
-void Equalizer::FDLSEstimation(complex<float>** pXt,complex<float>** pXtDagger,complex<float>** pYt,complex<float>** pHTranspose,int NumLayer)
+void FDLSEstimation(std::complex<float>** pXt, std::complex<float>** pXtDagger, std::complex<float>** pYt, std::complex<float>** pHTranspose, int NumLayer, int NumRxAntenna)
 {
 //////////////////// Freq Domain Estimate HTranspose ////////////////////
-	complex<float>** pXDX=new complex<float>*[NumLayer];
-	for(int layer=0;layer<NumLayer;layer++){*(pXDX+layer)=new complex<float>[NumLayer];}
-	MatrixProd<int,complex<float> >(NumLayer,2,NumLayer,pXtDagger,pXt,pXDX);
+	std::complex<float>** pXDX=new std::complex<float>*[NumLayer];
+	for(int layer=0;layer<NumLayer;layer++){*(pXDX+layer)=new std::complex<float>[NumLayer];}
+	MatrixProd<int,std::complex<float> >(NumLayer,2,NumLayer,pXtDagger,pXt,pXDX);
 
-	complex<float>** pInvXDX=new complex<float>*[NumLayer];
-	for(int layer=0;layer<NumLayer;layer++){*(pInvXDX+layer)=new complex<float>[NumLayer];}
-	MatrixInv<int,complex<float> >(NumLayer,pXDX,pInvXDX);
+	std::complex<float>** pInvXDX=new std::complex<float>*[NumLayer];
+	for(int layer=0;layer<NumLayer;layer++){*(pInvXDX+layer)=new std::complex<float>[NumLayer];}
+	MatrixInv<int,std::complex<float> >(NumLayer,pXDX,pInvXDX);
 
-	complex<float>** pXDY=new complex<float>*[NumLayer];
-	for(int layer=0;layer<NumLayer;layer++){*(pXDY+layer)=new complex<float>[NumRxAntenna];}
-	MatrixProd<int,complex<float> >(NumLayer,2,NumRxAntenna,pXtDagger,pYt,pXDY);
+	std::complex<float>** pXDY=new std::complex<float>*[NumLayer];
+	for(int layer=0;layer<NumLayer;layer++){*(pXDY+layer)=new std::complex<float>[NumRxAntenna];}
+	MatrixProd<int,std::complex<float> >(NumLayer,2,NumRxAntenna,pXtDagger,pYt,pXDY);
 
-	MatrixProd<int,complex<float> >(NumLayer,NumLayer,NumRxAntenna,pInvXDX,pXDY,pHTranspose);
+	MatrixProd<int,std::complex<float> >(NumLayer,NumLayer,NumRxAntenna,pInvXDX,pXDY,pHTranspose);
 
 	for(int layer=0;layer<NumLayer;layer++){delete[] *(pXDX+layer);delete[] *(pInvXDX+layer);delete[] *(pXDY+layer);}
 	delete[] pXDX; delete[] pInvXDX; delete[] pXDY;  
@@ -89,20 +56,20 @@ void Equalizer::FDLSEstimation(complex<float>** pXt,complex<float>** pXtDagger,c
 }
 
 
-//void Equalizer::FDLSEqualization(complex<float>** pHTranspose,int m,int NumLayer)
-void Equalizer::FDLSEqualization(complex<float> *pInpData, complex<float>** pHTranspose,int m,int NumLayer, complex<float> *pOutData)
+void FDLSEqualization(std::complex<float> *pInpData, std::complex<float>** pHTranspose, int m, int NumLayer, int NumRxAntenna, int MDFTPerUser, std::complex<float> *pOutData)
 {
+	int NumULSymbSF = LTE_PHY_N_SYMB_PER_SUBFR;
 //////////////////// Freq Domain Equalize received Data /////////////////
-	complex<float>** pH=new complex<float>*[NumRxAntenna];
-	for(int nrx=0;nrx<NumRxAntenna;nrx++){*(pH+nrx)=new complex<float>[NumLayer];}
-	complex<float>** pHDagger=new complex<float>*[NumLayer];
-	for(int layer=0;layer<NumLayer;layer++){*(pHDagger+layer)=new complex<float>[NumRxAntenna];}
-	complex<float>** pHDH=new complex<float>*[NumLayer];
-	for(int layer=0;layer<NumLayer;layer++){*(pHDH+layer)=new complex<float>[NumLayer];}
-	complex<float>** pInvHDH=new complex<float>*[NumLayer];
-	for(int layer=0;layer<NumLayer;layer++){*(pInvHDH+layer)=new complex<float>[NumLayer];}
+	std::complex<float>** pH=new std::complex<float>*[NumRxAntenna];
+	for(int nrx=0;nrx<NumRxAntenna;nrx++){*(pH+nrx)=new std::complex<float>[NumLayer];}
+	std::complex<float>** pHDagger=new std::complex<float>*[NumLayer];
+	for(int layer=0;layer<NumLayer;layer++){*(pHDagger+layer)=new std::complex<float>[NumRxAntenna];}
+	std::complex<float>** pHDH=new std::complex<float>*[NumLayer];
+	for(int layer=0;layer<NumLayer;layer++){*(pHDH+layer)=new std::complex<float>[NumLayer];}
+	std::complex<float>** pInvHDH=new std::complex<float>*[NumLayer];
+	for(int layer=0;layer<NumLayer;layer++){*(pInvHDH+layer)=new std::complex<float>[NumLayer];}
 
-	complex<float>* pHDY=new complex<float>[NumLayer];
+	std::complex<float>* pHDY=new std::complex<float>[NumLayer];
 
 	for(int nrx=0;nrx<NumRxAntenna;nrx++)
 	{
@@ -112,28 +79,28 @@ void Equalizer::FDLSEqualization(complex<float> *pInpData, complex<float>** pHTr
 			*(*(pHDagger+layer)+nrx)=conj((*(*(pHTranspose+layer)+nrx)));
 		}
 	}
-	MatrixProd<int,complex<float> >(NumLayer,NumRxAntenna,NumLayer,pHDagger,pH,pHDH);
-	MatrixInv<int,complex<float> >(NumLayer,pHDH,pInvHDH);
+	MatrixProd<int,std::complex<float> >(NumLayer,NumRxAntenna,NumLayer,pHDagger,pH,pHDH);
+	MatrixInv<int,std::complex<float> >(NumLayer,pHDH,pInvHDH);
 
 	////////////////// Equalizing Data /////////////////
 	for(int nSymb=0;nSymb<NumULSymbSF-2;nSymb++)
 	{
-		complex<float>* pYData=new complex<float>[NumRxAntenna];
+		std::complex<float>* pYData=new std::complex<float>[NumRxAntenna];
 		for(int nrx=0;nrx<NumRxAntenna;nrx++)
 		{
 			int IDX=(NumULSymbSF-2)*nrx+nSymb+2*NumRxAntenna;
 			//	*(pYData+nrx)=*(*(pInpData+IDX)+m);
 			*(pYData + nrx) = pInpData[IDX * MDFTPerUser + m];
 		}
-		MatrixProd<int,complex<float> >(NumLayer,NumRxAntenna,1,pHDagger,pYData,pHDY);
+		MatrixProd<int,std::complex<float> >(NumLayer,NumRxAntenna,1,pHDagger,pYData,pHDY);
 
-		complex<float>* pXData=new complex<float>[NumLayer];
-		MatrixProd<int,complex<float> >(NumLayer,NumLayer,1,pInvHDH,pHDY,pXData);
+		std::complex<float>* pXData=new std::complex<float>[NumLayer];
+		MatrixProd<int,std::complex<float> >(NumLayer,NumLayer,1,pInvHDH,pHDY,pXData);
 
 		/////////////////////// Get EqW ////////////////////////
-		complex<float> **pW = new complex<float>*[NumLayer];
-		for(int layer=0;layer<NumLayer;layer++){*(pW+layer)=new complex<float>[NumRxAntenna];}
-		MatrixProd<int,complex<float> >(NumLayer,NumLayer,1,pInvHDH,pHDagger,pW);
+		std::complex<float> **pW = new std::complex<float>*[NumLayer];
+		for(int layer=0;layer<NumLayer;layer++){*(pW+layer)=new std::complex<float>[NumRxAntenna];}
+		MatrixProd<int,std::complex<float> >(NumLayer,NumLayer,1,pInvHDH,pHDagger,pW);
 		for(int layer=0;layer<NumLayer;layer++)
 		{
 			for(int nrx=0;nrx<NumRxAntenna;nrx++)
@@ -178,20 +145,21 @@ void Equalizer::FDLSEqualization(complex<float> *pInpData, complex<float>** pHTr
 
 /////////////////////////Frequency Domain MMSE Equalization///////////////////////////////////
 ////////////////////////////////////////////////////////////
-void Equalizer::FDMMSEEqualization(complex<float>** pHTranspose,int m,int NumLayer,float No)
+void FDMMSEEqualization(std::complex<float> *pInpData, std::complex<float>** pHTranspose, int m, int NumLayer, int NumRxAntenna, int MDFTPerUser, float No, std::complex<float> *pOutData)
 {
+	int NumULSymbSF = LTE_PHY_N_SYMB_PER_SUBFR;
 //////////////////// Freq Domain Equalize received Data /////////////////
-	complex<float>** pH=new complex<float>*[NumRxAntenna];
-	for(int nrx=0;nrx<NumRxAntenna;nrx++){*(pH+nrx)=new complex<float>[NumLayer];}
-	complex<float>** pHDagger=new complex<float>*[NumLayer];
-	for(int layer=0;layer<NumLayer;layer++){*(pHDagger+layer)=new complex<float>[NumRxAntenna];}
-	complex<float>** pHHD=new complex<float>*[NumRxAntenna];
-	for(int nrx=0;nrx<NumRxAntenna;nrx++){*(pHHD+nrx)=new complex<float>[NumRxAntenna];}
-	complex<float>** pInvHHDN=new complex<float>*[NumRxAntenna];
-	for(int nrx=0;nrx<NumRxAntenna;nrx++){*(pInvHHDN+nrx)=new complex<float>[NumRxAntenna];}
+	std::complex<float>** pH=new std::complex<float>*[NumRxAntenna];
+	for(int nrx=0;nrx<NumRxAntenna;nrx++){*(pH+nrx)=new std::complex<float>[NumLayer];}
+	std::complex<float>** pHDagger=new std::complex<float>*[NumLayer];
+	for(int layer=0;layer<NumLayer;layer++){*(pHDagger+layer)=new std::complex<float>[NumRxAntenna];}
+	std::complex<float>** pHHD=new std::complex<float>*[NumRxAntenna];
+	for(int nrx=0;nrx<NumRxAntenna;nrx++){*(pHHD+nrx)=new std::complex<float>[NumRxAntenna];}
+	std::complex<float>** pInvHHDN=new std::complex<float>*[NumRxAntenna];
+	for(int nrx=0;nrx<NumRxAntenna;nrx++){*(pInvHHDN+nrx)=new std::complex<float>[NumRxAntenna];}
 
-	complex<float>** pEo=new complex<float>*[NumLayer];
-	for(int layer=0;layer<NumLayer;layer++){*(pEo+layer)=new complex<float>[NumRxAntenna];}
+	std::complex<float>** pEo=new std::complex<float>*[NumLayer];
+	for(int layer=0;layer<NumLayer;layer++){*(pEo+layer)=new std::complex<float>[NumRxAntenna];}
 
 	for(int nrx=0;nrx<NumRxAntenna;nrx++)
 	{
@@ -202,13 +170,13 @@ void Equalizer::FDMMSEEqualization(complex<float>** pHTranspose,int m,int NumLay
 		}
 	}
 
-	MatrixProd<int,complex<float> >(NumRxAntenna,NumLayer,NumRxAntenna,pH,pHDagger,pHHD);
+	MatrixProd<int,std::complex<float> >(NumRxAntenna,NumLayer,NumRxAntenna,pH,pHDagger,pHHD);
 
 	for(int nrx=0;nrx<NumRxAntenna;nrx++)
 	{(*(*(pHHD+nrx)+nrx))+=No;}   
 
-	MatrixInv<int,complex<float> >(NumRxAntenna,pHHD,pInvHHDN);
-	MatrixProd<int,complex<float> >(NumLayer,NumRxAntenna,NumRxAntenna,pHDagger,pInvHHDN,pEo);
+	MatrixInv<int,std::complex<float> >(NumRxAntenna,pHHD,pInvHHDN);
+	MatrixProd<int,std::complex<float> >(NumLayer,NumRxAntenna,NumRxAntenna,pHDagger,pInvHHDN,pEo);
     /////////////////////// Get EqW ////////////////////////
     for(int layer=0;layer<NumLayer;layer++)
     {
@@ -227,21 +195,23 @@ void Equalizer::FDMMSEEqualization(complex<float>** pHTranspose,int m,int NumLay
 	////////////////// Equalizing Data /////////////////
 	for(int nSymb=0;nSymb<NumULSymbSF-2;nSymb++)
 	{
-		complex<float>* pYData=new complex<float>[NumRxAntenna];
+		std::complex<float>* pYData=new std::complex<float>[NumRxAntenna];
 		for(int nrx=0;nrx<NumRxAntenna;nrx++)
 		{
 			int IDX=(NumULSymbSF-2)*nrx+nSymb+2*NumRxAntenna;
-			*(pYData+nrx)=*(*(pInpData+IDX)+m);
+			//	*(pYData+nrx)=*(*(pInpData+IDX)+m);
+			*(pYData + nrx) = pInpData[IDX * MDFTPerUser + m];
 		}
 
-		complex<float>* pXData=new complex<float>[NumLayer];
-		MatrixProd<int,complex<float> >(NumLayer,NumRxAntenna,1,pEo,pYData,pXData);
+		std::complex<float>* pXData=new std::complex<float>[NumLayer];
+		MatrixProd<int,std::complex<float> >(NumLayer,NumRxAntenna,1,pEo,pYData,pXData);
 
 
 		for(int layer=0;layer<NumLayer;layer++)
 		{
 			int IDX = (NumULSymbSF-2)*layer+nSymb;
-			*(*(pOutData+IDX)+m)=*(pXData+layer);
+			//	*(*(pOutData+IDX)+m)=*(pXData+layer);
+			pOutData[IDX * MDFTPerUser + m] = *(pXData + layer);
 		}
 
 		delete[] pYData;
@@ -261,151 +231,128 @@ void Equalizer::FDMMSEEqualization(complex<float>** pHTranspose,int m,int NumLay
 ////////////////////////////////////////////////////////////
 /////////////////////////END Frequency Domain MMSE Equalization///////////////////////////////////
 
-//void Equalizer::LSFreqDomain(void)
-void Equalizer::LSFreqDomain(complex<float> *pInpData, complex<float> *pOutData)
+void LSFreqDomain(std::complex<float> *pInpData, std::complex<float> *pOutData, int MDFT, int NumLayer, int NumRxAntenna)
 {
-	int MDFT=MDFTPerUser;
-	int NumLayer=NumLayerPerUser;
-	pDMRS=(*VpUser).GetpDMRS();
-//	bool ReadFlag = (*pInpBuf).Read(pInpData);
-//	if(ReadFlag)
-//	{
+	std::complex<float> pDMRS[2 * LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX];
+//	pDMRS = (*VpUser).GetpDMRS();
+	geneDMRS(pDMRS, NumLayer, MDFT);
   
-		for(int m=0;m<MDFT;m++)
+	for(int m=0;m<MDFT;m++)
+	{
+		std::complex<float>** pXt=new std::complex<float>*[2];
+		for(int slot=0;slot<2;slot++){*(pXt+slot)=new std::complex<float>[NumLayer];}
+		std::complex<float>** pXtDagger = new std::complex<float>* [NumLayer];
+		for(int layer=0;layer<NumLayer;layer++){*(pXtDagger+layer)=new std::complex<float>[2];}
+		for(int slot=0;slot<2;slot++)
 		{
-/////////////////////////// Xt XtDagger//////////////////////////
-			complex<float>** pXt=new complex<float>*[2];
-			for(int slot=0;slot<2;slot++){*(pXt+slot)=new complex<float>[NumLayer];}
-			complex<float>** pXtDagger = new complex<float>* [NumLayer];
-			for(int layer=0;layer<NumLayer;layer++){*(pXtDagger+layer)=new complex<float>[2];}
-			for(int slot=0;slot<2;slot++)
+			for(int layer=0;layer<NumLayer;layer++)
 			{
-				for(int layer=0;layer<NumLayer;layer++)
-				{
-					*(*(pXt+slot)+layer)=*(*(*(pDMRS+slot)+layer)+m);
-					*(*(pXtDagger+layer)+slot)=conj((*(*(*(pDMRS+slot)+layer)+m)));
-				}
+				//	*(*(pXt+slot)+layer)=*(*(*(pDMRS+slot)+layer)+m);
+				*(*(pXt+slot)+layer)= pDMRS[(slot * NumLayer + layer) * MDFT + m];
+				//	*(*(pXtDagger+layer)+slot)=conj((*(*(*(pDMRS+slot)+layer)+m)));
+				*(*(pXtDagger+layer)+slot)=conj(pDMRS[(slot * NumLayer + layer) * MDFT + m]);
 			}
-///////////////////////////END Xt XtDagger//////////////////////////
-/////////////////////////// Yt //////////////////////////
-			complex<float>** pYt=new complex<float>*[2];
-			for(int slot=0;slot<2;slot++){*(pYt+slot)=new complex<float>[NumRxAntenna];}
-			for(int slot=0;slot<2;slot++)
-			{
-				for(int nrx=0;nrx<NumRxAntenna;nrx++)
-				{
-					//	*(*(pYt+slot)+nrx)=*(*(pInpData+(nrx*2+slot))+m);
-					*(*(pYt+slot)+nrx) = pInpData[(nrx * 2 + slot) * MDFT + m];
-				}
-			}
-/////////////////////////// END Yt //////////////////////////
-////////////////////////// HTranspose////////////////////////
-			complex<float>** pHTranspose=new complex<float>*[NumLayer];
-			for(int layer=0;layer<NumLayer;layer++){*(pHTranspose+layer)=new complex<float>[NumRxAntenna];}
-//////////////////////////END HTranspose/////////////////////
-
-//////////////////// Freq Domain Estimate HTranspose ////////////////////
-			FDLSEstimation(pXt,pXtDagger,pYt,pHTranspose,NumLayer);
-//////////////////// END Freq Domain Estimate HTranspose ////////////////////
-
-//////////////////// Freq Domain Equalize received Data /////////////////
-			//	FDLSEqualization(pHTranspose,m,NumLayer);
-			FDLSEqualization(pInpData, pHTranspose, m, NumLayer, pOutData); 
-//////////////////// END Freq Domain Equalize received Data//////////////////
-
-/////////////////////////////////Delete///////////////////////////////////////    
-/////////////////////////// Xt XtDagger//////////////////////////
-			for(int slot=0;slot<2;slot++){delete[] *(pXt+slot);}
-			delete[] pXt;
-			for(int layer=0;layer<NumLayer;layer++){delete[] *(pXtDagger+layer);}
-			delete[] pXtDagger;
-///////////////////////////END Xt XtDagger//////////////////////////
-/////////////////////////// Yt //////////////////////////
-			for(int slot=0;slot<2;slot++){delete[] *(pYt+slot);}
-			delete[] pYt; 
-/////////////////////////// END Yt //////////////////////////
-////////////////////////// HTranspose////////////////////////
-			for(int layer=0;layer<NumLayer;layer++){delete[]  *(pHTranspose+layer);}
-			delete[] pHTranspose;
-//////////////////////////END HTranspose/////////////////////   
 		}
-//		bool WriteFlag=(*VpOutBuf).Write(pOutData);
-//   if(WriteFlag){cout<<"successfully written!"<<endl;}
-		if(PSFlag)
-		{cout<<"Equalization completed"<<endl;}
-//	}
-//	else
-//	{cout<<"fail to read data from previous buffer"<<endl;}
 
+		std::complex<float>** pYt=new std::complex<float>*[2];
+		for(int slot=0;slot<2;slot++){*(pYt+slot)=new std::complex<float>[NumRxAntenna];}
+		for(int slot=0;slot<2;slot++)
+		{
+			for(int nrx=0;nrx<NumRxAntenna;nrx++)
+			{
+				*(*(pYt+slot)+nrx) = pInpData[(nrx * 2 + slot) * MDFT + m];
+			}
+		}
+
+		std::complex<float>** pHTranspose=new std::complex<float>*[NumLayer];
+		for(int layer=0;layer<NumLayer;layer++){*(pHTranspose+layer)=new std::complex<float>[NumRxAntenna];}
+
+		FDLSEstimation(pXt, pXtDagger, pYt, pHTranspose, NumLayer, NumRxAntenna);
+
+		FDLSEqualization(pInpData, pHTranspose, m, NumLayer, NumRxAntenna, MDFT, pOutData); 
+
+		for(int slot=0;slot<2;slot++){delete[] *(pXt+slot);}
+		delete[] pXt;
+		for(int layer=0;layer<NumLayer;layer++){delete[] *(pXtDagger+layer);}
+		delete[] pXtDagger;
+
+		for(int slot=0;slot<2;slot++){delete[] *(pYt+slot);}
+		delete[] pYt; 
+
+		for(int layer=0;layer<NumLayer;layer++){delete[]  *(pHTranspose+layer);}
+		delete[] pHTranspose;
+	}
 }
 
-//void Equalizer::Equalizing(FIFO<complex<float> >* pOutBuf)
-void Equalizer::Equalizing(complex<float> *pInpData, complex<float> *pOutData)
+void Equalizing(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pInpData, std::complex<float> *pOutData)
 {
-	if(PSFlag)
-	{cout<<"Equalizing"<<endl;}
-//VpInpBuf=pInpBuf;
-//	VpOutBuf=pOutBuf;
-	LSFreqDomain(pInpData, pOutData);
+	int MDFT = lte_phy_params->N_dft_sz;
+	int NumLayer = lte_phy_params->N_tx_ant;
+	int NumRxAntenna = lte_phy_params->N_rx_ant;
+	
+	LSFreqDomain(pInpData, pOutData, MDFT, NumLayer, NumRxAntenna);
 }
 
 /*
-void Equalizer::Equalizing(FIFO<complex<float> >* pOutBuf,complex<float>***pPCSI,float AWGNNo)
-{
-	if(PSFlag)
-	{cout<<"Equalizing"<<endl;}
+  void Equalizer::Equalizing(FIFO<complex<float> >* pOutBuf,complex<float>***pPCSI,float AWGNNo)
+  {
+  if(PSFlag)
+  {cout<<"Equalizing"<<endl;}
 //VpInpBuf=pInpBuf;
-	VpOutBuf=pOutBuf;
-	VpCSI=pPCSI;
-	float No=AWGNNo;
+VpOutBuf=pOutBuf;
+VpCSI=pPCSI;
+float No=AWGNNo;
 
-	int MDFT=MDFTPerUser;
-	int NumLayer=NumLayerPerUser;
+int MDFT=MDFTPerUser;
+int NumLayer=NumLayerPerUser;
 
-	int SCLoc = (*VpUser).SCLoc;
+int SCLoc = (*VpUser).SCLoc;
 
-	bool ReadFlag = (*pInpBuf).Read(pInpData);
+bool ReadFlag = (*pInpBuf).Read(pInpData);
 
-	if(ReadFlag)
-	{
+if(ReadFlag)
+{
 
-		for(int m=0;m<MDFT;m++)
-		{
+for(int m=0;m<MDFT;m++)
+{
 ////////////////////////// HTranspose////////////////////////
-			complex<float>** pHTranspose=new complex<float>*[NumLayer];
-			for(int layer=0;layer<NumLayer;layer++){*(pHTranspose+layer)=new complex<float>[NumRxAntenna];}
+complex<float>** pHTranspose=new complex<float>*[NumLayer];
+for(int layer=0;layer<NumLayer;layer++){*(pHTranspose+layer)=new complex<float>[NumRxAntenna];}
    
-			for(int layer=0;layer<NumLayer;layer++)
-			{
-				for(int nrx=0;nrx<NumRxAntenna;nrx++)
-				{*(*(pHTranspose+layer)+nrx)=*(*(*(VpCSI+layer)+nrx)+(m+SCLoc));}
-			}
+for(int layer=0;layer<NumLayer;layer++)
+{
+for(int nrx=0;nrx<NumRxAntenna;nrx++)
+{*(*(pHTranspose+layer)+nrx)=*(*(*(VpCSI+layer)+nrx)+(m+SCLoc));}
+}
 //////////////////////////END HTranspose/////////////////////
 
 //////////////////// Freq Domain Equalize received Data /////////////////
-			FDMMSEEqualization(pHTranspose,m,NumLayer,No);
+FDMMSEEqualization(pHTranspose,m,NumLayer,No);
 //////////////////// END Freq Domain Equalize received Data//////////////////
 
 
 /////////////////////////////////Delete///////////////////////////////////////    
 ////////////////////////// HTranspose////////////////////////
-			for(int layer=0;layer<NumLayer;layer++){delete[]  *(pHTranspose+layer);}
-			delete[] pHTranspose;
+for(int layer=0;layer<NumLayer;layer++){delete[]  *(pHTranspose+layer);}
+delete[] pHTranspose;
 //////////////////////////END HTranspose/////////////////////   
-		}
-		bool WriteFlag=(*VpOutBuf).Write(pOutData);
+}
+bool WriteFlag=(*VpOutBuf).Write(pOutData);
 //   if(WriteFlag){cout<<"successfully written!"<<endl;}
-		if(PSFlag)
-		{cout<<"Equalization completed"<<endl;}
-	}
-	else
-	{cout<<"fail to read data from previous buffer"<<endl;}
+if(PSFlag)
+{cout<<"Equalization completed"<<endl;}
+}
+else
+{cout<<"fail to read data from previous buffer"<<endl;}
 
 }
 */
 
-Equalizer::~Equalizer()
+void Equalizer_cleanup(LTE_PHY_PARAMS *lte_phy_params)
 {
+	int MDFTPerUser = lte_phy_params->N_dft_sz;
+	int NumLayerPerUser = lte_phy_params->N_tx_ant;
+	int NumRxAntenna = lte_phy_params->N_rx_ant;
 
 	for(int m=0;m<MDFTPerUser;m++)
 	{
@@ -428,12 +375,4 @@ Equalizer::~Equalizer()
 
 	delete[] pEqW;
 	delete[] pHdm;
-
-	/*
-	for(int s=0;s<NumULSymbSF*NumLayerPerUser;s++){delete[] *(pInpData+s);}
-	delete[] pInpData;
-	for(int s=0;s<(NumULSymbSF-2)*NumLayerPerUser;s++){delete[] *(pOutData+s);}
-	delete[] pOutData;
-	*/
-//	delete[] pInpBuf;
 }

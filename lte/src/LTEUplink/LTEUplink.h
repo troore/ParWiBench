@@ -14,8 +14,6 @@
 
 #include "gauss.h"
 #include "FIFO.h"
-#include "BSPara.h"
-#include "UserPara.h"
 #include "matrix.h"
 #include "GeneralFunc.h"
 
@@ -27,11 +25,12 @@
 #include "ResMapper.h"
 #include "Equalizer.h"
 #include "OFDM.h"
-#include "Sync.h"
 
 
-//#define NSTD 1
-#define MAX_SFRAMES 1
-#define MAX_BLOCK_SIZE 6144
+#define TIME_MEASURE_WRAPPER(BODY, i)				\
+	start = clock(); \
+	BODY; \
+	end = clock(); \
+	cost[i] += (end - start);
 
 #endif

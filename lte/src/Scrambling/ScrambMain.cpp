@@ -3,29 +3,19 @@
 
 int RANDOMSEED;
 
-//#define Scramb
+#define Scramb
 
-// Scrambler buffers
-int tx_scramb_in[N_SCRAMB_IN_MAX];
-int tx_scramb_out[N_SCRAMB_OUT_MAX];
-float rx_scramb_in[N_SCRAMB_IN_MAX];
-float rx_scramb_out[N_SCRAMB_OUT_MAX];
+LTE_PHY_PARAMS lte_phy_params;
 
 void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 {
 	std::cout << "Tx scrambling starts" << std::endl;
 
-	int in_buf_sz;
-	int out_buf_sz;
+	ReadInputFromFiles(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "ScrambleInput");
 	
-	in_buf_sz = lte_phy_params->N_tx_ant * lte_phy_params->N_dft_sz * (lte_phy_params->N_symb_per_subfr - 2) * lte_phy_params->N_bits_per_samp;
-	out_buf_sz = in_buf_sz;
+	Scrambling(lte_phy_params, lte_phy_params->scramb_in, lte_phy_params->scramb_out);
 	
-	ReadInputFromFiles(tx_scramb_in, in_buf_sz, "ScrambleInput");
-	
-	Scrambling(tx_scramb_in, in_buf_sz, tx_scramb_out, out_buf_sz);
-	
-	WriteOutputToFiles(tx_scramb_out, out_buf_sz, "testScrambleOutput");
+	WriteOutputToFiles(lte_phy_params->scramb_out, lte_phy_params->scramb_out_buf_sz, "testScrambleOutput");
 
 	std::cout << "Tx scrambling ends" << std::endl;
 
@@ -37,13 +27,8 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 	std::cout << "Rx descrambling starts" << std::endl;
 
 	int i;
-	int in_buf_sz;
-	int out_buf_sz;
-	
-	in_buf_sz = lte_phy_params->N_tx_ant * lte_phy_params->N_dft_sz * (lte_phy_params->N_symb_per_subfr - 2) * lte_phy_params->N_bits_per_samp;
-	out_buf_sz = in_buf_sz;
-	
-	ReadInputFromFiles(rx_scramb_in, in_buf_sz, "DescrambleInput");
+
+	ReadInputFromFiles(lte_phy_params->descramb_in, lte_phy_params->descramb_in_buf_sz, "DescrambleInput");
 //	ReadInputFromFiles(rx_scramb_in, in_buf_sz, "testScrambleOutput");
 	/*
 	for (i = 0; i < in_buf_sz; i++)
@@ -55,7 +40,7 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 	 }
 	*/
 	
-	Descrambling(rx_scramb_in, in_buf_sz, rx_scramb_out, out_buf_sz);
+	Descrambling(lte_phy_params, lte_phy_params->descramb_in, lte_phy_params->descramb_out);
 
 	/*
 	for (i = 0; i < out_buf_sz; i++)
@@ -67,7 +52,7 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 	}
 	*/
 
-	WriteOutputToFiles(rx_scramb_out, out_buf_sz, "testDescrambleOutput");
+	WriteOutputToFiles(lte_phy_params->descramb_out, lte_phy_params->descramb_out_buf_sz, "testDescrambleOutput");
 	
 	cout << "Rx descrambling ends" << endl;
 
@@ -79,7 +64,6 @@ int main(int argc, char *argv[])
 	int n_tx_ant, n_rx_ant;
 	int mod_type;
 	
-	LTE_PHY_PARAMS lte_phy_params;
 
 	if (argc != 5)
 	{

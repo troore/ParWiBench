@@ -114,24 +114,15 @@ float add_log(float a, float b)
 		return (a + log1p(exp(negdelta)));
 }
 
-void turbo_init(int DataLength)
+/*
+void turbo_init()
 {
-//	Rate = RATE;
-//	DataLength=(*pUser).DataLength;
-
-//	m_n_gens = N_GENS;
-//	m_gens[0] = 013, m_gens[1] = 015;
-//	m_cst_len = CST_LEN;
-//	m_block_size = BLOCK_SIZE;
-//	m_n_iters = MAX_ITERATIONS;
-
-
-
 	set_generator_polynomials(g_gens, N_GENS, CST_LEN);
 	
 	Lc = 1.0;
 	com_log = max_log;
 }
+*/
 
 void set_generator_polynomials(int gens[], int n_gens, int constraint_length)
 {
@@ -282,8 +273,9 @@ void constituent_encoder(int *input, int input_len, int *tail, int *parity)
 	}
 }
 
-void turbo_encoding(int *piSeq, int input_data_length, int *pcSeq)
+void turbo_encoding(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 {
+	int input_data_length;
 	int n_blocks;
 	int last_block_length;
 	int cur_blk_len;
@@ -299,6 +291,9 @@ void turbo_encoding(int *piSeq, int input_data_length, int *pcSeq)
 	int parity1[(N_UNCODED + N_TAIL) * (N_GENS - 1)];
 	int parity2[(N_UNCODED + N_TAIL) * (N_GENS - 1)];
 
+	set_generator_polynomials(g_gens, N_GENS, CST_LEN);
+
+	input_data_length = lte_phy_params->te_in_buf_sz;
 	n_blocks = ((input_data_length + BLOCK_SIZE - 1) / BLOCK_SIZE);
 	if (input_data_length % BLOCK_SIZE)
 	{
@@ -323,20 +318,18 @@ void turbo_encoding(int *piSeq, int input_data_length, int *pcSeq)
 			input_bits[j] = piSeq[inp_blk_offset + j];
 		}
 		
+		encode_block(input_bits, interleaved_input_bits, parity1, tail1, parity2, tail2, cur_blk_len);
+		
+		/*
 		// the first encoder
 		constituent_encoder(input_bits, cur_blk_len, tail1, parity1);
 
 		// the interleaver
 		internal_interleaver(input_bits, interleaved_input_bits, cur_blk_len);
 
-		/*
-		for (k = 0; k < N_UNCODED; k++)
-			std::cout << interleaved_input_bits[k];
-		std::cout << std::endl;
-		*/
-
 		// the second encoder
 		constituent_encoder(interleaved_input_bits, cur_blk_len, tail2, parity2);
+		*/
 
 //		memcpy(syst1, input_bits, sizeof(uint8_T) * m_n_uncoded);
 //		memcpy(syst2, interleaved_input_bits, sizeof(uint8_T) * m_n_uncoded);
@@ -399,11 +392,30 @@ void turbo_encoding(int *piSeq, int input_data_length, int *pcSeq)
 	}
 }
 
-/*
- * TODO: Separate encoding of a single block from @turbo_encoding
- */
-void encode_block()
-{}
+void encode_block(int *input_bits,
+		int *interleaved_input_bits,
+		int *parity1, 
+		int *tail1,
+		int *parity2,
+		int *tail2, 
+		int blk_len)
+{
+
+	// the first encoder
+	constituent_encoder(input_bits, blk_len, tail1, parity1);
+
+	// the interleaver
+	internal_interleaver(input_bits, interleaved_input_bits, blk_len);
+
+	/*
+	   for (k = 0; k < N_UNCODED; k++)
+	   std::cout << interleaved_input_bits[k];
+	   std::cout << std::endl;
+	   */
+
+	// the second encoder
+	constituent_encoder(interleaved_input_bits, blk_len, tail2, parity2);
+}
 
 
 int calc_state_transition(int instate, int input, int *parity)
@@ -455,8 +467,9 @@ int reverse_int(int length, int in)
  * FIXME: How to determine output buffer size from
  * input buffer size?
  */
-void turbo_decoding(float *pInpData, int *pOutBits, int out_data_length)
+void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, int *pOutBits)
 {
+	int out_data_length;
 	int n_blocks;
 	int last_block_length;
 	int out_bit_offset, out_block_offset;
@@ -469,6 +482,9 @@ void turbo_decoding(float *pInpData, int *pOutBits, int out_data_length)
 
 	int i, j, k;
 
+	set_generator_polynomials(g_gens, N_GENS, CST_LEN);
+	
+	out_data_length = lte_phy_params->td_out_buf_sz;
 	n_blocks = ((out_data_length + BLOCK_SIZE - 1) / BLOCK_SIZE);
 	if (out_data_length % BLOCK_SIZE)
 	{
@@ -778,6 +794,9 @@ void log_decoder(float *recv_syst, float *recv_parity, float *apriori, float *ex
 	float gamma[N_STATES * 2 * (BLOCK_SIZE + N_TAIL + 1)];
 	float denom[BLOCK_SIZE + N_TAIL + 1];
 
+	Lc = 1.0;
+	com_log = max_log;
+
 	for (k = 0; k <= block_length; k++)
 	{
 		denom[k] = -LOG_INFINITY;
@@ -907,7 +926,7 @@ void log_decoder(float *recv_syst, float *recv_parity, float *apriori, float *ex
 			den = com_log(den, alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp1 + beta[s1 * (block_length + 1) + k]);
 		}
 		extrinsic[kk] = nom - den;
-		std::cout << nom << "\t" << den << std::endl;
-		std::cout << extrinsic[kk] << std::endl;
+	//	std::cout << nom << "\t" << den << std::endl;
+	//	std::cout << extrinsic[kk] << std::endl;
 	}
 }

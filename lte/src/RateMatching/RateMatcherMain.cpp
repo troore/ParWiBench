@@ -1,86 +1,74 @@
 
 #include "RateMatcherMain.h"
 
-//#define TxRateM
+// #define TxRateM
 
-int RANDOMSEED;
+LTE_PHY_PARAMS lte_phy_params;
 
-int main()
+void tx_rate_matching(LTE_PHY_PARAMS *lte_phy_params)
 {
+	std::cout << "Tx RateMatching starts" << std::endl;
+
+	ReadInputFromFiles(lte_phy_params->rm_in, lte_phy_params->rm_in_buf_sz, "TxRateMatchInput");
+
+	TxRateMatching(lte_phy_params, lte_phy_params->rm_in, lte_phy_params->rm_out);
+	
+	WriteOutputToFiles(lte_phy_params->rm_out, lte_phy_params->rm_out_buf_sz, "testTxRateMatchOutput");
+
+	std::cout << "Tx RateMatching ends" << std::endl;
+}
+
+void rx_rate_matching(LTE_PHY_PARAMS *lte_phy_params)
+{
+	std::cout << "Rx RateMatching starts" << std::endl;
+
+	ReadInputFromFiles(lte_phy_params->rdm_in, lte_phy_params->rdm_in_buf_sz, "testTxRateMatchOutput");
+//	ReadInputFromFiles(rx_rm_in, in_buf_sz, "RxRateMatchInput");
+
+	RxRateMatching(lte_phy_params, lte_phy_params->rdm_in, lte_phy_params->rdm_out, lte_phy_params->rdm_hard);
+
+	/*
+	int test_out_buffer[N_RM_IN_MAX];
+
+	for (int i = 0; i < out_buf_sz; i++)
+		test_out_buffer[i] = (int)rx_rm_out[i];
+	*/
+
+	WriteOutputToFiles(lte_phy_params->rdm_out, lte_phy_params->rdm_out_buf_sz, "testRxRateMatchOutput");
+//	WriteOutputToFiles(test_out_buffer, out_buf_sz, "testRxRateMatchOutput");
+
+	std::cout << "Rx RateMatching ends" << std::endl;
+}
+
+int main(int argc, char *argv[])
+{
+	int enum_fs;
+	int n_tx_ant, n_rx_ant;
+	int mod_type;
+	
+//	LTE_PHY_PARAMS lte_phy_params;
+
+	if (argc != 5)
+	{
+		printf("Usage: ./a.out enum_fs mod_type n_tx_ant n_rx_ant\n");
+		
+		return 1;
+	}
+	
+	enum_fs = atoi(argv[1]);
+	mod_type = atoi(argv[2]);
+	n_tx_ant = atoi(argv[3]);
+	n_rx_ant = atoi(argv[4]);
+	
+	lte_phy_init(&lte_phy_params, enum_fs, mod_type, n_tx_ant, n_rx_ant);
+
 	#ifdef TxRateM
 	
-	cout<<"Tx RateMatching starts"<<endl;
+	tx_rate_matching(&lte_phy_params);
 	
-	BSPara BS;
-	BS.initBSPara();
-	UserPara User(&BS);
-	RateMatcher TxRM(&User);
-//FIFO<int> TxRMIn(1,TxRM.InBufSz);
-//	FIFO<int> TxRMOut(1,TxRM.OutBufSz);
-	int *pInpData = new int[TxRM.InBufSz];
-	int *pOutData = new int[TxRM.OutBufSz];
-//	ReadInputFromFiles(TxRM.pTxInpBuf,(TxRM.InBufSz),"TxRateMatchInput");
-	ReadInputFromFiles(pInpData,(TxRM.InBufSz),"TxRateMatchInput");
-	for (int i = 0; i < TxRM.InBufSz; i++)
-		cout << pInpData[i];
-	cout << endl;
-//GeneRandomInput(TxRM.pInpBuf,TxRM.InBufSz,"TxRateMatchRandomInput");
-//GeneRandomInput(TxRM.pInpBuf,TxRM.InBufSz);
-//	TxRM.TxRateMatching(&TxRMOut);
-	TxRM.TxRateMatching(pInpData, pOutData);
-//	WriteOutputToFiles(&TxRMOut,(TxRM.OutBufSz),"testTxRateMatchOutput");
-	WriteOutputToFiles(pOutData,(TxRM.OutBufSz),"testTxRateMatchOutput");
-//ReadOutput(&TxRMOut,(TxRM.OutBufSz));
-
-	delete[] pInpData;
-	delete[] pOutData;
-	
-	cout<<"Tx RateMatching ends"<<endl;
-
 	#else
 
-	cout<<"Rx RateMatching starts"<<endl;
-	
-	BSPara BS;
-	BS.initBSPara();
-//	UserPara User(&BS);
-	RateMatcher RxRM(&BS);
-//FIFO<float> RxRMIn(1,RxRM.InBufSz);
-//	FIFO<float> RxRMOut(1,RxRM.OutBufSz);
-	float *pInpData = new float[RxRM.InBufSz];
-	float *pOutData = new float[RxRM.OutBufSz];
-	int *pHard = new int[RxRM.OutBufSz];
-//	ReadInputFromFiles(RxRM.pRxInpBuf,(RxRM.InBufSz),"RxRateMatchInput");
-//	ReadInputFromFiles(pInpData,(RxRM.InBufSz),"RxRateMatchInput");
-	ReadInputFromFiles(pInpData,(RxRM.InBufSz),"testTxRateMatchOutput");
-//GeneRandomInput(RxRM.pInpBuf,RxRM.InBufSz,"RxRateMatchRandomInput");
-//GeneRandomInput(RxRM.pInpBuf,RxRM.InBufSz);
-//	RxRM.RxRateMatching(&RxRMOut);
-	RxRM.RxRateMatching(pInpData, pOutData, pHard);
-//	WriteOutputToFiles(&RxRMOut,(RxRM.OutBufSz),"testRxRateMatchOutput");
-	WriteOutputToFiles(pOutData,(RxRM.OutBufSz),"testRxRateMatchOutput");
-
-	/*
-	for (int i = 0; i < (RxRM.OutBufSz); i++)
-		cout << (int)pOutData[i] << "\t";
-	cout << endl;
-	*/
-	/*
-	for (int i = 0; i < (RxRM.OutBufSz); i += 3)
-		cout << (int)pOutData[i + 1] << "\t";
-	cout << endl;
-	for (int i = 0; i < (RxRM.OutBufSz); i += 3)
-		cout << (int)pOutData[i + 2] << "\t";
-	cout << endl;
-	*/
-
-//ReadOutput(&RxRMOut,(RxRM.OutBufSz));
-	
-	cout<<"Rx RateMatching ends"<<endl;
-
-	delete[] pInpData;
-	delete[] pOutData;
-	delete[] pHard;
+	rx_rate_matching(&lte_phy_params);
 	
 	#endif
 	

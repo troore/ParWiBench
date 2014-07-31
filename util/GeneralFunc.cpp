@@ -719,8 +719,7 @@ void WriteOutputToFiles(float *pOut, int Sz, const char *name)
 	fptr = fopen(name,"w+");
 	for(int i=0;i<Sz;i++)
 	{
-		fprintf(fptr,"%f\t",*(pOut+i));
-	//	fprintf(fptr,"%f\n",*(pOut+i));
+		fprintf(fptr,"%f\n",*(pOut+i));
 	}
 	fclose(fptr);
 }
@@ -780,8 +779,8 @@ void WriteOutputToFiles(complex<float> *pOut, int Sz, const char *nameReal, cons
 	
 	for(int i=0;i<Sz;i++)
 	{
-		fprintf(fptr_real,"%f\n",(pOut[i]).real());
-		fprintf(fptr_imag,"%f\n",(pOut[i]).imag());
+		fprintf(fptr_real,"%f\t",(pOut[i]).real());
+		fprintf(fptr_imag,"%f\t",(pOut[i]).imag());
 	}
 	
 	fclose(fptr_real);

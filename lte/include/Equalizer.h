@@ -2,72 +2,28 @@
 #ifndef __EQUALIZER_H_
 #define __EQUALIZER_H_
 
-//#pragma once
 #include <complex>
 #include <iostream>
 #include <cmath>
 
-#include "UserPara.h"
-#include "BSPara.h"
-#include "FIFO.h"
+#include "lte_phy.h"
+#include "ResMapper.h"
 #include "matrix.h"
 #include "fftw3.h"
 
+void Equalizer_init(LTE_PHY_PARAMS *lte_phy_params);
 
-using namespace std;
+void Equalizer_cleanup(LTE_PHY_PARAMS *lte_phy_params);
 
-class Equalizer
-{
-	private:
-		bool PSFlag;
-		bool BufFlag;
+void FDLSEstimation(std::complex<float>** pXt, std::complex<float>** pXtDagger, std::complex<float>** pYt, std::complex<float>** pHTranspose, int NumLayer, int NumRxAntenna);
 
-		int NumULSymbSF;
-		int MDFTPerUser;
-		int NumLayerPerUser;
+//	void FDLSEqualization(complex<float>** pHTranspose,int m,int NumLayer);
+void FDLSEqualization(std::complex<float> *pInpData, std::complex<float>** pHTranspose, int m, int NumLayer, int NumRxAntenna, int MDFTPerUser, std::complex<float> *pOutData);
+//	void FDMSEEEqualization(complex<float>** pHTranspose,int m,int NumLayer, float No);
+void FDMMSEEqualization(std::complex<float> *pInpData, std::complex<float>** pHTranspose, int m, int NumLayer, int NumRxAntenna, int MDFTPerUser, float No, std::complex<float> *pOutData);
 
-		int NumRxAntenna;
-		int EstimationMethod;
+void LSFreqDomain(std::complex<float> *pInpData, std::complex<float> *pOutData, int MDFT, int NumLayer, int NumRxAntenna);
 
-		UserPara* VpUser;
-		complex<float>*** pDMRS;
-		//FIFO<complex<float> >* VpInpBuf;
-		FIFO<complex<float> >* VpOutBuf;
-
-		complex<float>** pInpData;
-		complex<float>** pOutData;
-
-
-		complex<float> ***VpCSI;
-		complex<float> ***pEqW;
-		complex<float> ***pHdm;
-
-		void FDLSEstimation(complex<float>** pXt,complex<float>** pXtDagger,complex<float>** pYt,complex<float>** pHTranspose,int NumLayer);
-
-		//	void FDLSEqualization(complex<float>** pHTranspose,int m,int NumLayer);
-		void FDLSEqualization(complex<float> *pInpData, complex<float>** pHTranspose, int m, int NumLayer, complex<float> *pOutData);
-		void FDMMSEEqualization(complex<float>** pHTranspose,int m,int NumLayer,float No);
-
-		//void LSFreqDomain(void);
-		void LSFreqDomain(complex<float> *pInpData, complex<float> *pOutData);
-
-	public:
-		//		int InBufSz[2];
-		int InBufSz;
-		//Equalizer's FIFO
-		//	FIFO<complex<float> >* pInpBuf;
-		//	int OutBufSz[2];
-		int OutBufSz;
-
-		Equalizer(BSPara* pBS, UserPara* pUser);
-		//  void Equalizing(FIFO<complex<float> >* pInpBuf,FIFO<complex<float> >* pOutBuf);
-		//  void Equalizing(FIFO<complex<float> >* pInpBuf,FIFO<complex<float> >* pOutBuf,complex<float>***pPCSI,float AWGNNo);
-		//		void Equalizing(FIFO<complex<float> >* pOutBuf);
-		void Equalizing(complex<float> *pInpData, complex<float> *pOutData);
-		//	void Equalizing(FIFO<complex<float> >* pOutBuf,complex<float>***pPCSI,float AWGNNo);
-		complex<float> ***GetpEqW(void) const {return pEqW;}
-		complex<float> ***GetpHdm(void) const {return pHdm;}
-		~Equalizer(void);
-};
+void Equalizing(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pInpData, complex<float> *pOutData);
 
 #endif
