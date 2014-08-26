@@ -423,6 +423,31 @@ Latency: 30720 / 30.72MHz = 1ms
 
 \subsection{Turbo Coding}
 
+\subsubsection{Encoder}
+
+\subsubsection{MAP Decoder}
+
+\textit{Pseudo-Code for the Iterative Decoder}
+
+\begin{algorithm}[H]
+	\begin{algorithmic}[1]
+		\For{$k \gets 1$ to $N$} $\triangleright$ $N$ is block size
+		\State $\gamma_{k}(s',s) \sim exp[{1\over 2}u_{i}(L^{e}(u_{k})+L_{c}y_{k}^{s})+{1\over 2}L_{c}y_{k}^{p}x_{k}^{p}]$
+		\State $\tilde{\alpha}_{k}(s) = {{\sum_{s'}\tilde{\alpha}_{k-1}(s')\gamma_{k}(s',s)}\over {\sum_{s}\sum_{s'} \tilde{\alpha}_{k-1}(s')\gamma_{k}(s',s)}}$
+		\EndFor
+
+		\For{$k \gets N$ downto $2$}
+		\State $\tilde{\beta}_{k-1}(s') = {{\sum_{s}\tilde{\beta}_{k}(s)\gamma_{k}(s',s)}\over {\sum_{s}\sum_{s'} \tilde{\alpha}_{k-1}(s')\gamma_{k}(s',s)}}$
+		\EndFor
+
+		\For{$k \gets 1$ to $N$}
+		\State $L_{12}^{e}(u_{k}) = log({{\sum_{S^{+}} \alpha_{k-1}(s')\gamma(s',s)\beta_{k}(s)}\over {\sum_{S^{-}} \alpha_{k-1}(s')\gamma(s',s)\beta_{k}(s)}})$
+		\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Miscellaneous}
+
 WiBench中解调的最大似然软输出映射成bit流的规则是：
 
 \begin{verbatim}

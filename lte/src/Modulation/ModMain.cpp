@@ -30,7 +30,8 @@ void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 	float awgn_sigma = 0.193649; //this value is for the standard input  see "AWGNSigma"
 	
 //	ReadInputFromFiles(rx_demod_in, in_buf_sz, "testModulationRandomOutputReal", "testModulationRandomOutputImag");
-	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
+//	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
+	GeneRandomInput(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
 
 	Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
 
@@ -68,7 +69,8 @@ int main(int argc, char *argv[])
 	
 	#else
 
-	test_demod(&lte_phy_params, mod_type);
+	for (int i = 0; i < 100; i++)
+		test_demod(&lte_phy_params, mod_type);
 
 	#endif
 	

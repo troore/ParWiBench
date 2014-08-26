@@ -1,0 +1,52 @@
+
+
+#ifndef PI
+#define PI	3.14159265358979323846264338327950288
+#endif
+
+#define MUL(a, b, tmp) {tmp = a; a.x = (tmp.x * b.x - tmp.y * b.y); a.y = (tmp.x * b.y + tmp.y * b.x); }
+
+#define DFT2(a, b, tmp) {tmp = u0; u0 = u0 + u1; u1 = tmp - u1;}
+
+/*
+ * p = 1, 2, ..., N/2
+ */
+__kernel void fft_radix2_kernel(__global float2 *a, __global float2 *y, int p, int direction)
+{
+	int i = get_global_id(0); // current thread id
+	int t = get_global_size(0); // number of threads
+	int k = i & (p - 1); // power of basic twiddle factor
+	int j; // output index
+
+	float2 twiddle;
+	float2 u0, u1;
+	float2 tmp;
+
+//	printf("Thread #%d:%d\n", i, p);
+
+	twiddle.x = cos((2 * PI * k) / (2 * p));
+	twiddle.y = (float)direction * sin((2 * PI * k) / (2 * p));
+
+//	printf("twiddle=(%f,%f)\n", twiddle.x, twiddle.y);
+
+	u0 = a[i];
+	u1 = a[i + t];
+
+//	printf("%f\t%f\n", u0.x, u0.y);
+//	printf("%f\t%f\n", u1.x, u1.y);
+
+	MUL(u1, twiddle, tmp);
+
+//	printf("%f\t%f\n", u1.x, u1.y);
+
+	DFT2(u0, u1, tmp); // bufferfly
+
+//	printf("%f\t%f\n", u0.x, u0.y);
+//	printf("%f\t%f\n", u1.x, u1.y);
+
+	j = (i << 1) - k; // ==(2 * i - k)
+//	printf("%d\t%d\n", j, j+p);
+	y[j] = u0;
+	y[j + p] = u1;
+}
+

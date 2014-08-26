@@ -2,7 +2,7 @@
 #include "OFDMMain.h"
 
 
-//#define MOD
+#define MOD
 
 //int RANDOMSEED;
 
@@ -12,11 +12,12 @@ void test_mod(LTE_PHY_PARAMS *lte_phy_params)
 {
 	std::cout << "OFDM modulation starts" << std::endl;
 
-	ReadInputFromFiles(lte_phy_params->ofmod_in, lte_phy_params->ofmod_in_buf_sz, "ModulationInputReal", "ModulationInputImag");
+//	ReadInputFromFiles(lte_phy_params->ofmod_in, lte_phy_params->ofmod_in_buf_sz, "../testsuite/ModulationInputReal", "../testsuite/ModulationInputImag");
+	GeneRandomInput(lte_phy_params->ofmod_in, lte_phy_params->ofmod_in_buf_sz, "../testsuite/RandomModulationInputReal", "../testsuite/RandomModulationInputImag");
 
 	ofmodulating(lte_phy_params, lte_phy_params->ofmod_in, lte_phy_params->ofmod_out);
 	
-	WriteOutputToFiles(lte_phy_params->ofmod_out, lte_phy_params->ofmod_out_buf_sz, "testModulationOutputReal", "testModulationOutputImag");
+	WriteOutputToFiles(lte_phy_params->ofmod_out, lte_phy_params->ofmod_out_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
 
 	std::cout << "OFDM modulation ends" << std::endl;
 }
@@ -27,11 +28,11 @@ void test_demod(LTE_PHY_PARAMS *lte_phy_params)
 	std::cout <<"OFDM demodulation starts"<< std::endl;
 
 //	ReadInputFromFiles(rx_demod_in, in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
-	ReadInputFromFiles(lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_in_buf_sz, "testModulationOutputReal", "testModulationOutputImag");
+	ReadInputFromFiles(lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_in_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
 
 	ofdemodulating(lte_phy_params, lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_out);
 
-	WriteOutputToFiles(lte_phy_params->ofdemod_out, lte_phy_params->ofdemod_out_buf_sz, "testDemodulationOutputReal", "testDemodulationOutputImag");
+	WriteOutputToFiles(lte_phy_params->ofdemod_out, lte_phy_params->ofdemod_out_buf_sz, "../testsuite/testDemodulationOutputReal", "../testsuite/testDemodulationOutputImag");
 	
 	std::cout << "OFDM demodulation ends" << std::endl;
 }
@@ -56,15 +57,15 @@ int main(int argc, char *argv[])
 	
 	lte_phy_init(&lte_phy_params, enum_fs, mod_type, n_tx_ant, n_rx_ant);
 
-	#ifdef MOD
+//	#ifdef MOD
 	
 	test_mod(&lte_phy_params);
 	
-	#else
+//	#else
 
 	test_demod(&lte_phy_params);
 	
-	#endif
+//	#endif
 	
 	return 0;
 }

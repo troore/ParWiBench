@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.5-0.9999.3 (TeX Live 2013) (format=xelatex 2013.8.21)  10 JUL 2014 10:28
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (TeX Live 2013) (format=xelatex 2013.8.21)  31 JUL 2014 20:45
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1125,11 +1125,7 @@ File: se-ascii-print.def 2011/12/02 v1.10 stringenc: Printable ASCII characters
 
 ) [1
 
-]
-
-LaTeX Warning: Citation `erik' on page 1 undefined on input line 56.
-
-[1]
+] [1]
 *************************************************
 * xeCJK warning: "CJKfamily-Unknown"
 * 
@@ -1147,19 +1143,13 @@ Package amsmath Warning: Foreign command \over;
 (amsmath)                \frac or \genfrac should be used instead
 (amsmath)                 on input line 117.
 
-[2]
-
-LaTeX Warning: Citation `erik' on page 3 undefined on input line 147.
-
-[3]
+[2] [3]
 File: ./fig/FDM.png Graphic file (type QTm)
  <use  "./fig/FDM.png" >
 File: ./fig/OFDM.png Graphic file (type QTm)
  <use  "./fig/OFDM.png" > [4] [5]
-
-LaTeX Warning: Citation `36series-212' on page 6 undefined on input line 208.
-
 File: ./fig/turbo.png Graphic file (type QTm)
+
 <use  "./fig/turbo.png" >
 File: ./fig/DLCH.png Graphic file (type QTm)
  <use  "./fig/DLCH.png" >
@@ -1168,15 +1158,10 @@ File: ./fig/ULCH.png Graphic file (type QTm)
 [6] [7]
 File: ./fig/res-grid.png Graphic file (type QTm)
  <use  "./fig/res-grid.png" >
-
-LaTeX Warning: Citation `36series-211' on page 8 undefined on input line 264.
-
 File: ./fig/phy-params.png Graphic file (type QTm)
-<use  "./fig/phy-params.png" >
-
-LaTeX Warning: Citation `nutshell' on page 8 undefined on input line 270.
-
+ <use  "./fig/phy-params.png" >
 File: ./fig/DL-PHY-RES.png Graphic file (type QTm)
+
 <use  "./fig/DL-PHY-RES.png" >
 File: ./fig/DL-Frequency.png Graphic file (type QTm)
  <use  "./fig/DL-Frequency.png" >
@@ -1200,71 +1185,31 @@ Overfull \hbox (162.50592pt too wide) in paragraph at lines 419--419
  * (NumULSymbSF - 2) = (2048 + 160) * 2 + (2048 + 144) * 12 = 30720[]  
  []
 
-[13] [14]
+[13] [14] [15]
 
-LaTeX Warning: Reference `fig:802.11 frame' on page 15 undefined on input line 
-492.
+LaTeX Warning: Reference `fig:802.11 frame' on page 16 undefined on input line 
+517.
 
+[16] [17]
 
-LaTeX Warning: Reference `eq:C' on page 15 undefined on input line 502.
-
-
-LaTeX Warning: Reference `eq:P' on page 15 undefined on input line 502.
-
-[15]
-
-LaTeX Warning: Reference `eq:M' on page 16 undefined on input line 512.
+LaTeX Warning: Reference `MF' on page 18 undefined on input line 591.
 
 
-LaTeX Warning: Reference `eq:MF' on page 16 undefined on input line 522.
-
-
-LaTeX Warning: Reference `eq:MF' on page 16 undefined on input line 528.
-
-
-LaTeX Warning: Reference `eq:M' on page 16 undefined on input line 532.
-
-
-LaTeX Warning: Reference `eq:MF' on page 16 undefined on input line 532.
-
-
-LaTeX Warning: Reference `eq:M' on page 16 undefined on input line 534.
-
-
-LaTeX Warning: Reference `eq:MF' on page 16 undefined on input line 534.
-
-[16]
-
-LaTeX Warning: Reference `eq:Mth' on page 17 undefined on input line 552.
-
-
-LaTeX Warning: Reference `eq:2bit' on page 17 undefined on input line 566.
-
-
-LaTeX Warning: Reference `eq:MF' on page 17 undefined on input line 566.
-
-
-LaTeX Warning: Reference `MF' on page 17 undefined on input line 566.
-
-
-LaTeX Warning: Reference `MF' on page 17 undefined on input line 566.
-
-
-LaTeX Warning: Reference `eq:MFth' on page 17 undefined on input line 568.
+LaTeX Warning: Reference `MF' on page 18 undefined on input line 591.
 
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 583.
-[17]
+put line 608.
+[18]
 Overfull \vbox (52.78023pt too high) has occurred while \output is active []
 
 
-[18] [19] [20] (./lte.bbl [21])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 734.
- [22]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 734.
+[19] [20] [21] (./lte.bbl [22])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 759.
+ [23]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 759.
  (./lte.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 734.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 734.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 759.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 759.
 
 
 LaTeX Warning: There were undefined references.
@@ -1272,15 +1217,15 @@ LaTeX Warning: There were undefined references.
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 734.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 759.
  ) 
 Here is how much of TeX's memory you used:
- 24627 strings out of 493938
- 488742 string characters out of 6145347
- 510081 words of memory out of 5000000
- 27682 multiletter control sequences out of 15000+600000
+ 24632 strings out of 493938
+ 488821 string characters out of 6145347
+ 509273 words of memory out of 5000000
+ 27687 multiletter control sequences out of 15000+600000
  8000 words of font info for 46 fonts, out of 8000000 for 9000
  1144 hyphenation exceptions out of 8191
- 42i,12n,46p,640b,776s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 42i,12n,46p,640b,774s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on lte.pdf (23 pages).
+Output written on lte.pdf (24 pages).

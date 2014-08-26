@@ -25,19 +25,22 @@ void ReadInputFromFiles(float *pIn, int Sz, const char *name);
 void ReadInputFromFiles(FIFO<complex<float> > *pIn,int Sz[],const char *nameReal, const char *nameImag);
 
 void ReadInputFromFiles(complex<float> *pIn, int Sz, const char *nameReal, const char *nameImag);
+void ReadInputFromFiles(float (*pIn)[2], int Sz, const char *nameReal, const char *nameImag);
 
 
 
 void GeneRandomInput(FIFO<int> *pIn,int Sz[],const char *name);
-void GeneRandomInput(int *pIn,int Sz,const char *name);
 void GeneRandomInput(FIFO<float> *pIn,int Sz[],const char *name);
 void GeneRandomInput(FIFO<complex<float> > *pIn,int Sz[],const char *nameReal, const char *nameImag);
 void GeneRandomInput(complex<float> *pIn, int Sz, const char *nameReal, const char *nameImag);
+void GeneRandomInput(float (*pIn)[2], int Sz, const char *nameReal, const char *nameImag);
 
 void GeneRandomInput(FIFO<int> *pIn,int Sz[]);
 void GeneRandomInput(FIFO<float> *pIn,int Sz[]);
 void GeneRandomInput(FIFO<complex<float> > *pIn,int Sz[]);
 
+void GeneRandomInput(int *pIn,int Sz,const char *name);
+void GeneRandomInput(float *pIn,int Sz,const char *name);
 
 void WriteOutputToFiles(FIFO<int> *pOut,int Sz[],const char *name);
 void WriteOutputToFiles(int *pOut, int Sz, const char *name);
@@ -47,6 +50,7 @@ void WriteOutputToFiles(float *pOut, int Sz, const char *name);
 
 void WriteOutputToFiles(FIFO<complex<float> > *pOut,int Sz[],const char *nameReal, const char *nameImag);
 void WriteOutputToFiles(complex<float> *pOut, int Sz, const char *nameReal, const char *nameImag);
+void WriteOutputToFiles(float (*pOut)[2], int Sz, const char *nameReal, const char *nameImag);
 
 void ReadOutput(FIFO<int> *pOut,int Sz[]);
 void ReadOutput(FIFO<float> *pOut,int Sz[]);

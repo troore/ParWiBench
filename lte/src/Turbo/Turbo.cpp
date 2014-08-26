@@ -598,7 +598,7 @@ void decode_block(float *recv_syst1, float *recv_syst2,
 			*/
 		memset(Le12_int + interleaver_size, 0, N_TAIL * sizeof(float));
 	//	map_decoder(recv_syst2, recv_parity2, Le12_int, Le21_int, interleaver_size);
-	//	log_decoder(int_recv_syst, recv_parity2, Le12_int, Le21_int, interleaver_size);
+		log_decoder(int_recv_syst, recv_parity2, Le12_int, Le21_int, interleaver_size);
 		/*
 		for (int j = 0; j < interleaver_size; j++)
 		{

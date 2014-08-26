@@ -11,11 +11,11 @@ void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 {
 	std::cout << "Tx scrambling starts" << std::endl;
 
-	ReadInputFromFiles(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "ScrambleInput");
+	ReadInputFromFiles(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "../testsuite/ScrambleInput");
 	
 	Scrambling(lte_phy_params, lte_phy_params->scramb_in, lte_phy_params->scramb_out);
 	
-	WriteOutputToFiles(lte_phy_params->scramb_out, lte_phy_params->scramb_out_buf_sz, "testScrambleOutput");
+	WriteOutputToFiles(lte_phy_params->scramb_out, lte_phy_params->scramb_out_buf_sz, "../testsuite/testScrambleOutput");
 
 	std::cout << "Tx scrambling ends" << std::endl;
 
@@ -28,7 +28,7 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 
 	int i;
 
-	ReadInputFromFiles(lte_phy_params->descramb_in, lte_phy_params->descramb_in_buf_sz, "DescrambleInput");
+	ReadInputFromFiles(lte_phy_params->descramb_in, lte_phy_params->descramb_in_buf_sz, "../testsuite/DescrambleInput");
 //	ReadInputFromFiles(rx_scramb_in, in_buf_sz, "testScrambleOutput");
 	/*
 	for (i = 0; i < in_buf_sz; i++)
@@ -52,7 +52,7 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 	}
 	*/
 
-	WriteOutputToFiles(lte_phy_params->descramb_out, lte_phy_params->descramb_out_buf_sz, "testDescrambleOutput");
+	WriteOutputToFiles(lte_phy_params->descramb_out, lte_phy_params->descramb_out_buf_sz, "../testsuite/testDescrambleOutput");
 	
 	cout << "Rx descrambling ends" << endl;
 

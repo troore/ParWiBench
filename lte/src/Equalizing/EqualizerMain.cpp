@@ -11,7 +11,8 @@ void test_equalizer(LTE_PHY_PARAMS *lte_phy_params)
 
 	Equalizer_init(lte_phy_params);
 
-	ReadInputFromFiles(lte_phy_params->eq_in, lte_phy_params->eq_in_buf_sz, "LSCELSEqInputReal", "LSCELSEqInputImag");
+//	ReadInputFromFiles(lte_phy_params->eq_in, lte_phy_params->eq_in_buf_sz, "LSCELSEqInputReal", "LSCELSEqInputImag");
+	GeneRandomInput(lte_phy_params->eq_in, lte_phy_params->eq_in_buf_sz, "LSCELSEqInputReal", "LSCELSEqInputImag");
 
 	Equalizing(lte_phy_params, lte_phy_params->eq_in, lte_phy_params->eq_out);
 	
@@ -43,7 +44,8 @@ int main(int argc, char *argv[])
 	
 	lte_phy_init(&lte_phy_params, enum_fs, mod_type, n_tx_ant, n_rx_ant);
 
-	test_equalizer(&lte_phy_params);
+	for (int i = 0; i < 100; i++)
+		test_equalizer(&lte_phy_params);
 
 	return 0;
 }

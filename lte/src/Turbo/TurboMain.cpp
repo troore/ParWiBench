@@ -3,7 +3,7 @@
 
 int RANDOMSEED;
 
-#define TurboEnc
+//#define TurboEnc
 
 LTE_PHY_PARAMS lte_phy_params;
 
@@ -24,7 +24,8 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params)
 {
 	std::cout << "Turbo Decoder starts" << std::endl;
 	
-	ReadInputFromFiles(lte_phy_params->td_in, lte_phy_params->td_in_buf_sz, "testTurboEncoderOutput");
+//	ReadInputFromFiles(lte_phy_params->td_in, lte_phy_params->td_in_buf_sz, "testTurboEncoderOutput");
+	GeneRandomInput(lte_phy_params->td_in, lte_phy_params->td_in_buf_sz, "testTurboEncoderOutput");
 	
 	for (int i = 0; i < lte_phy_params->td_in_buf_sz; i++)
 		lte_phy_params->td_in[i] = (1 - 2 * lte_phy_params->td_in[i]);
@@ -69,7 +70,8 @@ int main(int argc, char *argv[])
 	
 	#else
 
-	test_turbo_decoding(&lte_phy_params);
+//	for (int i = 0; i < 100; i++)
+		test_turbo_decoding(&lte_phy_params);
 
 	#endif
 

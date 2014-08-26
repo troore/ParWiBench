@@ -6,6 +6,9 @@ SRC += $(UTIL_DIR)/FIFO.cpp $(UTIL_DIR)/gauss.cpp $(UTIL_DIR)/matrix.cpp $(UTIL_
 SRC += $(LTE_DIR)/src/LTEUplink/lte_phy.cpp
 INC_FLAGS += -I. -I$(LTE_DIR)/include
 
+CXXFLAGS += -static
+LINKFLAGS += -static
+
 TARGETS = Turbo.out
 
 OBJS := $(patsubst %.cpp, %.o, $(SRC))

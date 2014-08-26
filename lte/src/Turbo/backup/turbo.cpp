@@ -302,7 +302,6 @@ int Turbo::calc_state_transition(const uint32_T instate, const int input, uint8_
 	}
 	in = in ^ input;
 
-//	parity.set_size(n - 1, false);
 	for (uint32_T j = 0; j < (m_n_gens - 1); j++)
 	{
 //		parity_temp = ((instate << 1) + in) & m_rev_gen_pols[j + 1];
@@ -349,9 +348,7 @@ void Turbo::set_generator_polynomials(uint32_T gens[], uint32_T n_gens, uint32_T
 
 	for (s_prim = 0; s_prim < m_n_states; s_prim++)
 	{
-//		std::cout << s_prim << std::endl;
 		s0 = calc_state_transition(s_prim, 0, p0);
-//		std::cout << s0 << "\t";
 		m_state_trans[s_prim * 2 + 0] = s0;
 		m_rev_state_trans[s0 * 2 + 0] = s_prim;
 		for (uint32_T j = 0; j < (n_gens - 1); j++)
@@ -361,7 +358,6 @@ void Turbo::set_generator_polynomials(uint32_T gens[], uint32_T n_gens, uint32_T
 		}
 
 		s1 = calc_state_transition(s_prim, 1, p1);
-//		std::cout << s1 << std::endl;
 		m_state_trans[s_prim * 2 + 1] = s1;
 		m_rev_state_trans[s1 * 2 + 1] = s_prim;
 		for (uint32_T j = 0; j < (n_gens - 1); j++)
@@ -369,7 +365,6 @@ void Turbo::set_generator_polynomials(uint32_T gens[], uint32_T n_gens, uint32_T
 			m_output_parity[s_prim * (n_gens - 1) * 2 + 2 * j + 1] = p1[j];
 			m_rev_output_parity[s1 * (n_gens - 1) * 2 + 2 * j + 1] = p1[j];
 		}
-//		std::cout << (int)p0[0] << "\t" << (int)p1[0] << std::endl;
 	}
 
 	delete[] p0;
@@ -384,7 +379,8 @@ void Turbo::constituent_encoder(const uint8_T *input, uint8_T *tail, uint8_T *pa
 	{
 		for (uint32_T j = 0; j < (m_n_gens - 1); j++)
 		{
-			parity[i * (m_n_gens - 1) + j] = m_output_parity[encoder_state * (m_n_gens - 1) * 2 + j * 2 + (int)input[i]];
+			parity[i * (m_n_gens - 1) + j] = 
+				m_output_parity[encoder_state * (m_n_gens - 1) * 2 + j * 2 + (int)input[i]];
 		}
 		encoder_state = m_state_trans[encoder_state * 2 + (int)input[i]];
 	}

@@ -226,10 +226,10 @@ typedef struct
 #define N_OFMOD_OUT_MAX (LTE_PHY_N_ANT_MAX * (LTE_PHY_FFT_SIZE_MAX + LTE_PHY_N_SAMPS_CP_L_0_30_72MHZ) * LTE_PHY_N_SYMB_PER_SUBFR)
 #define N_OFDEMOD_IN_MAX (N_OFMOD_OUT_MAX)
 #define N_OFDEMOD_OUT_MAX (N_OFMOD_IN_MAX)
-  std::complex<float> ofmod_in[N_OFMOD_IN_MAX];
-  std::complex<float> ofmod_out[N_OFMOD_OUT_MAX];
-  std::complex<float> ofdemod_in[N_OFDEMOD_IN_MAX];
-  std::complex<float> ofdemod_out[N_OFDEMOD_OUT_MAX];
+  float ofmod_in[N_OFMOD_IN_MAX][2];
+  float ofmod_out[N_OFMOD_OUT_MAX][2];
+  float ofdemod_in[N_OFDEMOD_IN_MAX][2];
+  float ofdemod_out[N_OFDEMOD_OUT_MAX][2];
   int ofmod_in_buf_sz;
   int ofmod_out_buf_sz;
   int ofdemod_in_buf_sz;
