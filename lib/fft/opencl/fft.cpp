@@ -10,7 +10,6 @@
 
 #include "CL/cl.h"
 
-#include "fft.h"
 #include "clutil.h"
 
 #include "meas.h"

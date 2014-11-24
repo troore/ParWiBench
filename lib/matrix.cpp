@@ -107,76 +107,76 @@ void MatrixProd(U d1, U d2, U d3, T** M1, T* V2, T* oV)
 }
 
 
-template<class U,class T>
+	template<class U,class T>
 void MatrixInv(U sz,T** pM,T** pInvM)
 {
-T** pX=new T*[sz];
-for(int r=0;r<sz;r++){*(pX+r)=new T[2*sz];}
+	T** pX=new T*[sz];
+	for(int r=0;r<sz;r++){*(pX+r)=new T[2*sz];}
 
-for(int r=0;r<sz;r++)
-{
-    for(int c=0;c<sz;c++)
-    {*(*(pX+r)+c)=*(*(pM+r)+c);}
-    for(int c=sz;c<2*sz;c++)
-    {
-    if(c==r+sz){*(*(pX+r)+c)=(T)1.0;}
-    else{*(*(pX+r)+c)=(T)0.0;}
-    }
-}
-
-
-
-
-T* pCurRow=new T[2*sz];
-for(int r=0;r<sz;r++)
-{
-
-    for(int c=0;c<2*sz;c++){*(pCurRow+c)=(*(*(pX+r)+c))/(*(*(pX+r)+r));}
-    
-    for(int c=0;c<2*sz;c++){*(*(pX+r)+c)=*(pCurRow+c);}
-   
-    for(int er=r+1;er<sz;er++)
-    {
-        T curC=*(*(pX+er)+r);
-        
-        for(int c=0;c<2*sz;c++){*(*(pX+er)+c)-=(curC)*(*(pCurRow+c));}  
-    }
-}
-
-
-
-for(int r=sz-1;r>=0;r--)
-{
-
-    for(int c=0;c<2*sz;c++){*(pCurRow+c)=(*(*(pX+r)+c));}
-
-    for(int er=r-1;er>=0;er--)
-    {
-    T curC = *(*(pX+er)+r);
-
-        for(int c=0;c<2*sz;c++){*(*(pX+er)+c)-=(curC)*(*(pCurRow+c));}
-
-    }
-}
+	for(int r=0;r<sz;r++)
+	{
+		for(int c=0;c<sz;c++)
+		{*(*(pX+r)+c)=*(*(pM+r)+c);}
+		for(int c=sz;c<2*sz;c++)
+		{
+			if(c==r+sz){*(*(pX+r)+c)=(T)1.0;}
+			else{*(*(pX+r)+c)=(T)0.0;}
+		}
+	}
 
 
 
 
-for(int r=0;r<sz;r++)
-{
+	T* pCurRow=new T[2*sz];
+	for(int r=0;r<sz;r++)
+	{
 
-    for(int c=0;c<sz;c++)
-    {
-    int col=c+sz;
-    *(*(pInvM+r)+c)=*(*(pX+r)+col);
-    }
+		for(int c=0;c<2*sz;c++){*(pCurRow+c)=(*(*(pX+r)+c))/(*(*(pX+r)+r));}
 
-}
+		for(int c=0;c<2*sz;c++){*(*(pX+r)+c)=*(pCurRow+c);}
 
-delete[] pCurRow;
+		for(int er=r+1;er<sz;er++)
+		{
+			T curC=*(*(pX+er)+r);
 
-for(int r=0;r<sz;r++){delete[] *(pX+r);}
-delete[] pX;
+			for(int c=0;c<2*sz;c++){*(*(pX+er)+c)-=(curC)*(*(pCurRow+c));}  
+		}
+	}
+
+
+
+	for(int r=sz-1;r>=0;r--)
+	{
+
+		for(int c=0;c<2*sz;c++){*(pCurRow+c)=(*(*(pX+r)+c));}
+
+		for(int er=r-1;er>=0;er--)
+		{
+			T curC = *(*(pX+er)+r);
+
+			for(int c=0;c<2*sz;c++){*(*(pX+er)+c)-=(curC)*(*(pCurRow+c));}
+
+		}
+	}
+
+
+
+
+	for(int r=0;r<sz;r++)
+	{
+
+		for(int c=0;c<sz;c++)
+		{
+			int col=c+sz;
+			*(*(pInvM+r)+c)=*(*(pX+r)+col);
+		}
+
+	}
+
+	delete[] pCurRow;
+
+	for(int r=0;r<sz;r++){delete[] *(pX+r);}
+	delete[] pX;
 }
 
 template<class U,class T>

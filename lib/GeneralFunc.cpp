@@ -260,6 +260,53 @@ void ReadInputFromFiles(complex<float> *pIn, int Sz, const char *nameReal, const
 	delete[] pReadInImag;
 }
 
+void ReadInputFromFiles(float *pIn, int Sz, const char *nameReal, const char *nameImag)
+{
+	FILE *file;
+
+	if((file=fopen(nameReal,"r"))==NULL)
+		throw std::runtime_error ("file open error\n");
+
+	float *pReadInReal=new float[Sz];
+	
+	for(int i=0;i<Sz;i++)
+	{
+		if(fscanf(file,"%f",(pReadInReal+i)) == EOF)
+		{
+			if(ferror(file) != 0)
+				throw std::runtime_error ("file read error\n");
+		}
+
+	}
+	fclose(file);
+
+	if((file=fopen(nameImag,"r"))==NULL)
+		throw std::runtime_error ("file open error\n");
+
+	float *pReadInImag=new float[Sz];
+	for(int i=0;i<Sz;i++)
+	{
+		if(fscanf(file,"%f",(pReadInImag+i)) == EOF)
+		{
+			if(ferror(file) != 0)
+				throw std::runtime_error ("file read error\n");
+		}
+
+	}
+	fclose(file);
+
+	for(int i=0;i<Sz;i++)
+	{
+	//	pIn[i]=complex<float>(pReadInReal[i], pReadInImag[i]);
+		pIn[2 * i + 0] = pReadInReal[i];
+		pIn[2 * i + 1] = pReadInImag[i];
+	}
+
+	delete[] pReadInReal;
+	delete[] pReadInImag;
+}
+
+
 void ReadInputFromFiles(float (*pIn)[2], int Sz, const char *nameReal, const char *nameImag)
 {
 	FILE *real_file, *imag_file;
@@ -718,7 +765,7 @@ void WriteOutputToFiles(int *pOut, int Sz, const char *name)
 	fptr = fopen(name,"w+");
 	for(int i=0;i<Sz;i++)
 	{
-		fprintf(fptr,"%d\t",*(pOut+i));
+		fprintf(fptr,"%d\n",*(pOut+i));
 	}
 	fclose(fptr);
 }
@@ -768,7 +815,7 @@ void WriteOutputToFiles(float *pOut, int Sz, const char *name)
 	fptr = fopen(name,"w+");
 	for(int i=0;i<Sz;i++)
 	{
-		fprintf(fptr,"%f\n",*(pOut+i));
+		fprintf(fptr,"%f\t",*(pOut+i));
 	}
 	fclose(fptr);
 }
@@ -830,6 +877,24 @@ void WriteOutputToFiles(complex<float> *pOut, int Sz, const char *nameReal, cons
 	{
 		fprintf(fptr_real,"%f\t",(pOut[i]).real());
 		fprintf(fptr_imag,"%f\t",(pOut[i]).imag());
+	}
+	
+	fclose(fptr_real);
+	fclose(fptr_imag);
+}
+
+void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *nameImag)
+{
+	FILE *fptr_real=NULL;
+	FILE *fptr_imag=NULL;
+	
+	fptr_real = fopen(nameReal, "w+");
+	fptr_imag = fopen(nameImag, "w+");
+	
+	for(int i=0;i<Sz;i++)
+	{
+		fprintf(fptr_real,"%f\t",pOut[2 * i + 0]);
+		fprintf(fptr_imag,"%f\t",pOut[2 * i + 1]);
 	}
 	
 	fclose(fptr_real);

@@ -3,44 +3,46 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: lte.aux
 The style file: plain.bst
 Database file #1: ../ref.bib
-You've used 4 entries,
+Warning--empty year in yoon
+You've used 6 entries,
             2118 wiz_defined-function locations,
-            515 strings with 4421 characters,
-and the built_in function-call counts, 933 in all, are:
-= -- 89
-> -- 44
+            527 strings with 4720 characters,
+and the built_in function-call counts, 1528 in all, are:
+= -- 144
+> -- 70
 < -- 2
-+ -- 18
-- -- 14
-* -- 48
-:= -- 185
-add.period$ -- 12
-call.type$ -- 4
-change.case$ -- 19
++ -- 28
+- -- 22
+* -- 86
+:= -- 284
+add.period$ -- 18
+call.type$ -- 6
+change.case$ -- 29
 chr.to.int$ -- 0
-cite$ -- 4
-duplicate$ -- 38
-empty$ -- 68
-format.name$ -- 14
-if$ -- 183
+cite$ -- 7
+duplicate$ -- 63
+empty$ -- 122
+format.name$ -- 22
+if$ -- 309
 int.to.chr$ -- 0
-int.to.str$ -- 4
-missing$ -- 2
-newline$ -- 23
-num.names$ -- 8
-pop$ -- 20
+int.to.str$ -- 6
+missing$ -- 4
+newline$ -- 33
+num.names$ -- 12
+pop$ -- 32
 preamble$ -- 1
-purify$ -- 15
+purify$ -- 23
 quote$ -- 0
-skip$ -- 21
+skip$ -- 37
 stack$ -- 0
-substring$ -- 20
-swap$ -- 3
+substring$ -- 51
+swap$ -- 6
 text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 14
-warning$ -- 0
-while$ -- 8
-width$ -- 5
-write$ -- 45
+type$ -- 22
+warning$ -- 1
+while$ -- 13
+width$ -- 7
+write$ -- 66
+(There was 1 warning)

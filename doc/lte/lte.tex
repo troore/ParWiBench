@@ -43,7 +43,7 @@
 
 \begin{document}
 
-\title{LTE PHY Benchmark Notes}
+\title{ParWiBench Internal}
 \author{Xuechao Wei}
 \date{\today}
 \maketitle
@@ -223,8 +223,6 @@ where
 	\includegraphics[height=3in]{turbo}
 	\caption{Structure of rate 1/3 turbo encoder (dotted lines apply for trellis termination only)}
 \end{figure}
-
-
 
 \begin{itemize}
 	\item In case of single-antenna transmission there is a single transport block of dynamic size for each TTI.
@@ -445,6 +443,18 @@ Latency: 30720 / 30.72MHz = 1ms
 		\EndFor
 \end{algorithmic}
 \end{algorithm}
+
+\subsubsection{Parallel MAP}
+
+将Turbo Decoder并行的基本思路是将一个block再划分为sub-blocks，然后以sub-block为单位进行译码。因为block是协议规定的译码算法的最小单位，因此不能按照协议规定的初始化block的方法来初始化sub-block，否则可能影响误码率。目前初始化sub-block的方法主要有两种：Next Iteration Initialization（NII）\cite{yoon}和Overlap\cite{hsu}。
+
+NII对sub-block的初始化分为两个过程，即在第一次迭代开始之前和之后的迭代。第一次迭代开始之前的初始化按照如下过程：
+
+对于每一个block的第一个sub-block，初始化按照Kronecker delta函数进行，即如果状态索引s为0，将$\alpha$和$\beta$初始化为1.0，否则为0.0；对于其它的sub-block，在所有状态下都初始化为$1.0/N\_{STATES}$。
+
+在之后的迭代中，各个sub-block的初始化值来自于上一次迭代计算得到的$\alpha$和$\beta$的边界值。回忆我们在计算block的extrinsic值时，假设extrinsic的索引范围为$[0\cdots stride-1]$，那么为其分配的$\alpha$和$\beta$的范围必须为$[0\cdots stride]$，其中$\alpha[0]$和$\beta[stride]$都已经被初始化。而最后计算extrinsic值时，$\alpha[stride]$和$\beta[0]$都不会被用到，事实上，我们在计算block的extrinsic值时，都不会计算$\beta[0]$，计算$\alpha[stride]$值也仅仅是因为要计算一个normalization数组。但是对于sub-block，这两个边界值被用做下一次迭代的初始化值。设sub-block[i]的$\alpha$和$\beta$数组为$l\_\alpha[i]$和$l\_\beta[i]$，在计算完成sub-block[i]的extrinsic值后，我们必须计算$l\_\alpha[i][stride]$$l\_\beta[i][0]$来分别作为下一次迭代的sub-block[i+1]和sub-block[i-1]的初始值$\_\alpha[i+1][0]$$l\_\beta[i-1][stride]$（经过尝试，使用$l\_\beta[i][1]$作为下一次迭代的初始值会引入较大的误码率，且结果很不稳定）。当然，i-1不能是0，i+1也不能是最后一个sub-block的索引，因为第0个sub-block的$\alpha$和最后一个sub-block的$\beta$的初始化在第一次迭代之前的初始化完成后就不会再改变。
+
+在实现时，如果局部空间足够，只需要为每一个sub-block开辟一个局部的一维$l\_\alpha$和$l\_\beta$数组即可，不必使用全局的二维数组（第一维用来索引sub-block）。
 
 \subsubsection{Miscellaneous}
 
@@ -751,6 +761,20 @@ Time synchronize sequence containing 96 samplings
 
 
 \textbf{频率同步技术}
+
+\subsection{Usage}
+
+当前对于每个模块和流水线的测试使用4个参数：
+
+\begin{verbatim}
+./a.out enum_fs mod_type n_tx_ant n_rx_ant
+\end{verbatim}
+
+其中\verb|enum_fs|的类型为\verb|LTE_PHY_FS_ENUM|，是一个枚举类型，用来选择采样频率。共有6个值。根据表\ref{fig:phy-params}，这个值会决定DFT，FFT的点数，而且会决定CP长度等等参数值.\verb|mod_type|也是一个枚举类型，决定调制解调方法，一共有4种；\verb|n_tx_ant|和\verb|n_rx_ant|表示发送天线和接受天线的数目，最大值都为\verb|LTE_PHY_N_ANT_MAX|，在lte\_phy.h中定义，目前暂时为4。这些参数共同决定了各个模块输入输出的长度，这些长度值的具体计算公式在“Benchmark Suite Implementation”一章中已经给出。
+
+需要注意的是，如果要使用WiBench的一组测试数据（处理一帧数据时Turbo encoder的长度为2368，FFT和DFT的点数分别为128和75，调制解调方法为QAM16），则\verb|enum_fs|必须选择为0，使采样频率为1.92MHz，这样FFT和DFT的点数分别为128和75；\verb|mod_type|必须选择为2，表示调制解调方法为QAM16；发送和接收天线数目为2；再根据Turbo的交织长度为离散值，最后根据上述计算公式推算得到Turbo encoder的输入长度为2368，且\verb|BLOCK_SIZE|至少也为2368。
+
+另外，虽然Turbo可以作为一个独立的算法使用，这时其输入输出长度不受上述参数的影响。但是当作为PHY流水线的一个模块时，比如对于Encoding，其输出长度也必须由其下游模块的长度决定。
 
 
 \bibliographystyle{plain}

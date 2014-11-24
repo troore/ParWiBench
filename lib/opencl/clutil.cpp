@@ -1,12 +1,13 @@
 
 #include "clutil.h"
-#include "opencl/cldef.h"
 
+/*
 cl_device_id g_device;
 cl_context g_context;
 cl_command_queue g_queue;
 cl_program g_program;
 cl_kernel g_kernel;
+*/
 
 
 void device_query()
@@ -52,6 +53,8 @@ void device_query()
 		for (j = 0; j < devices_n; j++)
 		{
 			char buffer[MAX_BUF_SIZE];
+			cl_uint buf_uint;
+			cl_ulong buf_ulong;
 
 			printf("  -- %d --\n", j);
 			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL));
@@ -60,34 +63,35 @@ void device_query()
 			printf("  Device Vendor = %s\n", buffer);
 			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, sizeof(buffer), buffer, NULL));
 			printf("  Device Version = %s\n", buffer);
-			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(buffer), buffer, NULL));
-			printf("  Device Max Compute Units = %s\n", buffer);
-			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(buffer), buffer, NULL));
-			printf("  Device Max Clock Frequency = %s\n", buffer);
-			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(buffer), buffer, NULL));
-			printf("  Device Global Memory Size = %s\n", buffer);
+			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(buf_uint), &buf_uint, NULL));
+			printf("  Device Max Compute Units = %u\n", buf_uint);
+			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(buf_uint), &buf_uint, NULL));
+			printf("  Device Max Clock Frequency = %u\n", buf_uint);
+			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(buf_ulong), &buf_ulong, NULL));
+			printf("  Device Global Memory Size = %llu\n", buf_ulong);
 		}
 	}
 }
 
-void cl_params_init(const char *program_file_name, const char *kernel_file_name)
-{
-	cl_int _err;
+//void cl_params_init(const char *program_file_name, const char *kernel_file_name)
+//{
+//	cl_int _err;
 
 	/* Create a device and context */
-	g_device = create_device();
-	g_context = clCreateContext(NULL, 1, &g_device, NULL, NULL, &_err);
+//	g_device = create_device();
+//	g_context = clCreateContext(NULL, 1, &g_device, NULL, NULL, &_err);
 
 	/* Build the program */
-	g_program = build_program(g_context, g_device, program_file_name);
+//	g_program = build_program(g_context, g_device, program_file_name);
 
 	/* Create kernel */
-	g_kernel = clCreateKernel(g_program, kernel_file_name, &_err);
+//	g_kernel = clCreateKernel(g_program, kernel_file_name, &_err);
 
 	/* Create a command queue */
-	g_queue = clCreateCommandQueue(g_context, g_device, CL_QUEUE_PROFILING_ENABLE, &_err);
-}
+//	g_queue = clCreateCommandQueue(g_context, g_device, CL_QUEUE_PROFILING_ENABLE, &_err);
+//}
 
+/*
 void cl_params_release()
 {
 	clReleaseKernel(g_kernel);
@@ -95,6 +99,7 @@ void cl_params_release()
 	clReleaseCommandQueue(g_queue);
 	clReleaseContext(g_context);
 }
+*/
 
 /* Find a GPU or CPU associated with the first available platform */
 cl_device_id create_device()
@@ -154,7 +159,8 @@ cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename)
 	/* Create program from file */
 	program = clCreateProgramWithSource(ctx, 1, 
 			(const char**)&program_buffer, &program_size, &err);
-	if(err < 0) {
+	if(err < 0)
+	{
 		perror("Couldn't create the program");
 		exit(1);
 	}
@@ -173,6 +179,7 @@ cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename)
 				log_size + 1, program_log, NULL);
 		printf("%s\n", program_log);
 		free(program_log);
+
 		exit(1);
 	}
 

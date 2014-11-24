@@ -19,9 +19,20 @@ Eric Dahlman, Stefan Parkvall, Johan Sk\"old, and et~al.
 \newblock {\em {3G Evolution: HSPA and LTE for Mobile Broadhand, 2nd Edition}}.
 \newblock Academic Press, 2008.
 
+\bibitem{hsu}
+Jah-Ming Hsu and Chin-Liang Wang.
+\newblock {A Parallel Decoding Scheme for Turbo Codes}.
+\newblock In {\em Proceedings of the 1998 IEEE International Symposium on
+  Circuits and Systems}, ISCAS'98, 1998.
+
 \bibitem{nutshell}
 White Paper.
 \newblock {LTE in a Nutshell: The Physical Layer}.
 \newblock Technical report, Telesystem Innovations, 2010.
+
+\bibitem{yoon}
+Seokhyun Yoon and Yeheskel Bar-Ness.
+\newblock {A Parallel MAP Algorithm for Low Latency Turbo Decoding}.
+\newblock {\em Communications Letters, IEEE}, 6:288--290.
 
 \end{thebibliography}
