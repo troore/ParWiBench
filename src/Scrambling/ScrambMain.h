@@ -13,10 +13,8 @@
 #include <stdexcept>
 
 #include "gauss.h"
-#include "FIFO.h"
-//#include "BSPara.h"
-//#include "UserPara.h"
-#include "matrix.h"
+//#include "FIFO.h"
+//#include "matrix.h"
 #include "GeneralFunc.h"
 
 #include "Scrambler.h"

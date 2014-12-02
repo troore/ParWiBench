@@ -1,11 +1,11 @@
-include ../../../../common/makefile.config
+include ../../../common/makefile.config
 
 SRC = ../ScrambMain.cpp  Scrambler.cpp
-SRC += $(LIB_DIR)/FIFO.cpp $(LIB_DIR)/gauss.cpp $(LIB_DIR)/matrix.cpp $(LIB_DIR)/GeneralFunc.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp
 
-SRC += $(LTE_DIR)/src/LTEUplink/lte_phy.cpp
+SRC += $(SRC_DIR)/lte_phy.cpp
 
-INC_FLAGS += -I$(LTE_DIR)/include -I$(LIB_DIR)
+INC_FLAGS += -I$(LIB_DIR) -I$(SRC_DIR) -I../
 
 TARGETS = ScrDescr.out
 

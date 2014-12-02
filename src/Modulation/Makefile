@@ -1,11 +1,11 @@
 include ../../common/makefile.config
 
 SRC = ModMain.cpp Modulation.cpp
-SRC += $(UTIL_DIR)/FIFO.cpp $(UTIL_DIR)/gauss.cpp $(UTIL_DIR)/matrix.cpp $(UTIL_DIR)/GeneralFunc.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/matrix.cpp $(LIB_DIR)/GeneralFunc.cpp
 
-SRC += $(LTE_DIR)/src/LTEUplink/lte_phy.cpp
+SRC += $(SRC_DIR)/lte_phy.cpp
 
-INC_FLAGS += -I. -I$(LTE_DIR)/include
+INC_FLAGS += -I. -I$(SRC_DIR)
 
 TARGETS = ModDemod.out
 

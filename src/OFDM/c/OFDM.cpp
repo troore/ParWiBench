@@ -43,7 +43,7 @@ void ofmodulating(LTE_PHY_PARAMS *lte_phy_params, float (*pInpData)[2], float (*
 			}
 			*/
 			
-			fft(NIFFT, pInpData + symb_idx * NIFFT, pOutData + symb_idx * (NIFFT + CPLen) + CPLen, -1);
+			recur_fft(NIFFT, pInpData + symb_idx * NIFFT, pOutData + symb_idx * (NIFFT + CPLen) + CPLen, -1);
 
 			for (i = 0; i < NIFFT; i++)
 			{
@@ -104,7 +104,7 @@ void ofdemodulating(LTE_PHY_PARAMS *lte_phy_params, float (*pInpData)[2], float 
 			}
 			*/
 			
-			fft(NIFFT, pInpData + symb_idx * (CPLen + NIFFT) + CPLen, pOutData + symb_idx * NIFFT, 1);
+			recur_fft(NIFFT, pInpData + symb_idx * (CPLen + NIFFT) + CPLen, pOutData + symb_idx * NIFFT, 1);
 
 			
 			for(i = 0; i < NIFFT; i++)

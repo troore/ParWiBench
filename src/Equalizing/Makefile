@@ -8,7 +8,7 @@ SRC += $(LIB_DIR)/matrix.cpp
 else
 SRC += Matrix.cpp
 endif
-SRC += $(LIB_DIR)/FIFO.cpp $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp 
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp 
 SRC += $(SRC_DIR)/lte_phy.cpp $(SRC_DIR)/ResMapping/ResMapper.cpp
 
 INC_FLAGS += -I. -I$(SRC_DIR) -I$(SRC_DIR)/ResMapping

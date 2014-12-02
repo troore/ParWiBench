@@ -1,7 +1,7 @@
 include ../../common/makefile.config
 
 SRC = TransformPreMain.cpp TransformPrecoder.cpp 
-SRC += $(LIB_DIR)/FIFO.cpp $(LIB_DIR)/gauss.cpp $(LIB_DIR)/matrix.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/dft/dft.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/dft/dft.cpp
 
 SRC += $(SRC_DIR)/lte_phy.cpp
 

@@ -1,12 +1,12 @@
 include ../../../common/makefile.config
 
-SRC = OFDM.cpp ../OFDMMain.cpp $(LIB_DIR)/fft/c/fft.cpp
+SRC = ../OFDMMain.cpp $(LIB_DIR)/fft/c/fft.cpp OFDM.cpp
 
-SRC += $(LIB_DIR)/FIFO.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/gauss.cpp $(LIB_DIR)/matrix.cpp
+SRC += $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/gauss.cpp $(LIB_DIR)/matrix.cpp
 
-SRC += $(LTE_DIR)/src/LTEUplink/lte_phy.cpp
+SRC += $(SRC_DIR)/lte_phy.cpp
 
-INC_FLAGS += -I. -I$(LTE_DIR)/include -I$(LIB_DIR)/fft/include
+INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)/fft/c
 
 OBJS := $(patsubst %.cpp, %.o, $(SRC))
 

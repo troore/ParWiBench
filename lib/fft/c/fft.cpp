@@ -9,9 +9,13 @@
 
 #include "fft.h"
 
-float v[N * 2], v1[N * 2], vout[N * 2], v1out[N * 2];
+#define N (1 << 5)
+#define PI	3.14159265358979323846264338327950288
+
+//float v[N * 2], v1[N * 2], vout[N * 2], v1out[N * 2];
 
 /* Print a vector of complexes as ordered pairs. */
+/*
 static void print_vector(
 		const char *title,
 		float x[N * 2],
@@ -23,8 +27,9 @@ static void print_vector(
 	putchar('\n');
 	return;
 }
+*/
 
-int BitReverse(int src, int size)
+static int BitReverse(int src, int size)
 {
 	int tmp = src;
 	int des = 0;
@@ -36,12 +41,12 @@ int BitReverse(int src, int size)
 	return des;
 }
 
-inline int pow2(int n)
+static inline int pow2(int n)
 {
 	return 1<<n;
 }
 
-inline int log2(int n)
+static inline int log2(int n)
 {
 	int i = 0;
 
@@ -144,6 +149,7 @@ void iter_fft(int n, float a[N * 2], float y[N * 2], int direction)
 	}
 }
 
+/*
 int main(int argc, char *argv[])
 {
 //	float v[N][2], v1[N][2], vout[N][2], v1out[N][2];
@@ -190,3 +196,4 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+*/
