@@ -11,6 +11,9 @@ TARGETS = ScrDescr.out
 
 OBJS := $(patsubst %.cpp, %.o, $(SRC))
 
+ifeq ($(TX),1)
+	CXXFLAGS += -DScramb
+
 ScrDescr.out: $(OBJS)
 	$(CXX) $^ $(LINKFLAGS) -o $@
 

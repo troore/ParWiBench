@@ -3,7 +3,7 @@
 
 int RANDOMSEED;
 
-#define Scramb
+//#define Scramb
 
 LTE_PHY_PARAMS lte_phy_params;
 

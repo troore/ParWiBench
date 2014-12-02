@@ -14,6 +14,10 @@ TARGETS = OFDM.out
 
 #LINKFLAGS += -lfftw3f
 
+ifeq ($(TX),1)
+	CXXFLAGS += -DMOD
+endif
+
 all: $(TARGETS)
 
 OFDM.out: $(OBJS)

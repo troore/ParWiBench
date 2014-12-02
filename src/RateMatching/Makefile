@@ -12,6 +12,10 @@ TARGETS = RM.out
 
 OBJS := $(patsubst %.cpp, %.o, $(SRC))
 
+ifeq ($(TX),1)
+	CXXFLAGS += -DTxRateM
+endif
+
 all: $(TARGETS)
 
 RM.out: $(OBJS)

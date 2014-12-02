@@ -14,6 +14,10 @@ TARGETS = TPTD.out
 
 OBJS := $(patsubst %.cpp, %.o, $(SRC))
 
+ifeq ($(TX),1)
+	CXXFLAGS += -DTransformPre
+endif
+
 all: $(TARGETS)
 
 TPTD.out: $(OBJS) 

@@ -19,6 +19,7 @@ TARGETS = CEEq.out
 ifeq ($(DEBUG), 0)
 CXXFLAGS += -DDEBUG_EQ
 endif
+
 #LINKFLAGS += -lfftw3f
 
 all: $(TARGETS)

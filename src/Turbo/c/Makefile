@@ -13,6 +13,10 @@ TARGETS = Turbo.out
 
 OBJS := $(patsubst %.cpp, %.o, $(SRC))
 
+ifeq ($(TX),1)
+	CXXFLAGS += -DTurboEnc
+endif
+
 Turbo.out: $(OBJS)
 	$(CXX) $^ $(LINKFLAGS) -o $@
 

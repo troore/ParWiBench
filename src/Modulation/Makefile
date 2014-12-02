@@ -11,6 +11,10 @@ TARGETS = ModDemod.out
 
 OBJS := $(patsubst %.cpp, %.o, $(SRC))
 
+ifeq ($(TX),1)
+	CXXFLAGS += -DMod
+endif
+
 ModDemod.out: $(OBJS)
 	$(CXX) $^ $(LINKFLAGS) -o $@
 

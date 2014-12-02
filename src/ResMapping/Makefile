@@ -1,17 +1,20 @@
 include ../../common/makefile.config
 
 SRC = ResMapMain.cpp ResMapper.cpp 
-SRC += $(UTIL_DIR)/FIFO.cpp $(UTIL_DIR)/gauss.cpp $(UTIL_DIR)/matrix.cpp $(UTIL_DIR)/GeneralFunc.cpp
-SRC += $(LTE_DIR)/src/LTEUplink/lte_phy.cpp
+SRC += $(LIB_DIR)/gauss.cpp  $(LIB_DIR)/GeneralFunc.cpp
+SRC += $(SRC_DIR)/lte_phy.cpp
 
-INC_FLAGS += -I. -I$(LTE_DIR)/include
+INC_FLAGS += -I. -I$(SRC_DIR)
 
 #$(warning $(SRC))
 #$(warning $(UTIL_DIR))
 OBJS := $(patsubst %.cpp,%.o, $(SRC))
-$(warning $(OBJS))
 
 TARGETS = ResMapper.out
+
+ifeq ($(TX),1)
+	CXXFLAGS += -DSCMapper
+endif
 
 all: $(TARGETS)
 
