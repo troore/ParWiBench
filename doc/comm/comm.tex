@@ -1,0 +1,118 @@
+\documentclass[titlepage]{article}
+% preamble area, where packages used
+\usepackage{amsmath} % package usage example
+
+% paper setting
+\setlength{\textwidth}{16.0cm}
+\setlength{\textheight}{22.0cm}
+\setlength{\oddsidemargin}{0.0cm}
+\setlength{\topmargin}{0.0cm}
+
+% ****paragraph and line setting****
+% paragraph indentation
+\setlength\parindent{0ex}
+% paragraph skip: baselineskip=fontsize * baselinestretch, where fontsize is a constant corresponding to a chosen font type.
+\setlength{\parskip}{0.5\baselineskip}
+% line skip
+\renewcommand{\baselinestretch}{1.5}
+
+\usepackage{hyperref}
+\usepackage[section,nottoc]{tocbibind}
+
+\usepackage{graphicx}
+\usepackage{rotating}
+% declare the path(s) where your graphic files are
+\graphicspath{{./fig/}}
+% and their extensions so you won't have to specify these with
+% every instance of \includegraphics
+\DeclareGraphicsExtensions{.png}
+
+\usepackage{amsmath}
+\numberwithin{figure}{section}
+\numberwithin{equation}{section}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{comment}
+
+%\usepackage{xeCJK}
+%\setCJKmainfont{WenQuanYi Micro Hei Mono}
+
+\begin{document}
+
+\title{Communication Background Notes}
+\author{Xuechao Wei}
+\date{\today}
+\maketitle
+
+% main text
+\section{Handout}
+
+\subsection{MIT 6.450}
+
+\subsubsection{Chapter-1 Introduction}
+
+\textbf{Digital communication systems}, are communication systems that use such a digital sequence as an interface between the source and the channel input (and similarly between the channel output and final destination).
+
+\textbf{The reasons} why communication systems now usually contain a \textbf{binary interface} between source and channel:
+
+\begin{itemize}
+	\item Digital hardware has become so cheap, reliable, and miniaturized, that digital interfaces are eminently practical.
+	\item A standardized binary interface between source and channel simplifies implementation and understanding. Source coding/decoding can be done independently of the channel.
+	\item A standardized binary interface between source and channel simplifies networking, which now reduces to sending binary sequences through the network.
+	\item One of the most important of Shannon's information theoretic results is that if a source can be transmitted over a channel in any way at all, it can be transmitted using a binary interface between source and channel. This is known as the source/channel separation theorem.
+\end{itemize}
+
+\textbf{Source coding}: The most straightforward approach to analog source coding is called analog to digital (A/D) conversion. 
+
+\textbf{Channel encoding}: modulation refers to the process of combining a lowpass signal wavaform with a high frequency sinusoid, thun placing the signal waveform in a frequency band appropriate for transmission and regulatory requirements. An elementary waveform \textit{p(t)} is used to satisfy frequency constraints and reliably detect the binary digits from the received waveform in the presence of noise and intersysmbol interference.
+
+\textbf{Error correction} is usually separated from channel encoder as a individual layer because frequently the error probability incurred with simple modulation and demodulation techniques is too high.
+
+\subsubsection{Chapter-2 Coding for Discrete Sources}
+
+The motivation for using variable-length encoding on discrete sources is the intuition that data compression can be achieved by mapping more probable symbols into shorter bit sequences, and less likely symbols into longer bit sequences. 
+
+\textbf{The Kraft inequality for prefix-free codes}
+
+Every prefix-free code for an alphebet $\chi =\{a_{1}, ..., a_{M}\}$ with codeword lengths $\{l(a_{j}), 1 \leq j \leq M\}$ satisfies
+
+\begin{equation}\label{eq:1}
+\sum_{j=1}^{M} 2^{-l(a_{j})} \leq 1.
+\end{equation}
+
+Conversely, if \ref{eq:1} is satisfied, then a prefix-free code with lengths $\{l(a_{j}), 1 \leq j \leq M\}$ exists. Moreover, every full prefix-free code satisfies \ref{eq:1} with equality and every non-full prefix-free code satisfies it with strict inequality.
+
+2 remarks on the Kraft inequality:
+
++	Just because a code has lengths that satisfy \ref{eq:1}, it does not follow that the code is prefix-free, or even uniquely decodable.
+
++	The kraft inequality also holds for all uniquely-decodable codes---i.e., there exists a uniquely-decodable code with codeword lengths $\{l(a_{j}), 1 \leq j \geq M\}$ if and only if \ref{eq:1} holds. This will imply that if a uniquely-decodable code exists with a certain set of codeword lengths, then a prefix-free code exists with the same set of lenghts. So why use any code other than a prefix-free code?
+
+\textbf{Minimum $\overline L$ for prefix-free codes}
+
+Assume $X_{1}, X_{2}, ...$ are selected from $\chi$ using the same probablity mass function (pmf) $\{p_{X}(a_{1}), ..., p_{X}(a_{M})\}$, and $X_{k}$ is statically independent of the previous outputs $X_{1},...,X_{k-1}$. This kind of source output is called \textit{discrete memoryless source} (DMS) which is a toy source.
+
+Suppose a set of lengths $l(a_{1},...,l(a_{M}))$ (subject to the Kraft inequality) is chosen for encoding each symbol into a prefix-free codeword. Define $L(X)$ as a random variable representing the codework length for the randomly selected source symbol. The expected value of $L$ for the given code is then given by 
+
+\begin{displaymath}
+	\overline L=E[L]=\sum_{j=1}^{M}l(a_{j}p_{X}(a_{j})).
+\end{displaymath}
+
+We want to find $\overline L_{min}$, which is defined as the minimum value of $\overline L$ over all sets of codeword lengths satisfying the Kraft inequality.
+
+There are mainly two methods to achieve this: the Lagrange multiplier solution and the Huffman's algorithm.
+
+\subsection{MIT 6.451}
+
+\section{Module}
+
+\subsection{Modulation}
+
+\bibliographystyle{plain}
+\bibliography{../ref}
+
+\end{document}
+
+
