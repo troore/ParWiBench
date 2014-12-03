@@ -1,0 +1,44 @@
+1. ICACHE.IFETCH_STALL: Cycle where a code-fetch stalled due to L1 instruction-cache miss or an iTLB miss.
+
+2. ICACHE.MISSES: Instruction cache, streaming buffer and victim cache misses.
+
+3. INST_RETIRED.ANY: Instructioins retired from execution.
+
+4. INST_RETIRED.ANY_P: Number of instructions retired.
+
+5. L1D_PEND_MISS.OCCURENCES: The number of L1D misses outstanding, using an edge detect to count transitions.
+
+6. L1D_PEND_MISS.PENDING: L1D miss outstandings duration in cycles.
+
+7. L2_L1D_WB_RQSTS.MISS: The number of modified lines evicted from L1 and missed Le.
+
+8. L2_RQSTS.ALL_CODE_RD: L2 code requests.
+
+9. L2_RQSTS.ALL_DEMAND_DATA_RDA: Demand data read requets.
+
+10. L2_RQSTS.CODE_RD_HIT: L2 cache hits when fetching instructions, code reads.
+
+11. L2_RQSTS.CODE_RD_MISS: L2 cache misses when fetching instructions.
+
+12. L2_RQSTS.DEMAND_DATA_RD_HIT: Demand data read requests that hit L2 cache.
+
+13. L2_TRANS.CODE_RD: L2 cache accesses when fetching instructions.
+
+14. L2_TRANS.DEMAND_DATA_RD: Demand data read requests that access L2 cache.
+
+15. MEM_LOAD_UOPS_LLC_MISS_RETIRED.LOCAL_DRAM: Retired load uops which data sources missed LLC but serviced from local dram.
+
+16. MEM_LOAD_UOPS_RETIRED.L1_HIT: Retired load uops with L1 cache hits as data sources.
+
+17. MEM_LOAD_UOPS_RETIRED.L1_MISS: Retired load uops which data sources following L1 data-cache miss.
+
+18. MEM_LOAD_UOPS_RETIRED.L2_HIT: Retired load uops with L2 cache hits as data sources. 
+
+19. MEM_LOAD_UOPS_RETIRED.L2_MISS: Miss in mid-level (L2) cache. Excludes unknown data-source.
+
+20. MEM_LOAD_UOPS_RETIRED.LLC_HIT: Retired load uops which data sources were data hits in LLC without snoops required.
+
+21. MEM_LOAD_UOPS_RETIRED.LLC_MISS: Miss in last-level (L3) cache. Excludes unknown data-source.
+
+TurboDec
+

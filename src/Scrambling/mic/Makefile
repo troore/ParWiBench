@@ -12,14 +12,14 @@ TARGETS = ScrDescr.out
 OBJS := $(patsubst %.cpp, %.o, $(SRC))
 
 ifeq ($(TX),1)
-	CXXFLAGS += -DScramb
+	ICCFLAGS += -DScramb
 endif
 
 ScrDescr.out: $(OBJS)
-	$(CXX) $^ $(LINKFLAGS) -o $@
+	$(ICC) $^ $(LINKFLAGS) $(MMIC) -o $@ -g -openmp
 
 %.o: %.cpp
-	$(CXX) -c $< -o $@ $(CXXFLAGS)
+	$(ICC) -c $< -o $@ $(ICCFLAGS) $(MMIC) -g -openmp
 
 clean:
 	rm -rf $(TARGETS) $(OBJS)
