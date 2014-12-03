@@ -13,6 +13,7 @@ OBJS := $(patsubst %.cpp, %.o, $(SRC))
 
 ifeq ($(TX),1)
 	CXXFLAGS += -DScramb
+endif
 
 ScrDescr.out: $(OBJS)
 	$(CXX) $^ $(LINKFLAGS) -o $@
