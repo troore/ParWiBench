@@ -198,10 +198,10 @@ typedef struct
   std::complex<float> trans_decoder_in[N_TRANS_DECODER_IN_MAX];
   std::complex<float> trans_decoder_out[N_TRANS_DECODER_OUT_MAX];
 #else
-  float trans_encoder_in[N_TRANS_ENCODER_IN_MAX];
-  float trans_encoder_out[N_TRANS_ENCODER_OUT_MAX];
-  float trans_decoder_in[N_TRANS_DECODER_IN_MAX];
-  float trans_decoder_out[N_TRANS_DECODER_OUT_MAX];
+  float trans_encoder_in[N_TRANS_ENCODER_IN_MAX * 2];
+  float trans_encoder_out[N_TRANS_ENCODER_OUT_MAX * 2];
+  float trans_decoder_in[N_TRANS_DECODER_IN_MAX * 2];
+  float trans_decoder_out[N_TRANS_DECODER_OUT_MAX * 2];
 #endif
   int trans_encoder_in_buf_sz;
   int trans_encoder_out_buf_sz;

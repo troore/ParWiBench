@@ -1,0 +1,16 @@
+\BOOKMARK [1][-]{section.1}{LTE\040Background}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{LTE\040Downlink\040Scheme}{section.1}% 2
+\BOOKMARK [1][-]{section.2}{Benchmark\040Suite\040Implementation}{}% 3
+\BOOKMARK [2][-]{subsection.2.1}{Frame\040Parameters}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.2}{Turbo\040Coding}{section.2}% 5
+\BOOKMARK [3][-]{subsubsection.2.2.1}{Encoder}{subsection.2.2}% 6
+\BOOKMARK [3][-]{subsubsection.2.2.2}{MAP\040Decoder}{subsection.2.2}% 7
+\BOOKMARK [3][-]{subsubsection.2.2.3}{Parallel\040MAP}{subsection.2.2}% 8
+\BOOKMARK [3][-]{subsubsection.2.2.4}{Miscellaneous}{subsection.2.2}% 9
+\BOOKMARK [2][-]{subsection.2.3}{Rate\040Matching}{section.2}% 10
+\BOOKMARK [2][-]{subsection.2.4}{Scrambling}{section.2}% 11
+\BOOKMARK [2][-]{subsection.2.5}{Equalizing}{section.2}% 12
+\BOOKMARK [2][-]{subsection.2.6}{Synchronization}{section.2}% 13
+\BOOKMARK [3][-]{subsubsection.2.6.1}{802.11同步算法}{subsection.2.6}% 14
+\BOOKMARK [2][-]{subsection.2.7}{Usage}{section.2}% 15
+\BOOKMARK [1][-]{section*.1}{References}{}% 16
