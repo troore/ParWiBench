@@ -1,16 +1,8 @@
 
 #include "clutil.h"
 
-/*
-cl_device_id g_device;
-cl_context g_context;
-cl_command_queue g_queue;
-cl_program g_program;
-cl_kernel g_kernel;
-*/
 
-
-void device_query()
+cl_platform_id device_query()
 {
 	cl_platform_id platforms[MAX_PLATFORMS_NUM];
 	cl_device_id devices[MAX_DEVICES_NUM];
@@ -24,7 +16,7 @@ void device_query()
 	/**
 	 * Set platform/device/context
 	 */
-	CL_CHECK(clGetPlatformIDs(1, platforms, &platforms_n));
+	CL_CHECK(clGetPlatformIDs(MAX_PLATFORMS_NUM, platforms, &platforms_n));
 	printf("=== %d OpenCL platform(s) found: ===\n", platforms_n);
 
 	if (0 == platforms_n)
@@ -46,10 +38,14 @@ void device_query()
 
 		printf("\n");
 
-		CL_CHECK(clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 100, devices, &devices_n));
-		printf("=== %d OpenCL device(s) found on platform:\n", devices_n);
-		if (0 == devices_n)
+//		CL_CHECK(clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 100, devices, &devices_n));
+		cl_int dev_info = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 100, devices, &devices_n);
+		if (dev_info != CL_SUCCESS && dev_info != CL_DEVICE_NOT_FOUND)
+		{
+			printf("Device finding error.\n");
 			exit(1);
+		}
+		printf("=== %d OpenCL device(s) found on platform:\n", devices_n);
 		for (j = 0; j < devices_n; j++)
 		{
 			char buffer[MAX_BUF_SIZE];
@@ -71,6 +67,8 @@ void device_query()
 			printf("  Device Global Memory Size = %llu\n", buf_ulong);
 		}
 	}
+
+	return platforms[2];
 }
 
 //void cl_params_init(const char *program_file_name, const char *kernel_file_name)
@@ -102,25 +100,27 @@ void cl_params_release()
 */
 
 /* Find a GPU or CPU associated with the first available platform */
-cl_device_id create_device()
+cl_device_id create_device(cl_platform_id *p_pltfm)
 {
-	cl_platform_id platform;
+//	cl_platform_id platform;
 	cl_device_id dev;
 	int _err;
 
 	/* Identify a platform */
+	/*
 	_err = clGetPlatformIDs(1, &platform, NULL);
 	if (_err < 0)
 	{
 		perror("Couldn't identify a platform");
 		exit(1);
 	} 
+	*/
 
 	/* Access a device */
-	_err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &dev, NULL);
+	_err = clGetDeviceIDs(*p_pltfm, CL_DEVICE_TYPE_GPU, 1, &dev, NULL);
 	if (_err == CL_DEVICE_NOT_FOUND) 
 	{
-		_err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, 1, &dev, NULL);
+		_err = clGetDeviceIDs(*p_pltfm, CL_DEVICE_TYPE_CPU, 1, &dev, NULL);
 	}
 	if (_err < 0) 
 	{
@@ -132,7 +132,7 @@ cl_device_id create_device()
 }
 
 /* Create program from a file and compile it */
-cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename)
+cl_program build_program(cl_context *p_ctx, cl_device_id *p_dev, const char* filename)
 {
 	cl_program program;
 	FILE *program_handle;
@@ -157,7 +157,7 @@ cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename)
 	fclose(program_handle);
 
 	/* Create program from file */
-	program = clCreateProgramWithSource(ctx, 1, 
+	program = clCreateProgramWithSource(*p_ctx, 1, 
 			(const char**)&program_buffer, &program_size, &err);
 	if(err < 0)
 	{
@@ -171,11 +171,11 @@ cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename)
 	if(err < 0)
 	{
 		/* Find size of log and print to std output */
-		clGetProgramBuildInfo(program, dev, CL_PROGRAM_BUILD_LOG, 
+		clGetProgramBuildInfo(program, *p_dev, CL_PROGRAM_BUILD_LOG, 
 				0, NULL, &log_size);
 		program_log = (char*) malloc(log_size + 1);
 		program_log[log_size] = '\0';
-		clGetProgramBuildInfo(program, dev, CL_PROGRAM_BUILD_LOG, 
+		clGetProgramBuildInfo(program, *p_dev, CL_PROGRAM_BUILD_LOG, 
 				log_size + 1, program_log, NULL);
 		printf("%s\n", program_log);
 		free(program_log);

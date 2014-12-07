@@ -1,5 +1,5 @@
-#define PROGRAM_FILE "/home/xcwei/ParWiBench/lib/fft/opencl/fft.ocl"
-#define FFT_FUNC "fft_radix2_kernel"
+#define PROGRAM_FILE "/home/pacuser12/ParWiBench/lib/fft/opencl/fft.ocl"
+#define KERNEL_FUNC "fft_radix2_kernel"
 
 #include <math.h>
 #include <stdio.h>
@@ -11,7 +11,7 @@
 #include "CL/cl.h"
 
 #include "clutil.h"
-
+#include "fft.h"
 #include "meas.h"
 
 float v[N][2], v1[N][2], vout[N][2], v1out[N][2];
@@ -31,9 +31,18 @@ static void print_vector(
 
 void fft(int n, float (*a)[2], float (*y)[2], int direction)
 {
+	cl_platform_id platform;
+	cl_device_id device;
+	cl_context context;
+	cl_command_queue queue;
+	cl_program program;
+
+	cl_kernel kernel;
+
+	cl_int _err;
+
 	cl_ulong local_mem_size;
 	cl_mem input_buffer, output_buffer;
-	cl_int _err;
 
 	size_t global_size, local_size;
 
@@ -42,6 +51,13 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	float *input, *output;
 
 	int i;
+
+	platform = device_query();
+	device = create_device(&platform);
+	context = clCreateContext(NULL, 1, &device, NULL, NULL, &_err);
+	program = build_program(&context, &device, PROGRAM_FILE);
+	kernel = clCreateKernel(program, KERNEL_FUNC, &_err);
+	queue = clCreateCommandQueue(context, device, 0, &_err);
 
 	input = (float *)malloc(n * 2 * sizeof(float));
 	output = (float *)malloc(n * 2 * sizeof(float));
@@ -54,16 +70,16 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	//	printf("(%f\t%f)\n", a[i][0], a[i][1]);
 	}
 
-	cl_params_init(PROGRAM_FILE, FFT_FUNC);
+//	cl_params_init(PROGRAM_FILE, FFT_FUNC);
 
 	/* Create buffer */
-	input_buffer = clCreateBuffer(g_context, CL_MEM_READ_WRITE, 2 * n * sizeof(float), NULL, &_err);
+	input_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, 2 * n * sizeof(float), NULL, &_err);
 	if (_err < 0)
 	{
 		perror("Couldn't create input buffer");
 		exit(1);
 	};
-	output_buffer = clCreateBuffer(g_context, CL_MEM_WRITE_ONLY, 2 * n * sizeof(float), NULL, &_err);
+	output_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, 2 * n * sizeof(float), NULL, &_err);
 	if (_err < 0)
 	{
 		perror("Couldn't create output buffer");
@@ -71,7 +87,7 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	};
 
 	/* Determine maximum work-group size */
-	_err = clGetKernelWorkGroupInfo(g_kernel, g_device, 
+	_err = clGetKernelWorkGroupInfo(kernel, device, 
 			CL_KERNEL_WORK_GROUP_SIZE, sizeof(local_size), &local_size, NULL);
 	if (_err < 0) 
 	{
@@ -82,7 +98,7 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	local_size = (int)pow(2, trunc(log2(local_size)));
 
 	/* Determine local memory size */
-	_err = clGetDeviceInfo(g_device, CL_DEVICE_LOCAL_MEM_SIZE, 
+	_err = clGetDeviceInfo(device, CL_DEVICE_LOCAL_MEM_SIZE, 
 			sizeof(local_mem_size), &local_mem_size, NULL);
 	if (_err < 0) 
 	{
@@ -102,9 +118,9 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	local_size = global_size;
 
 	/* Set kernel arguments */
-	_err = clSetKernelArg(g_kernel, 0, sizeof(cl_mem), &input_buffer);
-	_err |= clSetKernelArg(g_kernel, 1, sizeof(cl_mem), &output_buffer);
-	_err |= clSetKernelArg(g_kernel, 3, sizeof(int), &direction);
+	_err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &input_buffer);
+	_err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &output_buffer);
+	_err |= clSetKernelArg(kernel, 3, sizeof(int), &direction);
 	if (_err < 0)
 	{
 		printf("Couldn't set a kernel argument");
@@ -116,11 +132,11 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	/* Enqueue fft kernel */
 	for (p = 1; p <= (num_points / 2); p <<= 1)
 	{
-		_err = clSetKernelArg(g_kernel, 2, sizeof(int), &p);
-		_err = clEnqueueWriteBuffer(g_queue, input_buffer, CL_TRUE, 0, 2 * n * sizeof(float), input, 0, NULL, NULL);
+		_err = clSetKernelArg(kernel, 2, sizeof(int), &p);
+		_err = clEnqueueWriteBuffer(queue, input_buffer, CL_TRUE, 0, 2 * n * sizeof(float), input, 0, NULL, NULL);
 		
-	//	_err = clEnqueueNDRangeKernel(queue, fft_kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL); 
-		_err = clEnqueueNDRangeKernel(g_queue, g_kernel, 1, NULL, &global_size, NULL, 0, NULL, &prof_event); 
+	//	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL); 
+		_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, &prof_event); 
 		if (_err < 0)
 		{
 			perror("Invalid kernel");
@@ -128,14 +144,14 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 		};
 		cl_ulong ev_start_time = (cl_ulong)0;
 		cl_ulong ev_end_time = (cl_ulong)0;
-		clFinish(g_queue);
+		clFinish(queue);
 		_err = clWaitForEvents(1, &prof_event);
 		_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ev_start_time, NULL);
 		_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ev_end_time, NULL);
 
 		elapsed_time = elapsed_time + (double)(ev_end_time - ev_start_time) / 1000000.0;
 
-		_err = clEnqueueReadBuffer(g_queue, output_buffer, CL_TRUE, 0, 2 * n * sizeof(float), output, 0, NULL, NULL);
+		_err = clEnqueueReadBuffer(queue, output_buffer, CL_TRUE, 0, 2 * n * sizeof(float), output, 0, NULL, NULL);
 		for (i = 0; i < 2 * num_points; i++)
 		{
 			input[i] = output[i];
@@ -161,7 +177,7 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	}
 
 	/* Deallocate resources */
-	cl_params_release();
+//	cl_params_release();
 	clReleaseMemObject(input_buffer);
 	clReleaseMemObject(output_buffer);
 
@@ -194,6 +210,11 @@ int main(void)
 
 	print_vector("Orig", v, N);
 	TIME_MEASURE_WRAPPER_SCALAR(fft(N, v, vout, -1))
+	for (k = 0; k < N; k++)
+	{
+		vout[k][0] /= N;
+		vout[k][1] /= N;
+	}
 	print_vector("FFT", vout, N);
 	fft(N, vout, v, 1);
 	print_vector("iFFT", v, N);

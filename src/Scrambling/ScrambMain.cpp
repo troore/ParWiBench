@@ -18,7 +18,6 @@ void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 	WriteOutputToFiles(lte_phy_params->scramb_out, lte_phy_params->scramb_out_buf_sz, "../testsuite/testScrambleOutput");
 
 	std::cout << "Tx scrambling ends" << std::endl;
-
 }
 
 void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
@@ -64,7 +63,6 @@ int main(int argc, char *argv[])
 	int n_tx_ant, n_rx_ant;
 	int mod_type;
 	
-
 	if (argc != 5)
 	{
 		printf("Usage: ./a.out enum_fs mod_type n_tx_ant n_rx_ant\n");
@@ -83,14 +81,12 @@ int main(int argc, char *argv[])
 
 	test_scrambling(&lte_phy_params);
 
-	#else
+#else
 
 	test_descrambling(&lte_phy_params);
-	
-	#endif
-	
+
+#endif
+
 	return 0;
 }
-
-
 

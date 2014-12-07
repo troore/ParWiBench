@@ -26,21 +26,12 @@
 	 })									\
 
 #define MAX_PLATFORMS_NUM	100
-#define MAX_DEVICES_NUM	100
+#define MAX_DEVICES_NUM		100
 #define MAX_BUF_SIZE		10240
 
-void device_query();
-//void cl_params_init(const char *program_file_name, const char *kernel_file_name);
-//void cl_params_release();
-cl_device_id create_device();
-cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename);
+cl_platform_id device_query();
+cl_device_id create_device(cl_platform_id *p_pltfm);
+cl_program build_program(cl_context *p_ctx, cl_device_id *p_dev, const char* filename);
 
-/*
-extern cl_device_id g_device;
-extern cl_context g_context;
-extern cl_command_queue g_queue;
-extern cl_program g_program;
-extern cl_kernel g_kernel;
-*/
 
 #endif
