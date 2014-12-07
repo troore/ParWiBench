@@ -1,7 +1,7 @@
 
 all: fft fft_check
 
-INC_DIRS=.. ../../
+INC_DIRS = ./ ../
 
 fft: fft.cpp
 	g++ -o $@ -g $^ $(INC_DIRS:%=-I%)
