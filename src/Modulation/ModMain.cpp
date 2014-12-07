@@ -13,7 +13,7 @@ void test_mod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 	std::cout << "Modulation starts" << std::endl;
 
 	ReadInputFromFiles(lte_phy_params->mod_in, lte_phy_params->mod_in_buf_sz, "ModulationInput");
-
+	//printf("%d\n",lte_phy_params->mod_in_buf_sz);
 	Modulating(lte_phy_params, lte_phy_params->mod_in, lte_phy_params->mod_out, mod_type);
 	
 	WriteOutputToFiles(lte_phy_params->mod_out, lte_phy_params->mod_out_buf_sz, "testModulationRandomOutputReal", "testModulationRandomOutputImag");
@@ -29,9 +29,11 @@ void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 
 	float awgn_sigma = 0.193649; //this value is for the standard input  see "AWGNSigma"
 	
-//	ReadInputFromFiles(rx_demod_in, in_buf_sz, "testModulationRandomOutputReal", "testModulationRandomOutputImag");
+	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "testModulationRandomOutputReal", "testModulationRandomOutputImag");
+
+	//printf("%d\n", lte_phy_params->demod_in_buf_sz);
 //	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
-	GeneRandomInput(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
+//	GeneRandomInput(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
 
 	Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
 
@@ -66,14 +68,14 @@ int main(int argc, char *argv[])
 #ifdef Mod
 
 	test_mod(&lte_phy_params, mod_type);
-	
-	#else
 
-	for (int i = 0; i < 100; i++)
+#else
+
+//	for (int i = 0; i < 100; i++)
 		test_demod(&lte_phy_params, mod_type);
 
-	#endif
-	
+#endif
+
 	return 0;
 }
 

@@ -68,7 +68,7 @@ void ReadInputFromFiles(float *pIn,int Sz, const char *name)
 }
 
 
-void ReadInputFromFiles(complex<float> *pIn, int Sz, const char *nameReal, const char *nameImag)
+void ReadInputFromFiles(float *pIn, int Sz, const char *nameReal, const char *nameImag)
 {
 	FILE *file;
 
@@ -105,14 +105,15 @@ void ReadInputFromFiles(complex<float> *pIn, int Sz, const char *nameReal, const
 
 	for(int i=0;i<Sz;i++)
 	{
-		pIn[i]=complex<float>(pReadInReal[i], pReadInImag[i]);
+		pIn[i]=pReadInReal[i];
+		pIn[i+Sz] = pReadInImag[i];
 	}
 
 	delete[] pReadInReal;
 	delete[] pReadInImag;
 }
 
-void ReadInputFromFiles(float *pIn, int Sz, const char *nameReal, const char *nameImag)
+/*void ReadInputFromFiles(float *pIn, int Sz, const char *nameReal, const char *nameImag)
 {
 	FILE *file;
 
@@ -156,7 +157,7 @@ void ReadInputFromFiles(float *pIn, int Sz, const char *nameReal, const char *na
 
 	delete[] pReadInReal;
 	delete[] pReadInImag;
-}
+}*/
 
 
 void ReadInputFromFiles(float (*pIn)[2], int Sz, const char *nameReal, const char *nameImag)
@@ -317,7 +318,7 @@ void WriteOutputToFiles(float *pOut, int Sz, const char *name)
 	fclose(fptr);
 }
 
-void WriteOutputToFiles(complex<float> *pOut, int Sz, const char *nameReal, const char *nameImag)
+void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *nameImag)
 {
 	FILE *fptr_real=NULL;
 	FILE *fptr_imag=NULL;
@@ -327,15 +328,15 @@ void WriteOutputToFiles(complex<float> *pOut, int Sz, const char *nameReal, cons
 	
 	for(int i=0;i<Sz;i++)
 	{
-		fprintf(fptr_real,"%f\t",(pOut[i]).real());
-		fprintf(fptr_imag,"%f\t",(pOut[i]).imag());
+		fprintf(fptr_real,"%f\t",pOut[i]);
+		fprintf(fptr_imag,"%f\t",pOut[i+Sz]);
 	}
 	
 	fclose(fptr_real);
 	fclose(fptr_imag);
 }
 
-void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *nameImag)
+/*void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *nameImag)
 {
 	FILE *fptr_real=NULL;
 	FILE *fptr_imag=NULL;
@@ -351,7 +352,7 @@ void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *n
 	
 	fclose(fptr_real);
 	fclose(fptr_imag);
-}
+}*/
 
 void WriteOutputToFiles(float (*pOut)[2], int Sz, const char *nameReal, const char *nameImag)
 {
