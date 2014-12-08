@@ -29,13 +29,13 @@ void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 
 	float awgn_sigma = 0.193649; //this value is for the standard input  see "AWGNSigma"
 	//ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "testModulationRandomOutputReal", "testModulationRandomOutputImag");
-	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputReal", "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputImag");
+	//ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputReal", "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputImag");
 	ReadInputFromFiles(lte_phy_params->demod_in_0, lte_phy_params->demod_in_1, lte_phy_params->demod_in_buf_sz, "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputReal", "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputImag");
 //	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
 //	GeneRandomInput(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
 	for(int i=0;i<1000;i++)
-		//Demodulating(lte_phy_params, lte_phy_params->demod_in_0, lte_phy_params->demod_in_1, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
-	Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
+		Demodulating(lte_phy_params, lte_phy_params->demod_in_0, lte_phy_params->demod_in_1, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
+	//Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
 	WriteOutputToFiles(lte_phy_params->demod_LLR, lte_phy_params->demod_out_buf_sz, "/home/xblee/ParWiBench/src/Modulation/testDemodulationOutput");
 
 //	std::cout << "Demodulation ends" << std::endl;

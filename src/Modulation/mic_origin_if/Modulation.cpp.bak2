@@ -1,7 +1,5 @@
 
 #include "Modulation.h"
-#define LEN16 16
-#include <immintrin.h>
 
 static const float INF = 1.0e9;
 
@@ -313,14 +311,7 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, 
 	/* End demodulation*/
 }
 
-#ifdef __MIC__
-typedef __attribute__((aligned(64))) union zmmf {
-	            __m512 reg;
-		                    float elems[LEN16];
-} zmmf_t;
-#endif
-
-void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq_0, float *pDecSeq_1, float *pLLR, int mod_type, float awgnSigma)
+void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, float *pLLR, int mod_type, float awgnSigma)
 {
 
 	float No = 2.0 * (pow(awgnSigma, 2.0));
@@ -328,19 +319,21 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq_0, float *pDecS
 	int bits_per_samp;
 	int mod_table_len;
 
-	int idx_table[MAX_MOD_TABLE_LEN][MAX_MOD_BITS_PER_SAMP];
-	float metric[MAX_MOD_TABLE_LEN],metric_[MAX_MOD_TABLE_LEN][16];
-	float metric_set[2][(MAX_MOD_TABLE_LEN / 2)],metric_set_[2][(MAX_MOD_TABLE_LEN / 2)][16];
+	int idx_table[MAX_MOD_BITS_PER_SAMP][MAX_MOD_TABLE_LEN];
+	float metric[MAX_MOD_TABLE_LEN];
+	float metric_set[2][(MAX_MOD_TABLE_LEN / 2)];
 
 	int in_buf_sz;
-	int i, j, k, jj;
+
+	int i, j, k;
+
 	in_buf_sz = lte_phy_params->demod_in_buf_sz;
 
 	set_mod_params(&p_table, &bits_per_samp, &mod_table_len, mod_type);
 	
-	for (i = 0; i < mod_table_len; i++)
+	for (i = 0; i < bits_per_samp; i++)
 	{
-		for (j = 0; j < bits_per_samp; j++)
+		for (j = 0; j < mod_table_len; j++)
 		{
 			idx_table[i][j] = 0;
 		}
@@ -353,144 +346,51 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq_0, float *pDecS
 		
 		while (idx_val)
 		{
-			idx_table[i][b] = idx_val % 2;
+			idx_table[b][i] = idx_val % 2;
 			idx_val /= 2;
 			b--;
 		}
 	}
-	for (i = 0; i < in_buf_sz-LEN16; i+=LEN16)
+	
+	for (i = 0; i < in_buf_sz; i++)
 	{
-		zmmf_t a0,a1,b0,b1,tmp1,tmp2,tmp3,result;
 		for(j = 0; j < mod_table_len; j++)
 		{
-			a0.elems[0:16] = pDecSeq_0[0:16];
-			a1.elems[0:16] = pDecSeq_1[0:16];
-			for(int ii=0;ii<16;ii++)
-			{
-				b0.elems[ii] = p_table[j][0];
-				b1.elems[ii] = p_table[j][1];
-			}
-			tmp1.reg = _mm512_sub_ps(a0.reg,b0.reg);
-			tmp2.reg = _mm512_sub_ps(a1.reg,b1.reg);
-			tmp3.reg = _mm512_mul_ps(tmp1.reg,tmp1.reg);
-			result.reg = _mm512_fmadd_ps(tmp2.reg,tmp2.reg,tmp3.reg);
-			metric_[j][0:16] = result.elems[0:16];
-/*			for(int ii=0;ii<16;ii++)
-			{
-            			metric_[ii][j] = pow(abs((std::complex<float>(pDecSeq_0[ii], pDecSeq_1[ii]) - (std::complex<float>(p_table[j][0], p_table[j][1])))), 2.0);
-				if(abs(metric_[ii][j]-(pDecSeq_0[ii]-p_table[j][0])*(pDecSeq_0[ii]-p_table[j][0]) - (pDecSeq_1[ii]-p_table[j][1])*(pDecSeq_1[ii]-p_table[j][1]))>0.0001) printf("right!\n");
-				if(abs(result.elems[ii]-metric_[ii][j])>0.0001) printf("wrong!\n");
-			}
-*/		}
+			metric[j] = pow(abs((pDecSeq[i] - (std::complex<float>(p_table[j][0], p_table[j][1])))), 2.0);
+		}
 
 		for (j = 0; j < bits_per_samp; j++)
 		{
-			float min0[16], min1[16];
+			float min0, min1;
 			int idx[2]={0,0};
-           // idx0[0:16] = zero_i[0:16];
-           // idx1[0:16] = zero_i[0:16];
+		       
+
 			for (k = 0; k < mod_table_len; k++)
 			{
-			//	if(idx_table[k][j] == 0)
-				{
-                    metric_set_[idx_table[k][j]][idx[idx_table[k][j]]][0:16] = metric_[k][0:16];
-                    idx[idx_table[k][j]]++;
-				}
-	/*			else
-				{
-                    metric_set_[0:16][1][idx1] = metric_[0:16][k];
-                    idx1++;
-				}
-	*/		}
-//printf("2 ");
-			zmmf_t min_0,min_1;
-			min_0.elems[0:16] = metric_set_[0][0][0:16];
-			min_1.elems[0:16] = metric_set_[1][0][0:16];
-			for(jj=1;jj<mod_table_len / 2;jj++)
-			{
-			    zmmf_t tmpp0,tmpp1,tmpp2,tmpp3;
-			    tmpp0.elems[0:16] = metric_set_[0][jj][0:16];
-			    tmpp1.elems[0:16] = metric_set_[1][jj][0:16];
-		            tmpp2.reg = _mm512_gmin_ps(tmpp0.reg, min_0.reg);
-		            tmpp3.reg = _mm512_gmin_ps(tmpp1.reg, min_1.reg);
-			    min_0.reg = tmpp2.reg;
-			    min_1.reg = tmpp3.reg;
+				//if(idx_table[k][j] == 0)
+				int axx=idx_table[j][k];
+					metric_set[axx][idx[axx]] = metric[k];
+					idx[axx]++;
+				
+				//else
+				//{
+				//	metric_set[1][idx1] = metric[k];
+			//		idx1++;
+			//	}
 			}
-/*			if(i==0) 
+
+			min0 = vecmin(metric_set[0], mod_table_len / 2);
+			min1  = vecmin(metric_set[1], mod_table_len / 2);
+
+			if (No == (float)0)
 			{
-				float min__=INF,min1__=INF;
-				for(jj=0;jj<mod_table_len/2;jj++)
-				{
-					printf("%f %f\n",metric_set_[0][jj][0],metric_set_[1][jj][0]);
-					if(metric_set_[0][jj][0]<min__)
-						min__ = metric_set_[0][jj][0];
-					if(metric_set_[1][jj][0]<min1__)
-		                                min1__ = metric_set_[1][jj][0];
-				}
-				printf("\n%f xx %f\n",min__,min1__);
-				printf("%f yy %f\n",min_0.elems[0],min_1.elems[0]);
-			}
-	min0[0:16] = vecmin(metric_set_[0][0:16], mod_table_len / 2);
-	min1[0:16]  = vecmin(metric_set_[1][0:16], mod_table_len / 2);
-	for(j=0;j<16;j++)
-		if(min0[j]!=min_0.elems[j]) 1;//printf("0 wrong\n");
-		else if(min1[j]!=min_1.elems[j]) 1;//printf("1 wrong\n");
-		else printf("right %d\n",j);
-*/			if (No == (float)0)
-			{
-//				printf("a\n");
-				for(int ii=0;ii<16;ii++)
-  			              pLLR[(i+ii) * bits_per_samp + j] = (min_0.elems[ii] - min_1.elems[ii]);
+				pLLR[i * bits_per_samp + j] = (min0 - min1);
 			}
 			else
 			{
-//				printf("b\n");
-				for(int ii=0;ii<16;ii++)
-        			        pLLR[(i+ii) * bits_per_samp + j] = (min_0.elems[ii] - min_1.elems[ii]) / No;
+				pLLR[i * bits_per_samp + j] = (min0 - min1) / No;
 			}
-//		printf("3 ");
 		}
 	}
-//printf("ok");    
-    for (; i < in_buf_sz; i++)
-    {
-        for(j = 0; j < mod_table_len; j++)
-        {
-            metric[j] = pow(abs((std::complex<float>(pDecSeq_0[i], pDecSeq_1[i]) - (std::complex<float>(p_table[j][0], p_table[j][1])))), 2.0);
-        }
-        
-        for (j = 0; j < bits_per_samp; j++)
-        {
-            float min0, min1;
-            int idx0 = 0, idx1 = 0;
-            
-            for (k = 0; k < mod_table_len; k++)
-            {
-                if(idx_table[k][j] == 0)
-                {
-                    metric_set[0][idx0] = metric[k];
-                    idx0++;
-                }
-                else
-                {
-                    metric_set[1][idx1] = metric[k];
-                    idx1++;
-                }
-            }
-            
-            min0 = vecmin(metric_set[0], mod_table_len / 2);
-            min1  = vecmin(metric_set[1], mod_table_len / 2);
-            
-            if (No == (float)0)
-            {
-                pLLR[i * bits_per_samp + j] = (min0 - min1);
-            }
-            else
-            {
-                pLLR[i * bits_per_samp + j] = (min0 - min1) / No;
-            	//if(i==0) printf("%f rr %f\n",min0,min1);
-	    }
-        }
-    }
 }
 
