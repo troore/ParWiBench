@@ -56,7 +56,7 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 		for(j=offset*i;j<j_end;j++)
 		pOutSeq[j] = (pInpSeq[j] + scramb_seq_int[j]) % 2;
 	}*/
-    printf("left\n");
+//    printf("left\n");
     for (i = 0; i < n_inp; i+=16)
     {
         zmmi_t tmp_f,tmp_f2,tmp_result;
@@ -114,7 +114,7 @@ void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq
 //	zmmf_t tmp_zero;
 //	for (i=0;i<16;i++)
 //		tmp_zero.elems[i] = 0;
-	printf("right\n");
+//	printf("right\n");
 	for (i = 0; i < n_inp; i+=16)
 	{
 		zmmf_t tmp_f,tmp_f2,tmp_result;

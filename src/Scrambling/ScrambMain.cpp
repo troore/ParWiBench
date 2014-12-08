@@ -35,7 +35,7 @@ void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 {
 	
-	std::cout << "Rx descrambling starts" << std::endl;
+	//std::cout << "Rx descrambling starts" << std::endl;
 
 	int i;
 
@@ -65,7 +65,7 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 
 	WriteOutputToFiles(lte_phy_params->descramb_out, lte_phy_params->descramb_out_buf_sz, "/home/xblee/ParWiBench/src/Scrambling/testsuite/testDescrambleOutput");
 	
-	cout << "Rx descrambling ends" << endl;
+	//cout << "Rx descrambling ends" << endl;
 
 }
 
@@ -97,8 +97,8 @@ int main(int argc, char *argv[])
 	test_scrambling(&lte_phy_params);
 
 	#else
-
-	test_descrambling(&lte_phy_params);
+	for(int qq=0;qq<1000;qq++)
+		test_descrambling(&lte_phy_params);
 	
 	#endif
 	double ttime = dtime() - tstart;

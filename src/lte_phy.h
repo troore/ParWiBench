@@ -178,7 +178,9 @@ typedef struct
 #define N_MOD_OUT_MAX (LTE_PHY_DFT_SIZE_MAX * (LTE_PHY_N_SYMB_PER_SUBFR - 2))
   int mod_in[N_MOD_IN_MAX];
   std::complex<float> mod_out[N_MOD_OUT_MAX];
-  std::complex<float> demod_in[N_MOD_IN_MAX];
+  std::complex<float> demod_in[N_MOD_OUT_MAX];
+  float demod_in_0[N_MOD_IN_MAX];
+  float demod_in_1[N_MOD_IN_MAX];
   float demod_LLR[N_MOD_IN_MAX];
   int demod_HD[N_MOD_IN_MAX];
   int mod_in_buf_sz;
@@ -235,10 +237,10 @@ typedef struct
 #define N_OFMOD_OUT_MAX (LTE_PHY_N_ANT_MAX * (LTE_PHY_FFT_SIZE_MAX + LTE_PHY_N_SAMPS_CP_L_0_30_72MHZ) * LTE_PHY_N_SYMB_PER_SUBFR)
 #define N_OFDEMOD_IN_MAX (N_OFMOD_OUT_MAX)
 #define N_OFDEMOD_OUT_MAX (N_OFMOD_IN_MAX)
-  float ofmod_in[N_OFMOD_IN_MAX][2];
-  float ofmod_out[N_OFMOD_OUT_MAX][2];
-  float ofdemod_in[N_OFDEMOD_IN_MAX][2];
-  float ofdemod_out[N_OFDEMOD_OUT_MAX][2];
+  float ofmod_in[N_OFMOD_IN_MAX*2];
+  float ofmod_out[N_OFMOD_OUT_MAX*2];
+  float ofdemod_in[N_OFDEMOD_IN_MAX*2];
+  float ofdemod_out[N_OFDEMOD_OUT_MAX*2];
   int ofmod_in_buf_sz;
   int ofmod_out_buf_sz;
   int ofdemod_in_buf_sz;
