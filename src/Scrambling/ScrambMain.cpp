@@ -1,11 +1,22 @@
 
 #include "ScrambMain.h"
-
+#include "timer.h"
 int RANDOMSEED;
 
 //#define Scramb
 
 LTE_PHY_PARAMS lte_phy_params;
+
+double dtime()
+{
+	    double tseconds = 0.0;
+	        struct timeval mytime;
+		    gettimeofday(&mytime,(struct timezone*)0);
+		        tseconds = (double)(mytime.tv_sec +
+					                mytime.tv_usec*1.0e-6);
+			    return( tseconds );
+}
+
 
 void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 {
@@ -24,7 +35,7 @@ void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 {
 	
-	std::cout << "Rx descrambling starts" << std::endl;
+	//std::cout << "Rx descrambling starts" << std::endl;
 
 	int i;
 
@@ -54,7 +65,7 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 
 	WriteOutputToFiles(lte_phy_params->descramb_out, lte_phy_params->descramb_out_buf_sz, "testsuite/testDescrambleOutput");
 	
-	cout << "Rx descrambling ends" << endl;
+	//cout << "Rx descrambling ends" << endl;
 
 }
 
@@ -77,17 +88,21 @@ int main(int argc, char *argv[])
 	n_tx_ant = atoi(argv[3]);
 	n_rx_ant = atoi(argv[4]);
 	
+	double tstart = dtime();
+
 	lte_phy_init(&lte_phy_params, enum_fs, mod_type, n_tx_ant, n_rx_ant);
 	
 #ifdef Scramb
 
 	test_scrambling(&lte_phy_params);
 
-#else
-
-	test_descrambling(&lte_phy_params);
-
-#endif
+	#else
+	for(int qq=0;qq<1000;qq++)
+		test_descrambling(&lte_phy_params);
+	
+	#endif
+	double ttime = dtime() - tstart;
+	printf("whole time is %f s\n", ttime);
 
 	return 0;
 }

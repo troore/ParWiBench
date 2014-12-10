@@ -12,13 +12,23 @@ void test_SCMapper(LTE_PHY_PARAMS *lte_phy_params)
 {
 	std::cout << "Resource mapping starts" << std::endl;
 
-	ReadInputFromFiles(lte_phy_params->resm_in, lte_phy_params->resm_in_buf_sz, "SubCarrierMapInputReal", "SubCarrierMapInputImag");
-	
+	double tstart, tstop, ttime;
+
+	ReadInputFromFiles(lte_phy_params->resm_in, lte_phy_params->resm_in_buf_sz, "../SubCarrierMapInputReal", "../SubCarrierMapInputImag");
+
+	tstart = dtime();
+
 	SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in, lte_phy_params->resm_out);
 	
-	WriteOutputToFiles(lte_phy_params->resm_out, lte_phy_params->resm_out_buf_sz, "testSubCarrierMapOutputReal", "testSubCarrierMapOutputImag");
+	tstop = dtime();
+
+	ttime = (tstop - tstart);
+
+	WriteOutputToFiles(lte_phy_params->resm_out, lte_phy_params->resm_out_buf_sz, "../testSubCarrierMapOutputReal", "../testSubCarrierMapOutputImag");
 	
 	std::cout << "Resource mapping ends" << std::endl;
+
+	std::cout << ttime << "ms\n";
 }
 
 void test_SCDemapper(LTE_PHY_PARAMS *lte_phy_params)
@@ -27,15 +37,25 @@ void test_SCDemapper(LTE_PHY_PARAMS *lte_phy_params)
 	
 	int in_buf_sz, out_buf_sz;
 
+	double tstart, tstop, ttime;
+
 	in_buf_sz = lte_phy_params->N_tx_ant * lte_phy_params->N_fft_sz * lte_phy_params->N_symb_per_subfr;
 	
-	ReadInputFromFiles(lte_phy_params->resdm_in, lte_phy_params->resdm_in_buf_sz, "SubCarrierDemapInputReal", "SubCarrierDemapInputImag");
+	ReadInputFromFiles(lte_phy_params->resdm_in, lte_phy_params->resdm_in_buf_sz, "../SubCarrierDemapInputReal", "../SubCarrierDemapInputImag");
 	
+	tstart = dtime();
+
 	SubCarrierDemapping(lte_phy_params, lte_phy_params->resdm_in, lte_phy_params->resdm_out);
 
-	WriteOutputToFiles(lte_phy_params->resdm_out, lte_phy_params->resdm_out_buf_sz, "testSubCarrierDemapOutputReal", "testSubCarrierDemapOutputImag");
+	tstop = dtime();
+
+	ttime = (tstop - tstart);
+
+	WriteOutputToFiles(lte_phy_params->resdm_out, lte_phy_params->resdm_out_buf_sz, "../testSubCarrierDemapOutputReal", "../testSubCarrierDemapOutputImag");
 
 	std::cout << "Resource demapping ends" << std::endl;
+
+	std::cout << ttime << "ms\n";
 
 }
 

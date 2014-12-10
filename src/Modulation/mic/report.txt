@@ -1,0 +1,2 @@
+5.081368s for 1000 times with 1 read&write
+0.391443s for 1000 times with 1 read&write
