@@ -194,8 +194,10 @@ void ReadInputFromFiles(float *pIn, int Sz, const char *nameReal, const char *na
 	for(int i=0;i<Sz;i++)
 	{
 	//	pIn[i]=complex<float>(pReadInReal[i], pReadInImag[i]);
-		pIn[2 * i + 0] = pReadInReal[i];
-		pIn[2 * i + 1] = pReadInImag[i];
+	//	pIn[2 * i + 0] = pReadInReal[i];
+	//	pIn[2 * i + 1] = pReadInImag[i];
+		pIn[i] = pReadInReal[i];
+		pIn[Sz + i] = pReadInImag[i];
 	}
 
 	delete[] pReadInReal;
@@ -389,8 +391,10 @@ void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *n
 	
 	for(int i=0;i<Sz;i++)
 	{
-		fprintf(fptr_real,"%f\t",pOut[2 * i + 0]);
-		fprintf(fptr_imag,"%f\t",pOut[2 * i + 1]);
+		//	fprintf(fptr_real,"%f\t",pOut[2 * i + 0]);
+		//	fprintf(fptr_imag,"%f\t",pOut[2 * i + 1]);
+		fprintf(fptr_real,"%f\t",pOut[i]);
+		fprintf(fptr_imag,"%f\t",pOut[Sz + i]);
 	}
 	
 	fclose(fptr_real);
