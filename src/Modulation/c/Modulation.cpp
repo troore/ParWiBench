@@ -1,10 +1,8 @@
-
 #include "Modulation.h"
 
 static const float INF = 1.0e9;
 
-float BPSK_table[2][2];
-float QPSK_table[4][2];
+float BPSK_table[2][2]; float QPSK_table[4][2];
 float QAM16_table[16][2];
 float QAM64_table[64][2];
 
@@ -191,7 +189,7 @@ void set_mod_params(/*float (*mod_table)[2]*/ p_a *pp_table, int *bits_per_samp,
 		break;
 	case LTE_QAM64:
 		*pp_table = &QAM64_table[0];
-		*bits_per_samp = QAM16_BITS_PER_SAMP;
+		*bits_per_samp = QAM16_BITS_PER_SAMP;	//177,why 16,not 64
 		*mod_table_len = QAM64_TABLE_LEN;
 		break;
 	default:

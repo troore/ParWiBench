@@ -12,8 +12,8 @@ void test_mod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 {
 	std::cout << "Modulation starts" << std::endl;
 
-	ReadInputFromFiles(lte_phy_params->mod_in, lte_phy_params->mod_in_buf_sz, "/home/xblee/ParWiBench/src/Modulation/ModulationInput");
-
+	ReadInputFromFiles(lte_phy_params->mod_in, lte_phy_params->mod_in_buf_sz, "ModulationInput");
+	//printf("%d\n",lte_phy_params->mod_in_buf_sz);
 	Modulating(lte_phy_params, lte_phy_params->mod_in, lte_phy_params->mod_out, mod_type);
 	
 	WriteOutputToFiles(lte_phy_params->mod_out, lte_phy_params->mod_out_buf_sz, "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputReal", "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputImag");
@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
 #ifdef Mod
 
 	test_mod(&lte_phy_params, mod_type);
+<<<<<<< HEAD
 	
 	#else
 	double tbegin,ttime;
@@ -87,6 +88,16 @@ int main(int argc, char *argv[])
 	printf("whole time is %f\n", ttime);
 	#endif
 	
+=======
+
+#else
+
+//	for (int i = 0; i < 100; i++)
+		test_demod(&lte_phy_params, mod_type);
+
+#endif
+
+>>>>>>> opencl
 	return 0;
 }
 
