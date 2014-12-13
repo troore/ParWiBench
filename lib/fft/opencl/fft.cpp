@@ -1,5 +1,5 @@
 
-#define PROGRAM_FILE "/home/pacuser12/ParWiBench/lib/fft/opencl/fft.ocl"
+#define PROGRAM_FILE "/home/xcwei/ParWiBench/lib/fft/opencl/fft.ocl"
 #define KERNEL_FUNC "fft_radix2_kernel"
 
 #include <math.h>
@@ -58,7 +58,8 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, &_err);
 	program = build_program(&context, &device, PROGRAM_FILE);
 	kernel = clCreateKernel(program, KERNEL_FUNC, &_err);
-	queue = clCreateCommandQueue(context, device, 0, &_err);
+//	queue = clCreateCommandQueue(context, device, 0, &_err);
+	queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &_err);
 
 	input = (float *)malloc(n * 2 * sizeof(float));
 	output = (float *)malloc(n * 2 * sizeof(float));
@@ -209,16 +210,16 @@ int main(void)
 //		fscanf(fptr_imag, "%f", &(v[k][1]));
 	}
 
-	print_vector("Orig", v, N);
+//	print_vector("Orig", v, N);
 	TIME_MEASURE_WRAPPER_SCALAR(fft(N, v, vout, -1))
 	for (k = 0; k < N; k++)
 	{
 		vout[k][0] /= N;
 		vout[k][1] /= N;
 	}
-	print_vector("FFT", vout, N);
+//	print_vector("FFT", vout, N);
 	fft(N, vout, v, 1);
-	print_vector("iFFT", v, N);
+//	print_vector("iFFT", v, N);
 
 //	print_vector("Orig", v1, N);
 //	fft(N, v1, v1out, -1);

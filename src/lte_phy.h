@@ -247,8 +247,14 @@ typedef struct
 	// Equalizing
 #define N_EQ_IN_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_N_SYMB_PER_SUBFR * LTE_PHY_DFT_SIZE_MAX)
 #define N_EQ_OUT_MAX (LTE_PHY_N_ANT_MAX * (LTE_PHY_N_SYMB_PER_SUBFR - 2) * LTE_PHY_DFT_SIZE_MAX)
-	std::complex<float> eq_in[N_EQ_IN_MAX];
-	std::complex<float> eq_out[N_EQ_OUT_MAX];
+//	std::complex<float> eq_in[N_EQ_IN_MAX];
+//	std::complex<float> eq_out[N_EQ_OUT_MAX];
+	float eq_in[N_EQ_IN_MAX * 2];
+	float eq_out[N_EQ_OUT_MAX * 2];
+	float eq_in_real[N_EQ_IN_MAX];
+	float eq_in_imag[N_EQ_IN_MAX];
+	float eq_out_real[N_EQ_OUT_MAX];
+	float eq_out_imag[N_EQ_OUT_MAX];
 	int eq_in_buf_sz;
 	int eq_out_buf_sz;
 

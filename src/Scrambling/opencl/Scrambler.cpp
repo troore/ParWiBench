@@ -2,6 +2,7 @@
 #include "Scrambler.h"
 #include "CL/opencl.h"
 #include "opencl/clutil.h"
+#include "meas.h"
 
 #define PROGRAM_FILE "scrambler.ocl"
 #define SCR_KERNEL_FUNC "scrambler"
@@ -62,7 +63,7 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, &_err);
 	program = build_program(&context, &device, PROGRAM_FILE);
 	kernel = clCreateKernel(program, SCR_KERNEL_FUNC, &_err);
-	queue = clCreateCommandQueue(context, device, 0, &_err);
+	queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &_err);
 
 	n = lte_phy_params->scramb_in_buf_sz;
 
@@ -77,14 +78,37 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 	_err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &output_buffer);
 	_err |= clSetKernelArg(kernel, 3, sizeof(int), &n);
 
+	double tstart, tstop, ttime;
+	tstart = dtime();
 	// Generate integer scrambling sequence
 	GenScrambInt(scramb_seq_int, n);
+	tstop = dtime();
+
+	ttime = tstop - tstart;
+
+	printf("Elapsed time of GenScrambInt is %lfms\n", ttime);
 
 	_err = clEnqueueWriteBuffer(queue, input_buffer, CL_TRUE, 0, n * sizeof(int), pInpSeq, 0, NULL, NULL);
 	_err = clEnqueueWriteBuffer(queue, scramb_buffer, CL_TRUE, 0, n * sizeof(int), scramb_seq_int, 0, NULL, NULL);
 
 	global_size = n;
-	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
+
+	double elapsed_time = 0.0;
+	cl_event prof_event;
+
+	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, /*NULL*/&prof_event);
+
+	cl_ulong ev_start_time = (cl_ulong)0;
+	cl_ulong ev_end_time = (cl_ulong)0;
+	clFinish(queue);
+
+	_err = clWaitForEvents(1, &prof_event);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ev_start_time, NULL);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ev_end_time, NULL);
+
+	elapsed_time = elapsed_time + (double)(ev_end_time - ev_start_time) / 1000000.0;
+
+	printf("Elapsed time of kernel is: %lfms\n", elapsed_time);
 
 	_err = clEnqueueReadBuffer(queue, output_buffer, CL_TRUE, 0, n * sizeof(int), pOutSeq, 0, NULL, NULL);
 

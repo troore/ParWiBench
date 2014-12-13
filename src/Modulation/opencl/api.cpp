@@ -23,7 +23,7 @@ cl_device_id create_device() {
       perror("Couldn't find any platforms");
       exit(1);
    }
-   platform = platforms[2];
+   platform = platforms[0];
 
    /* Access a device */
    err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &dev, NULL);

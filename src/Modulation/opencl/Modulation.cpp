@@ -229,7 +229,7 @@ void set_mod_params(float* t, /*float (*mod_table)[2]*/ p_a *pp_table, int *bits
 	case LTE_QAM64:
 	//	tt = &QAM64_table[0][0];
 		*pp_table = &QAM64_table[0];
-		*bits_per_samp = QAM16_BITS_PER_SAMP;	//177,why 16,not 64
+		*bits_per_samp = QAM64_BITS_PER_SAMP;	//177,why 16,not 64
 		for(int i =0; i < QAM64_TABLE_LEN; i++)
 		{
 			t[i*2] = QAM64_table[i][0];
@@ -275,10 +275,12 @@ void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, float *pModedSeq,
 
 	/* Create buffers*/
 	cl_mem pBitsSeq_buffer,pModedSeq_buffer,ptable_buffer;
-	pBitsSeq_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, in_buf_sz* sizeof(int), pBitsSeq, &err);	
+	pBitsSeq_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, in_buf_sz* sizeof(int), pBitsSeq, &err);
+	if(err < 0) { perror("Couldn't create pBitsSeq_buffer");  exit(1);   };
 	pModedSeq_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, 2*n*sizeof(float), pModedSeq, &err);
+	if(err < 0) { perror("Couldn't create pModedSeq_buffer");  exit(1);   };
 	ptable_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, mod_table_len*2*sizeof(float),t, &err);	
-	if(err < 0) { perror("Couldn't create a buffer");  exit(1);   };
+	if(err < 0) { perror("Couldn't create ptable_buffer");  exit(1);   };
 
 	//initcl_kernel(device, context, queue, kernel,program,SCR_KERNEL_FUNC);
 
@@ -426,11 +428,23 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, i
 	initcl_kernel(&device, &context, &queue, &kernel,&program,DESCR_KERNEL_FUNC);
 	/* Create buffers*/
 	cl_mem pDecSeq_buffer,pLLR_buffer,ptable_buffer,idx_table_buffer;
-	pDecSeq_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, in_buf_sz * 2* sizeof(float), pDecSeq, &err);	
+	pDecSeq_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, in_buf_sz * 2 * sizeof(float), pDecSeq, &err);
+	printf("%d\n", err);
+//	printf("CL_SUCCESS=%d\n", CL_SUCCESS);
+//	printf("CL_INVALID_CONTEXT=%d\n", CL_INVALID_CONTEXT);
+//	printf("CL_INVALID_VALUE=%d\n", CL_INVALID_VALUE);
+	printf("CL_INVALID_BUFFER_SIZE=%d\n", CL_INVALID_BUFFER_SIZE);
+//	printf("CL_INVALID_HOST_PTR=%d\n", CL_INVALID_HOST_PTR);
+//	printf("CL_MEM_OBJECT_ALLOCATION_FAILURE=%d\n", CL_MEM_OBJECT_ALLOCATION_FAILURE);
+//	printf("CL_OUT_OF_HOST_MEMORY=%d\n", CL_OUT_OF_HOST_MEMORY);
+	
+	if(err < 0) { perror("Couldn't create pDecSeq_buffer");  exit(1);   };
 	pLLR_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, n * sizeof(float), pLLR, &err);
-	ptable_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, mod_table_len*2 *sizeof(float), t, &err);	
+	if(err < 0) { perror("Couldn't create pLLR_buffer");  exit(1);   };	
+	ptable_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, mod_table_len*2 *sizeof(float), t, &err);
+	if(err < 0) { perror("Couldn't create ptable_buffer");  exit(1);   };	
 	idx_table_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, MAX_MOD_TABLE_LEN * MAX_MOD_BITS_PER_SAMP*sizeof(int), idx_table, &err);	
-	if(err < 0) { perror("Couldn't create a buffer");  exit(1);   };	
+	if(err < 0) { perror("Couldn't create idx_table_buffer");  exit(1);   };	
 	//initcl_kernel(device, context, queue, kernel,program,DESCR_KERNEL_FUNC);
 	
 	/* Set kernel arguments */

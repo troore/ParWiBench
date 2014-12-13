@@ -68,7 +68,8 @@ cl_platform_id device_query()
 		}
 	}
 
-	return platforms[2];
+//	return platforms[2];
+	return platforms[0];
 }
 
 //void cl_params_init(const char *program_file_name, const char *kernel_file_name)

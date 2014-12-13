@@ -9,21 +9,25 @@ void test_equalizer(LTE_PHY_PARAMS *lte_phy_params)
 {
 	std::cout << "Equalizing starts" << std::endl;
 
-#ifdef DEBUG_EQ
-	Equalizer_init(lte_phy_params);
+#ifdef DEBUG
+	ReadInputFromFiles(lte_phy_params->eq_in, lte_phy_params->eq_in_buf_sz, "../LSCELSEqInputReal", "../LSCELSEqInputImag");
+#else
+	ReadInputFromFiles(lte_phy_params->eq_in_real, lte_phy_params->eq_in_imag, lte_phy_params->eq_in_buf_sz, "../LSCELSEqInputReal", "../LSCELSEqInputImag");
 #endif
-
-	ReadInputFromFiles(lte_phy_params->eq_in, lte_phy_params->eq_in_buf_sz, "LSCELSEqInputReal", "LSCELSEqInputImag");
 //	GeneRandomInput(lte_phy_params->eq_in, lte_phy_params->eq_in_buf_sz, "LSCELSEqInputReal", "LSCELSEqInputImag");
 
+#ifdef DEBUG
 	Equalizing(lte_phy_params, lte_phy_params->eq_in, lte_phy_params->eq_out);
-	
-	WriteOutputToFiles(lte_phy_params->eq_out, lte_phy_params->eq_out_buf_sz, "testLSCELSEqOutputReal", "testLSCELSEqOutputImag");
-
-#ifdef DEBUG_EQ
-	Equalizer_cleanup(lte_phy_params);
+#else
+	Equalizing(lte_phy_params, lte_phy_params->eq_in_real, lte_phy_params->eq_in_imag, lte_phy_params->eq_out_real, lte_phy_params->eq_out_imag);
 #endif
 	
+#ifdef DEBUG
+	WriteOutputToFiles(lte_phy_params->eq_out, lte_phy_params->eq_out_buf_sz, "../testLSCELSEqOutputReal", "../testLSCELSEqOutputImag");
+#else
+	WriteOutputToFiles(lte_phy_params->eq_out_real, lte_phy_params->eq_out_imag, lte_phy_params->eq_out_buf_sz, "../testLSCELSEqOutputReal", "../testLSCELSEqOutputImag");
+#endif
+
 	std::cout << "Equalizing ends" << std::endl;
 
 }

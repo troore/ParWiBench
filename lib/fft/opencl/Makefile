@@ -19,8 +19,8 @@ else
 	CXXFLAGS+=-m64
 endif
 
-#AMDAPPSDKROOT = /opt/AMDAPP
-NVSDKCOMPUTE_ROOT = /usr/local/cuda
+AMDAPPSDKROOT = /opt/AMDAPP
+#NVSDKCOMPUTE_ROOT = /usr/local/cuda
 
 #### Check for Linux-AMD ####
 #ifdef AMDAPPSDKROOT
@@ -33,14 +33,14 @@ NVSDKCOMPUTE_ROOT = /usr/local/cuda
 #else
 
 #### Check for Linux-Nvidia ####
-ifdef NVSDKCOMPUTE_ROOT
-   INC_DIRS += $(NVSDKCOMPUTE_ROOT)/include
-   LIB_DIRS += $(NVSDKCOMPUTE_ROOT)/lib64
-endif
+#ifdef NVSDKCOMPUTE_ROOT
+#   INC_DIRS += $(NVSDKCOMPUTE_ROOT)/include
+#   LIB_DIRS += $(NVSDKCOMPUTE_ROOT)/lib64
+#endif
 
 #ifdef AMDAPPSDKROOT
-#	INC_DIRS += $(AMDAPPSDKROOT)/include
-#	LIB_DIRS += $(AMDAPPSDKROOT)/lib
+	INC_DIRS += $(AMDAPPSDKROOT)/include
+	LIB_DIRS += $(AMDAPPSDKROOT)/lib
 #endif
 
 $(PROJ): $(PROJ).cpp ../../opencl/clutil.cpp

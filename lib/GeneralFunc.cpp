@@ -24,14 +24,13 @@ void ReadInputFromFiles(int *pIn, int Sz, const char *name)
 	fclose(file);
 }
 
-void ReadInputFromFiles(float *pIn,int Sz, const char *name)
+void ReadInputFromFiles(float *pIn, int Sz, const char *name)
 {
 	FILE *file;
 
 	if((file=fopen(name,"r"))==NULL)
 		throw std::runtime_error ("file open error\n");
 
-//	float *pReadIn=new float[(Sz[0]*Sz[1])];
 	for(int i=0; i < Sz; i++)
 	{
 		if(fscanf(file, "%f", (pIn+i)) == EOF)
@@ -42,29 +41,6 @@ void ReadInputFromFiles(float *pIn,int Sz, const char *name)
 
 	}
 	fclose(file);
-
-	/*
-	if(Sz[0]==1)
-	{bool flag = (*pIn).Write(pReadIn);}
-	else
-	{
-		float **pReadMatrix=new float*[Sz[0]];
-		for(int r=0;r<Sz[0];r++){*(pReadMatrix+r)=new float[Sz[1]];}
-
-		for(int r=0;r<Sz[0];r++)
-		{
-			for(int c=0;c<Sz[1];c++)
-			{
-				*(*(pReadMatrix+r)+c)=*(pReadIn+r*Sz[1]+c);
-			}
-		}
-		bool flag = (*pIn).Write(pReadMatrix);
-		for(int r=0;r<Sz[0];r++){delete[] *(pReadMatrix+r);}
-		delete[] pReadMatrix;
-	}
-
-	delete[] pReadIn;
-	*/
 }
 
 
@@ -113,7 +89,7 @@ void ReadInputFromFiles(float *pIn, int Sz, const char *nameReal, const char *na
 	delete[] pReadInImag;
 }
 
-void ReadInputFromFiles(float *pIn_0, float *pIn_1, int Sz, const char *nameReal, const char *nameImag)
+void ReadInputFromFiles(float *pInReal, float *pInImag, int Sz, const char *nameReal, const char *nameImag)
 {
 	FILE *file;
 
@@ -149,8 +125,8 @@ void ReadInputFromFiles(float *pIn_0, float *pIn_1, int Sz, const char *nameReal
 
 	for(int i=0;i<Sz;i++)
 	{
-		pIn_0[i]=pReadInReal[i];
-		pIn_1[i]=pReadInImag[i];
+		pInReal[i]=pReadInReal[i];
+		pInImag[i]=pReadInImag[i];
 	}
 
 	delete[] pReadInReal;
@@ -206,7 +182,8 @@ void ReadInputFromFiles(float *pIn_0, float *pIn_1, int Sz, const char *nameReal
 }*/
 
 
-/*void ReadInputFromFiles(float *pIn, int Sz, const char *nameReal, const char *nameImag)
+/*
+void ReadInputFromFiles(float *pIn, int Sz, const char *nameReal, const char *nameImag)
 {
 	FILE *real_file, *imag_file;
 	int i;
@@ -232,7 +209,8 @@ void ReadInputFromFiles(float *pIn_0, float *pIn_1, int Sz, const char *nameReal
 	
 	fclose(real_file);
 	fclose(imag_file);
-}*/
+}
+*/
 
 //////////////////// Random Generate Input and Write to Files ////////////////////////
 
@@ -382,7 +360,7 @@ void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *n
 	fclose(fptr_imag);
 }
 
-/*void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *nameImag)
+void WriteOutputToFiles(float *pOutReal, float *pOutImag, int Sz, const char *nameReal, const char *nameImag)
 {
 	FILE *fptr_real=NULL;
 	FILE *fptr_imag=NULL;
@@ -392,15 +370,13 @@ void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *n
 	
 	for(int i=0;i<Sz;i++)
 	{
-		//	fprintf(fptr_real,"%f\t",pOut[2 * i + 0]);
-		//	fprintf(fptr_imag,"%f\t",pOut[2 * i + 1]);
-		fprintf(fptr_real,"%f\t",pOut[i]);
-		fprintf(fptr_imag,"%f\t",pOut[Sz + i]);
+		fprintf(fptr_real,"%f\t",pOutReal[i]);
+		fprintf(fptr_imag,"%f\t",pOutImag[i]);
 	}
 	
 	fclose(fptr_real);
 	fclose(fptr_imag);
-}*/
+}
 
 /*void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *nameImag)
 {

@@ -1,17 +1,17 @@
 include ../../../common/makefile.config
 
-#AMD_SDK_HOME := /opt/AMDAPP
-CUDA_HOME := /usr/local/cuda
+AMD_SDK_HOME := /opt/AMDAPP
+#CUDA_HOME := /usr/local/cuda
 
 SRC = ../ScrambMain.cpp  Scrambler.cpp
-SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/opencl/clutil.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/meas.cpp $(LIB_DIR)/opencl/clutil.cpp
 
 SRC += $(SRC_DIR)/lte_phy.cpp
 
-INC_FLAGS += -I.. -I$(SRC_DIR) -I$(CUDA_HOME)/include -I$(LIB_DIR)
+INC_FLAGS += -I.. -I$(SRC_DIR) -I$(AMD_SDK_HOME)/include -I$(LIB_DIR)
 
-#LINKFLAGS += -L$(AMD_SDK_HOME)/lib -lOpenCL
-LINKFLAGS += -L$(CUDA_HOME)/lib64 -lOpenCL
+LINKFLAGS += -L$(AMD_SDK_HOME)/lib -lOpenCL
+#LINKFLAGS += -L$(CUDA_HOME)/lib64 -lOpenCL
 
 TARGETS = ScrDescr.out
 

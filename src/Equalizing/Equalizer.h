@@ -2,32 +2,36 @@
 #ifndef __EQUALIZER_H_
 #define __EQUALIZER_H_
 
-#include <complex>
-#include <iostream>
-#include <cmath>
-
 #include "lte_phy.h"
-#include "ResMapper.h"
-#ifdef DEBUG_EQ
-#include "matrix.h"
-#else
-#include "Matrix.h"
-#endif
-//#include "fftw3.h"
+#include "dmrs.h"
+#include <stdlib.h>
 
-void Equalizer_init(LTE_PHY_PARAMS *lte_phy_params);
+void FDLSEstimation(float *pXt, float *pXtDagger, float *pYt, float *pHTranspose, int NumLayer, int NumRxAntenna);
+void FDLSEstimation(float *pXtReal, float *pXtImag,
+				    float *pXtDaggerReal, float *pXtDaggerImag,
+ 					float *pYtReal, float *pYtImag,
+					float *pHTransposeReal, float *pHTransposeImag,
+					int NumLayer,
+					int NumRxAntenna);
 
-void Equalizer_cleanup(LTE_PHY_PARAMS *lte_phy_params);
+void FDLSEqualization(float *pInpData, float *pHTranspose, int m, int NumLayer, int NumRxAntenna, int MDFTPerUser, int NumULSymbSF, float *pOutData);
+void FDLSEqualization(float *pInpDataReal, float *pInpDataImag,
+					  float *pHTransposeReal, float *pHTransposeImag,
+					  int m,
+					  int NumLayer,
+					  int NumRxAntenna,
+					  int MDFTPerUser,
+					  int NumULSymbSF,
+					  float *pOutDataReal, float *pOutDataImag);
 
-void FDLSEstimation(std::complex<float>** pXt, std::complex<float>** pXtDagger, std::complex<float>** pYt, std::complex<float>** pHTranspose, int NumLayer, int NumRxAntenna);
+void LSFreqDomain(float *pInpData, float *pOutData, int MDFT, int NumLayer, int NumRxAyntenna, int NumULSymbSF);
+void LSFreqDomain(float *pInpDataReal, float *pInpDataImag,
+				  float *pOutDataReal, float *pOutDataImag,
+				  int MDFT, int NumLayer, int NumRxAntenna, int NumULSymbSF);
 
-//	void FDLSEqualization(complex<float>** pHTranspose,int m,int NumLayer);
-void FDLSEqualization(std::complex<float> *pInpData, std::complex<float>** pHTranspose, int m, int NumLayer, int NumRxAntenna, int MDFTPerUser, std::complex<float> *pOutData);
-//	void FDMSEEEqualization(complex<float>** pHTranspose,int m,int NumLayer, float No);
-void FDMMSEEqualization(std::complex<float> *pInpData, std::complex<float>** pHTranspose, int m, int NumLayer, int NumRxAntenna, int MDFTPerUser, float No, std::complex<float> *pOutData);
-
-void LSFreqDomain(std::complex<float> *pInpData, std::complex<float> *pOutData, int MDFT, int NumLayer, int NumRxAntenna);
-
-void Equalizing(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pInpData, std::complex<float> *pOutData);
+void Equalizing(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOutData);
+void Equalizing(LTE_PHY_PARAMS *lte_phy_params,
+				float *pInpDataReal, float *pInpDataImag,
+				float *pOutDataReal, float *pOutDataImag);
 
 #endif

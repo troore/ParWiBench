@@ -1,11 +1,12 @@
 
 #include "ResMapper.h"
 
-#include <iostream>
+//#include <iostream>
 
-void geneDMRS(std::complex<float> *pDMRS, int N_layer, int N_dft)
+void geneDMRS(float *pDMRS, int N_layer, int N_dft)
 {
 	int i;
+	int table_len = 2 * N_layer * N_dft;
 	
 	int pPrimeTable[6][2];
 	int ncs[2] = {3, 11};
@@ -14,14 +15,15 @@ void geneDMRS(std::complex<float> *pDMRS, int N_layer, int N_dft)
 	int idx;
 	int RSu, RSv;
 	double qbar, q;
-	std::complex<double> px[1200];
+//	std::complex<double> px[1200];
+	double px[2][1200];
 	
-	pPrimeTable[0][0] = 75;  pPrimeTable[0][1] = 73;
-	pPrimeTable[1][0] = 150; pPrimeTable[1][1] = 149;
-	pPrimeTable[2][0] = 300; pPrimeTable[2][1] = 293;
-	pPrimeTable[3][0] = 600; pPrimeTable[3][1] = 599;
-	pPrimeTable[4][0] = 900; pPrimeTable[4][1] = 887;
-	pPrimeTable[5][0] = 1200;pPrimeTable[5][1] = 1193;
+	pPrimeTable[0][0] = 75;		pPrimeTable[0][1] = 73;
+	pPrimeTable[1][0] = 150;	pPrimeTable[1][1] = 149;
+	pPrimeTable[2][0] = 300;	pPrimeTable[2][1] = 293;
+	pPrimeTable[3][0] = 600;	pPrimeTable[3][1] = 599;
+	pPrimeTable[4][0] = 900;	pPrimeTable[4][1] = 887;
+	pPrimeTable[5][0] = 1200;	pPrimeTable[5][1] = 1193;
 
 	zc_flag = 1;
 	idx = 0;
@@ -40,48 +42,53 @@ void geneDMRS(std::complex<float> *pDMRS, int N_layer, int N_dft)
 
 	RSu = 0;
 	RSv = 0;
-	qbar=(double)Nzc*(RSu+1.0)/31.0;
-	q=floor((qbar+0.5))+RSv*pow(-1.0,(floor((2.0*qbar))));
+	qbar = ((double)Nzc) * (RSu + 1.0) / 31.0;
+	q = floor((qbar + 0.5)) + RSv * pow(-1.0, (floor((2.0 * qbar))));
 
-
-	for(int m=0;m<Nzc;m++)
+	for (int m = 0; m < Nzc; m++)
 	{
-		double theta = -PI*q*m*(m+1.0)/((double)Nzc);
-		px[m] = std::complex<double>(cos(theta), sin(theta));
+		double theta = (-PI * q * m * (m + 1.0)) / ((double)Nzc);
+		//	px[m] = std::complex<double>(cos(theta), sin(theta));
+		px[0][m] = cos(theta);
+		px[1][m] = sin(theta);
 	}
 
-	for(int slot=0;slot<2;slot++)
+	for (int slot = 0; slot < 2; slot++)
 	{
-		for(int layer=0; layer < N_layer; layer++)
+		for (int layer = 0; layer < N_layer; layer++)
 		{
-			int cs = ncs[slot]+6*layer;
-			double alpha = 2.0*PI*cs/12.0;
-			for(int n=0;n<N_dft;n++)
+			int cs = ncs[slot] + 6*layer;
+			double alpha = (2.0 * PI * cs) / 12.0;
+
+			for (int n = 0; n < N_dft; n++)
 			{
-				int idx=n%Nzc;
+				int idx = (n % Nzc);
 				double a = cos(alpha * n);
 				double b = sin(alpha * n);
 				//	std::complex<double> c = std::complex<double>((cos(alpha*n)),(sin(alpha*n)));
-				std::complex<double> c = std::complex<double>(a, b);
-				//	*(*(*(pDMRS+slot)+layer)+n)=(complex<float>)(c * px[idx]);
-				pDMRS[(slot * N_layer + layer) * N_dft + n] = (std::complex<float>)(c * px[idx]);
+				double c[2] = {a, b};
+
+				pDMRS[(slot * N_layer + layer) * N_dft + n] = c[0] * px[0][idx] - c[1] * px[1][idx];
+				pDMRS[table_len + (slot * N_layer + layer) * N_dft + n] = c[0] * px[1][idx] + c[1] * px[0][idx];
 			}
 		}
 	}
 
-	if(N_layer==2)
+	if (N_layer == 2)
 	{
-		for(int n=0;n<N_dft;n++)
+		for (int n = 0; n < N_dft; n++)
 		{
 			//	(*(*(*(pDMRS+1)+1)+n))*=(-1.0);
-			pDMRS[(1 * N_layer + 1) * N_dft + n] *= (-1.0);
+			//	pDMRS[(1 * N_layer + 1) * N_dft + n] *= (-1.0);
+			pDMRS[(1 * N_layer + 1) * N_dft + n] = -1.0 * pDMRS[(1 * N_layer + 1) * N_dft + n];
+			pDMRS[table_len + (1 * N_layer + 1) * N_dft + n] = -1.0 * pDMRS[table_len + (1 * N_layer + 1) * N_dft + n];
 		}
 	}
 	else
 	{}
 }
 
-void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pInpData, std::complex<float> *pOutData)
+void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOutData)
 {
 	int NumLayer = lte_phy_params->N_tx_ant;
 	int NumULSymbSF = LTE_PHY_N_SYMB_PER_SUBFR;
@@ -89,10 +96,15 @@ void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pInp
 	int NIFFT = lte_phy_params->N_fft_sz;
 	int MDFT = lte_phy_params->N_dft_sz;
 
-	std::complex<float> DMRS[2 * LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX];
+	int in_buf_sz = lte_phy_params->resm_in_buf_sz;
+	int out_buf_sz = lte_phy_params->resm_out_buf_sz;
 
-	geneDMRS(DMRS, NumLayer, MDFT);
+//	float DMRS[2 * (2 * LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX)];
+	float *pDMRS = (float *)malloc(2 * (2 * NumLayer * MDFT) * sizeof(float));
 
+	geneDMRS(pDMRS, NumLayer, MDFT);
+
+	/*
 	for (int nlayer = 0; nlayer < NumLayer; nlayer++)
 	{
 		for (int nsym = 0; nsym < NumULSymbSF; nsym++)
@@ -105,11 +117,19 @@ void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pInp
 			}
 		}
 	}
+	*/
+	int nsig = NumLayer * NumULSymbSF * NIFFT;
+
+	for (int k = 0; k < nsig; k++)
+	{
+		pOutData[k] = 1.0;
+		pOutData[out_buf_sz + k] = 0.0;
+	}
 
 	for (int nlayer = 0; nlayer < NumLayer; nlayer++)
 	{
 		int DMRSslot = 0;
-			
+//#pragma omp parallel for		
 		for (int nsym = 0; nsym < NumULSymbSF; nsym++)
 		{
 			int SymIdx = nlayer * NumULSymbSF + nsym;
@@ -118,25 +138,29 @@ void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pInp
 			{
 				for (int n = SCLoc; n < SCLoc + MDFT; n++)
 				{
-					//	pOutData[SymIdx * NIFFT + n] = *(*(*(VpDMRS + DMRSslot) + nlayer) + n - SCLoc);
-					pOutData[SymIdx * NIFFT + n] = DMRS[(DMRSslot * NumLayer + nlayer) * MDFT + (n - SCLoc)];
+					//	pOutData[SymIdx * NIFFT + n] = DMRS[(DMRSslot * NumLayer + nlayer) * MDFT + (n - SCLoc)];
+					pOutData[SymIdx * NIFFT + n] = pDMRS[(DMRSslot * NumLayer + nlayer) * MDFT + (n - SCLoc)];
+					pOutData[out_buf_sz + SymIdx * NIFFT + n] = pDMRS[(2 * NumLayer * MDFT) + (DMRSslot * NumLayer + nlayer) * MDFT + (n - SCLoc)];
 				}
 				DMRSslot++;
 			}
 			else
 			{
-
 				for (int n = SCLoc; n < SCLoc + MDFT; n++)
 				{
-					//	*(*(pOutData+SymIdx)+n)=*(*(pInpData+nlayer*(NumULSymbSF-2)+nsym-DMRSslot)+n-SCLoc);
+					//	pOutData[SymIdx * NIFFT + n] = pInpData[nlayer * (NumULSymbSF - 2) * MDFT + (nsym - DMRSslot) * MDFT + n - SCLoc];
 					pOutData[SymIdx * NIFFT + n] = pInpData[nlayer * (NumULSymbSF - 2) * MDFT + (nsym - DMRSslot) * MDFT + n - SCLoc];
+					pOutData[out_buf_sz + SymIdx * NIFFT + n] = pInpData[in_buf_sz + nlayer * (NumULSymbSF - 2) * MDFT + (nsym - DMRSslot) * MDFT + n - SCLoc];
+					
 				}
 			}
 		}
 	}
+
+	free(pDMRS);
 }
 
-void SubCarrierDemapping(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pInpData, std::complex<float> *pOutData)
+void SubCarrierDemapping(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOutData)
 {
 	int SCLoc = lte_phy_params->sc_loc;
 	int NumRxAntenna = lte_phy_params->N_rx_ant;
@@ -144,40 +168,47 @@ void SubCarrierDemapping(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pI
 	int NIFFT = lte_phy_params->N_fft_sz;
 	int MDFT = lte_phy_params->N_dft_sz;
 
+	int in_buf_sz = lte_phy_params->resdm_in_buf_sz;
+	int out_buf_sz = lte_phy_params->resdm_out_buf_sz;
+
 	//////////// Get DMRS /////////////
 	for (int nrs = 0; nrs < 2; nrs++)
 	{
 		int DMRSPos = lte_phy_params->dmrs_symb_pos[nrs];
 			
-		for(int nrx=0;nrx<NumRxAntenna;nrx++)
+		for (int nrx = 0; nrx < NumRxAntenna; nrx++)
 		{
 
-			int SymIdxIn = nrx*NumULSymbSF+DMRSPos;
-			int SymIdxOut= nrx*2+nrs;
+			int SymIdxIn = nrx * NumULSymbSF + DMRSPos;
+			int SymIdxOut = nrx * 2 + nrs;
 
-			for(int n=0;n<MDFT;n++)
+			for (int n = 0 ; n < MDFT; n++)
 			{
 				pOutData[SymIdxOut * MDFT + n] = pInpData[SymIdxIn * NIFFT + (n + SCLoc)];
+				pOutData[out_buf_sz + SymIdxOut * MDFT + n] = pInpData[in_buf_sz + SymIdxIn * NIFFT + (n + SCLoc)];
 			}
 		}
 	}
 		
 	//////////// Get Data /////////////
-	for(int nrx=0;nrx<NumRxAntenna;nrx++)
+	for(int nrx = 0; nrx < NumRxAntenna; nrx++)
 	{
-		int SymOutIdx=0;
-		for(int nsym=0;nsym<NumULSymbSF;nsym++)
+		int SymOutIdx = 0;
+		
+		for (int nsym = 0; nsym < NumULSymbSF; nsym++)
 		{
-			int SymIdxIn = NumULSymbSF*nrx+nsym;
-			if(((nsym==lte_phy_params->dmrs_symb_pos[0]) || (nsym==lte_phy_params->dmrs_symb_pos[1])))
+			int SymIdxIn = NumULSymbSF * nrx + nsym;
+			
+			if(((nsym == lte_phy_params->dmrs_symb_pos[0]) || (nsym == lte_phy_params->dmrs_symb_pos[1])))
 			{}
 			else
 			{
-				int SymOutT=(NumULSymbSF-2)*nrx+SymOutIdx+NumRxAntenna*2;
+				int SymOutT = (NumULSymbSF - 2) * nrx + SymOutIdx + NumRxAntenna * 2;
 
 				for (int n = 0; n < MDFT; n++)
 				{
 					pOutData[SymOutT * MDFT + n] = pInpData[SymIdxIn * NIFFT + (n + SCLoc)];
+					pOutData[out_buf_sz + SymOutT * MDFT + n] = pInpData[in_buf_sz + SymIdxIn * NIFFT + (n + SCLoc)];
 				}
 				SymOutIdx++;
 			}
