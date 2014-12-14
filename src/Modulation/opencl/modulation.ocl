@@ -44,14 +44,6 @@ __kernel void demodulating(__global float *pDecSeq, int bits_per_samp, int in_bu
 		}
 		for (j = 0; j < bits_per_samp; j++)
 		{
-			for (k = 0; k < mod_table_len; k++)
-			{
-				//	printf("%d", p_idx_table[k * bits_per_samp + j]);
-			}
-			//	printf("\n");
-		}
-		for (j = 0; j < bits_per_samp; j++)
-		{
 			float min0, min1;
 			//	int idx0 = 0, idx1 = 0;
 			int idx[2] = {0, 0};

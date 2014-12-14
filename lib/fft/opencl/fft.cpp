@@ -15,6 +15,9 @@
 #include "fft.h"
 #include "meas.h"
 
+#define N (1 << 10)
+#define PI	3.14159265358979323846264338327950288
+
 float v[N][2], v1[N][2], vout[N][2], v1out[N][2];
 
 /* Print a vector of complexes as ordered pairs. */

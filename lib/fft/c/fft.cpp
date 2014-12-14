@@ -13,21 +13,24 @@
 #define PI	3.14159265358979323846264338327950288
 
 //float v[N * 2], v1[N * 2], vout[N * 2], v1out[N * 2];
+float v[2 * N], v1[2 * N], vout[2 * N], v1out[2 * N];
 
 /* Print a vector of complexes as ordered pairs. */
-/*
 static void print_vector(
 		const char *title,
-		float x[N * 2],
+		float *x,
 		int n)
 {
 	int i;
 	printf("%s (dim=%d):", title, n);
+#ifdef DEBUG
 	for(i=0; i<n; i++ ) printf(" %f,%f ", x[2 * i + 0],x[2 * i + 1]);
+#else
+	for(i=0; i<n; i++ ) printf(" %f,%f ", x[i], x[i + n]);
+#endif
 	putchar('\n');
 	return;
 }
-*/
 
 static int BitReverse(int src, int size)
 {
@@ -149,7 +152,54 @@ void iter_fft(int n, float a[N * 2], float y[N * 2], int direction)
 	}
 }
 
-/*
+
+void fft_nrvs(int n, float *a, float *y, int direction)
+{
+	int p, i, k;
+	int lgn;
+	float omega_m[2], omega[2];
+	float t[2], u[2];
+	float ang;
+
+//	lgn = log2(n);
+//	for (i = 0; i < n; i++)
+//		y[i] = a[i];
+
+	for (p = 1; p <= (n / 2); p <<= 1)
+	{
+		//	omega_m[0] = cos((2 * PI) / m);
+		//	omega_m[1] = ((float)direction) * sin((2 * PI) / m);
+		for (i = 0; i < (n >> 1); i++)
+		{
+			int o_idx = i + (n >> 1);
+			
+			k = i & (p - 1); // i % p
+			ang = ((2 * PI * k) / (2 * p));
+			omega[0] = cos(ang);
+			omega[1] = ((float)direction) * sin(ang);
+			// t = omega * a[i + n / 2];
+			t[0] = omega[0] * a[o_idx] - omega[1] * a[o_idx + n];
+			t[1] = omega[0] * a[o_idx + n] + omega[1] * a[o_idx];
+			// u = a[i];
+			u[0] = a[i];
+			u[1] = a[i + n];
+
+			//	y[2 * i - k] = u + t;
+			y[2 * i - k] = u[0] + t[0];
+			y[2 * i - k + n] = u[1] + t[1];
+			//	y[2 * i - k + p] = u - t;
+			y[2 * i - k + p] = u[0] - t[0];
+			y[2 * i - k + p + n] = u[1] - t[1];
+		}
+		
+		for (i = 0; i < n; i++)
+		{
+			a[i] = y[i];
+			a[i + n] = y[i + n];
+		}
+	}
+}
+
 int main(int argc, char *argv[])
 {
 //	float v[N][2], v1[N][2], vout[N][2], v1out[N][2];
@@ -161,10 +211,15 @@ int main(int argc, char *argv[])
 //	fptr_imag = fopen("../lte/src/OFDM/testsuite/ModulationInputImag", "r");
 
 	// Fill v[] with a function of known FFT:
-	for(k=0; k<N; k++)
+	for (k = 0; k < N; k++)
 	{
+#ifdef DEBUG
 		v[2 * k + 0] = 0.125*cos(2*PI*k/(float)N);
 		v[2 * k + 1] = 0.125*sin(2*PI*k/(float)N);
+#else
+		v[k] = 0.125 * cos((2 * PI * k) / (float)N);
+		v[k + N] = 0.125 * sin((2 * PI * k ) / (float)N);
+#endif
 	//	v1[k][0] =  0.3*cos(2*PI*k/(float)N);
 	//	v1[k][1] = -0.3*sin(2*PI*k/(float)N);
 
@@ -178,14 +233,31 @@ int main(int argc, char *argv[])
 //	v[6]=3;v[7]=0;
 
 	print_vector("Orig", v, N);
+#ifdef DEBUG
 	iter_fft(N, v, vout, -1);
+#else
+	fft_nrvs(N, v, vout, -1);
+#endif
+
+#ifdef DEBUG
 	for (k = 0; k < N; k++)
 	{
 		vout[2 * k + 0] /= N;
 		vout[2 * k + 1] /= N;
 	}
+#else
+	for (k = 0; k < N; k++)
+	{
+		vout[k] /= N;
+		vout[k + N] /= N;
+	}
+#endif
 	print_vector("iFFT", vout, N);
+#ifdef DEBUG
 	iter_fft(N, vout, v, 1);
+#else
+	fft_nrvs(N, vout, v, 1);
+#endif
 	print_vector(" FFT", v, N);
 
 //	print_vector("Orig", v1, N);
@@ -196,4 +268,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-*/
