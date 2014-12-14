@@ -194,8 +194,8 @@ typedef struct
 
 	// Transform precoding
   int mod_in[N_MOD_IN_MAX];
-  float mod_out[N_MOD_OUT_MAX*2];
-  float demod_in[N_MOD_IN_MAX*2];
+  float mod_out[N_MOD_OUT_MAX * 2];
+  float demod_in[N_MOD_IN_MAX * 2];
   float demod_LLR[N_MOD_IN_MAX];
   int demod_HD[N_MOD_IN_MAX];
   int mod_in_buf_sz;

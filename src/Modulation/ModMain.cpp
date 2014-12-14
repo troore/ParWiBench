@@ -25,7 +25,7 @@ void test_mod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 {
 		
-//	std::cout << "Demodulation starts" << std::endl;
+	std::cout << "Demodulation starts" << std::endl;
 
 	float awgn_sigma = 0.193649; //this value is for the standard input  see "AWGNSigma"
 	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "testModulationRandomOutputReal", "testModulationRandomOutputImag");
@@ -39,7 +39,7 @@ void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 //	WriteOutputToFiles(lte_phy_params->demod_LLR, lte_phy_params->demod_out_buf_sz, "/home/xblee/ParWiBench/src/Modulation/testDemodulationOutput");
 	WriteOutputToFiles(lte_phy_params->demod_LLR, lte_phy_params->demod_out_buf_sz, "testDemodulationOutput");
 
-//	std::cout << "Demodulation ends" << std::endl;
+	std::cout << "Demodulation ends" << std::endl;
 
 
 }
