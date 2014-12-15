@@ -86,7 +86,7 @@ void lte_phy_init(LTE_PHY_PARAMS *lte_phy_params, int enum_fs, int mod_type, int
 	lte_phy_params->descramb_out_buf_sz = lte_phy_params->scramb_in_buf_sz;
 
 	// Modulation
-	lte_phy_params->mod_in_buf_sz = lte_phy_params->descramb_out_buf_sz;
+	lte_phy_params->mod_in_buf_sz = lte_phy_params->scramb_out_buf_sz;
 	lte_phy_params->mod_out_buf_sz = lte_phy_params->N_tx_ant * lte_phy_params->N_dft_sz * (lte_phy_params->N_symb_per_subfr - 2);
 	lte_phy_params->demod_in_buf_sz = lte_phy_params->mod_out_buf_sz;
 	lte_phy_params->demod_out_buf_sz = lte_phy_params->mod_in_buf_sz;

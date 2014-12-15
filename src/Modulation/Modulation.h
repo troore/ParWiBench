@@ -9,16 +9,6 @@
 #include <fstream>
 
 #include "lte_phy.h"
-#include "api.h"
-
-typedef float (*p_a)[2];
-
-float vecmin(float* pV,int len);
-float eudist(float a, float b, float c, float d);
-void dec2bits(int i, int n, int *bvec);
-
-void set_mod_params(p_a *pp_table, int *bits_per_samp, int *mod_table_len, int mod_type);
-void init_mod_tables();
 
 void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, float *pQAMSeq, int mod_type);
 

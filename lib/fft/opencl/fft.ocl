@@ -16,7 +16,7 @@ __kernel void fft_radix2_kernel(__global float2 *a, __global float2 *y, int p, i
 {
 	int i = get_global_id(0); // current thread id
 	int t = get_global_size(0); // number of threads
-	int k = i & (p - 1); // power of basic twiddle factor
+	int k = i & (p - 1); // == i % p, power of basic twiddle factor
 	int j; // output index
 
 	float2 twiddle;
@@ -45,7 +45,7 @@ __kernel void fft_radix2_kernel(__global float2 *a, __global float2 *y, int p, i
 //	printf("%f\t%f\n", u0.x, u0.y);
 //	printf("%f\t%f\n", u1.x, u1.y);
 
-	j = (i << 1) - k; // ==(2 * i - k)
+	j = (i << 1) - k; // == (2 * i - k)
 //	printf("%d\t%d\n", j, j+p);
 	y[j] = u0;
 	y[j + p] = u1;

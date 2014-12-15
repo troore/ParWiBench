@@ -1,31 +1,27 @@
-#define _CRT_SECURE_NO_WARNINGS
+#define PROGRAM_FILE "modulation.ocl"
+#define MOD_KERNEL_FUNC "modulating"
+#define DEMOD_KERNEL_FUNC "demodulating"
 
-#define SCR_PROGRAM_FILE "modulation.cl"
-#define SCR_KERNEL_FUNC "modulation"
-#define DESCR_KERNEL_FUNC "demodulation"
-
-#include "Modulation.h"
-//#include "api.h"
-//#include "CL/opencl.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 
-#ifdef MAC
-#include <OpenCL/cl.h>
-#else  
 #include <CL/cl.h>
-#endif
+
+#include "Modulation.h"
+#include "opencl/clutil.h"
 
 
+typedef float (*p_a)[2];
 
 static const float INF = 1.0e9;
 
-float BPSK_table[2][2]; float QPSK_table[4][2];
+float BPSK_table[2][2];
+float QPSK_table[4][2];
 float QAM16_table[16][2];
 float QAM64_table[64][2];
 
-void init_mod_tables()
+static void init_mod_tables()
 {
 	int i, j;
 	
@@ -169,7 +165,7 @@ void init_mod_tables()
  * n: width of bit sequence
  * bvec: vector to contain the sequence
  */
-void dec2bits(int i, int n, int *bvec)
+static void dec2bits(int i, int n, int *bvec)
 {
 	int j;
 	
@@ -180,62 +176,30 @@ void dec2bits(int i, int n, int *bvec)
 	}
 }
 
-void set_mod_params(float* t, /*float (*mod_table)[2]*/ p_a *pp_table, int *bits_per_samp, int *mod_table_len, int mod_type)
+static void set_mod_params(p_a *pp_table, int *bits_per_samp, int *mod_table_len, int mod_type)
 {
 	init_mod_tables();
-
-//	int (*p)[2];
-
-//	p = (int (*)[2])0x1;
 	
 	switch(mod_type)
 	{
 	case LTE_BPSK:
-	//	tt = &BPSK_table[0][0];
 		*pp_table = &BPSK_table[0];
 		*bits_per_samp = BPSK_BITS_PER_SAMP;
 		*mod_table_len = BPSK_TABLE_LEN;
-		for(int i =0; i < BPSK_TABLE_LEN; i++)
-		{
-			t[i*2] = BPSK_table[i][0];
-			t[i*2+1] = BPSK_table[i][1];
-		}
 		break;
 	case LTE_QPSK:
-	//	tt = &QPSK_table[0][0];
 		*pp_table = &QPSK_table[0];
 		*bits_per_samp = QPSK_BITS_PER_SAMP;
 		*mod_table_len = QPSK_TABLE_LEN;
-		for(int i =0; i < QPSK_TABLE_LEN; i++)
-		{
-			t[i*2] = QPSK_table[i][0];
-			t[i*2+1] = QPSK_table[i][1];
-		}
-
 		break;
 	case LTE_QAM16:
-	//	tt = &QAM16_table[0][0];
 		*pp_table = &QAM16_table[0];
-//		*pp_table = (float (*)[2])0x1;
 		*bits_per_samp = QAM16_BITS_PER_SAMP;
 		*mod_table_len = QAM16_TABLE_LEN;
-		for(int i =0; i < QAM16_TABLE_LEN; i++)
-		{
-			t[i*2] = QAM16_table[i][0];
-			t[i*2+1] = QAM16_table[i][1];
-		}
-
 		break;
 	case LTE_QAM64:
-	//	tt = &QAM64_table[0][0];
 		*pp_table = &QAM64_table[0];
-		*bits_per_samp = QAM64_BITS_PER_SAMP;	//177,why 16,not 64
-		for(int i =0; i < QAM64_TABLE_LEN; i++)
-		{
-			t[i*2] = QAM64_table[i][0];
-			t[i*2+1] = QAM64_table[i][1];
-		}
-
+		*bits_per_samp = QAM64_BITS_PER_SAMP;
 		*mod_table_len = QAM64_TABLE_LEN;
 		break;
 	default:
@@ -252,130 +216,88 @@ void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, float *pModedSeq,
 	int bits_per_samp;
 	int mod_table_len;
 	int n_samp, b, idx;
-	int in_buf_sz;
-	float t[MAX_MOD_TABLE_LEN*2]; 
+	int in_buf_sz, out_buf_sz;
+	
+//	float t[MAX_MOD_TABLE_LEN*2];
+	float *p_mod_table;
 
-	in_buf_sz = lte_phy_params->mod_in_buf_sz;
-	set_mod_params(t, &p_table, &bits_per_samp, &mod_table_len, mod_type);
-	//for(int i = 0; i < mod_table_len; i++)
-	//	printf("%f ",t[2*i]);
-
-	int n = in_buf_sz / bits_per_samp;
+	cl_platform_id platform;	
 	cl_device_id device;
    	cl_context context;
   	cl_program program;
    	cl_kernel kernel;
    	cl_command_queue queue;
-   	cl_int i, err;
-  	size_t local_size, global_size;
+   	cl_int _err;
 
-	initcl_context(&device,&context,&program,SCR_PROGRAM_FILE);
+	cl_mem pBitsSeq_buffer, pModedSeq_buffer, p_mod_table_buffer;
+	
+  	size_t global_size, local_size;
 
-	initcl_kernel(&device, &context, &queue, &kernel,&program,SCR_KERNEL_FUNC);
+	in_buf_sz = lte_phy_params->mod_in_buf_sz;
+	out_buf_sz = lte_phy_params->mod_out_buf_sz;
+	
+	set_mod_params(&p_table, &bits_per_samp, &mod_table_len, mod_type);
+	
+	p_mod_table = (float *)malloc(2 * mod_table_len * sizeof(float));
+	for (int i = 0; i < mod_table_len; i++)
+	{
+		p_mod_table[i] = p_table[i][0];
+		p_mod_table[i + mod_table_len] = p_table[i][1];
+	}
+	//for(int i = 0; i < mod_table_len; i++)
+	//	printf("%f ",t[2*i]);
+
+
+//	initcl_context(&device,&context,&program,SCR_PROGRAM_FILE);
+
+//	initcl_kernel(&device, &context, &queue, &kernel,&program,SCR_KERNEL_FUNC);
+
+	platform = device_query();
+	device = create_device(&platform);
+	context = clCreateContext(NULL, 1, &device, NULL, NULL, &_err);
+	program = build_program(&context, &device, PROGRAM_FILE);
+	kernel = clCreateKernel(program, MOD_KERNEL_FUNC, &_err);
+	queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &_err);
 
 	/* Create buffers*/
-	cl_mem pBitsSeq_buffer,pModedSeq_buffer,ptable_buffer;
-	pBitsSeq_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, in_buf_sz* sizeof(int), pBitsSeq, &err);
-	if(err < 0) { perror("Couldn't create pBitsSeq_buffer");  exit(1);   };
-	pModedSeq_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, 2*n*sizeof(float), pModedSeq, &err);
-	if(err < 0) { perror("Couldn't create pModedSeq_buffer");  exit(1);   };
-	ptable_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, mod_table_len*2*sizeof(float),t, &err);	
-	if(err < 0) { perror("Couldn't create ptable_buffer");  exit(1);   };
+
+	pBitsSeq_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, in_buf_sz * sizeof(int), NULL, &_err);
+	if(_err < 0) { perror("Couldn't create pBitsSeq_buffer");  exit(1);   };
+	pModedSeq_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, 2 * out_buf_sz * sizeof(float), NULL, &_err);
+	if(_err < 0) { perror("Couldn't create pModedSeq_buffer");  exit(1);   };
+	p_mod_table_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, mod_table_len * 2 * sizeof(float), NULL, &_err);	
+	if(_err < 0) { perror("Couldn't create p_mod_table_buffer");  exit(1);   };
 
 	//initcl_kernel(device, context, queue, kernel,program,SCR_KERNEL_FUNC);
 
 	/* Set kernel arguments */
-	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pBitsSeq_buffer);
-	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &pModedSeq_buffer);
-	err |= clSetKernelArg(kernel, 2, sizeof(int), &bits_per_samp);
-	err |= clSetKernelArg(kernel, 3, sizeof(int), &n);
-	err |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &ptable_buffer);
-	err |= clSetKernelArg(kernel,5,sizeof(int),&mod_table_len);
-	if(err < 0) { perror("Couldn't create a kernel argument");  exit(1);   }
+	_err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pBitsSeq_buffer);
+	_err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &pModedSeq_buffer);
+	_err |= clSetKernelArg(kernel, 2, sizeof(int), &bits_per_samp);
+	_err |= clSetKernelArg(kernel, 3, sizeof(int), &out_buf_sz);
+	_err |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &p_mod_table_buffer);
+	_err |= clSetKernelArg(kernel, 5, sizeof(int),&mod_table_len);
+	if(_err < 0) { perror("Couldn't create a kernel argument");  exit(1);   }
 	
-	global_size = n;
+	global_size = out_buf_sz;
 
-	err = clEnqueueWriteBuffer(queue, pBitsSeq_buffer, CL_TRUE, 0, in_buf_sz * sizeof(int), pBitsSeq, 0, NULL, NULL);
-	err |= clEnqueueWriteBuffer(queue, ptable_buffer, CL_TRUE, 0, mod_table_len*2*sizeof(float), t, 0, NULL, NULL);
+	_err = clEnqueueWriteBuffer(queue, pBitsSeq_buffer, CL_TRUE, 0, in_buf_sz * sizeof(int), pBitsSeq, 0, NULL, NULL);
+	_err |= clEnqueueWriteBuffer(queue, p_mod_table_buffer, CL_TRUE, 0, mod_table_len * 2 * sizeof(float), p_mod_table, 0, NULL, NULL);
 
-	err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
+	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
 
-	err = clEnqueueReadBuffer(queue, pModedSeq_buffer, CL_TRUE, 0, 2 * n * sizeof(float), pModedSeq, 0, NULL, NULL);
+	_err = clEnqueueReadBuffer(queue, pModedSeq_buffer, CL_TRUE, 0, 2 * out_buf_sz * sizeof(float), pModedSeq, 0, NULL, NULL);
 
 	clReleaseMemObject(pBitsSeq_buffer);
 	clReleaseMemObject(pModedSeq_buffer);
-	clReleaseMemObject(ptable_buffer);
+	clReleaseMemObject(p_mod_table_buffer);
    	clReleaseKernel(kernel);
    	clReleaseCommandQueue(queue);
    	clReleaseProgram(program);
    	clReleaseContext(context);
+
+	free(p_mod_table);
 }
-
-
-/*
- * Euclidean distance of two complex values: a+bi and c+di
- */
-/*float eudist(float a, float b, float c, float d)
-{
-	return sqrt((a - c) * (a - c) + (b - d) * (b - d));
-}
-
-void Demodulating(LTE_PHY_PARAMS *lte_phy_params,  std::complex<float>*pDecSeq, int *pHD, int mod_type)
-{
-	float dist, mindist;
-	int closest;
-
-	float (*p_table)[2];
-	int bits_per_samp;
-	int mod_table_len;
-		
-	int bitmap[MAX_MOD_TABLE_LEN * MAX_MOD_BITS_PER_SAMP];
-	int bvec[MAX_MOD_BITS_PER_SAMP];
-	
-	int in_buf_sz;
-
-	int i, j;
-
-	in_buf_sz = lte_phy_params->demod_in_buf_sz;
-
-	set_mod_params(&p_table, &bits_per_samp, &mod_table_len, mod_type);
-
-	// set bitmap 
-	for (i = 0; i < mod_table_len; i++)
-	{
-		dec2bits(i, bits_per_samp, bvec);
-		for (j = 0; j < bits_per_samp; j++)
-		{
-			bitmap[i * bits_per_samp + j] = bvec[j];
-		}
-	}
-	// set bitmap over... 
-
-
-	// Start demodulation 
-	for (i = 0; i < in_buf_sz; i++)
-	{
-		mindist = eudist(p_table[0][0], p_table[0][1], std::real(pDecSeq[i]), std::imag(pDecSeq[i]));
-		
-		closest = 0;
-		for (j = 1; j < mod_table_len; j++)
-		{
-			//	dist = std::abs(symbols(j) - signal(i));
-			dist = eudist(p_table[j][0], p_table[j][1], std::real(pDecSeq[i]), std::imag(pDecSeq[i]));
-			if (dist < mindist)
-			{
-				mindist = dist;
-				closest = j;
-			}
-		}
-		for (j = 0; j < bits_per_samp; j++)
-		{
-			pHD[i * bits_per_samp + j] = bitmap[closest * bits_per_samp + j];
-		}
-	}
-
-	//End demodulation
-}*/
 
 void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, int mod_type, float awgnSigma)
 {
@@ -383,24 +305,48 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, i
 	float (*p_table)[2];
 	int bits_per_samp;
 	int mod_table_len;
-	float t[MAX_MOD_TABLE_LEN*2]; 
-
-	int idx_table[MAX_MOD_TABLE_LEN][MAX_MOD_BITS_PER_SAMP];
+//	float t[MAX_MOD_TABLE_LEN*2];
+	float *p_mod_table;
 
 	int i, j, k;
 
-	int in_buf_sz = lte_phy_params->demod_in_buf_sz;
+	int in_buf_sz, out_buf_sz;
 	
-	set_mod_params(t, &p_table, &bits_per_samp, &mod_table_len, mod_type);
+	int *p_idx_table;
 
-	int n = in_buf_sz  * bits_per_samp;
+	cl_platform_id platform;
+	cl_device_id device;
+   	cl_context context;
+  	cl_program program;
+   	cl_kernel kernel;
+   	cl_command_queue queue;
+   	cl_int _err;
+
+	cl_mem pDecSeq_buffer, pLLR_buffer, p_mod_table_buffer, p_idx_table_buffer;
+	
+  	size_t global_size, local_size;
+	
+	set_mod_params(&p_table, &bits_per_samp, &mod_table_len, mod_type);
+
+	p_mod_table = (float *)malloc(2 * mod_table_len * sizeof(float));
+	for (int i = 0; i < mod_table_len; i++)
+	{
+		p_mod_table[i] = p_table[i][0];
+		p_mod_table[i + mod_table_len] = p_table[i][1];
+	}
+
+	in_buf_sz = lte_phy_params->demod_in_buf_sz;
+	out_buf_sz = lte_phy_params->demod_out_buf_sz;
+
+	p_idx_table = (int *)malloc(mod_table_len * bits_per_samp * sizeof(int));
+	
 	//for(i = 0; i < in_buf_sz; i++)
 	//	printf("%f ",pDecSeq[i+in_buf_sz]);
 	for (i = 0; i < mod_table_len; i++)
 	{
 		for (j = 0; j < bits_per_samp; j++)
 		{
-			idx_table[i][j] = 0;
+			p_idx_table[i * bits_per_samp + j] = 0;
 		}
 	}
 	for (i = 0; i < mod_table_len; i++)
@@ -411,71 +357,74 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, i
 		
 		while (idx_val)
 		{
-			idx_table[i][b] = idx_val % 2;
+			p_idx_table[i * bits_per_samp + b] = idx_val % 2;
 			idx_val /= 2;
 			b--;
 		}
 	}
 
-	cl_device_id device;
-   	cl_context context;
-  	cl_program program;
-   	cl_kernel kernel;
-   	cl_command_queue queue;
-   	cl_int err;
-  	size_t local_size, global_size;
-	initcl_context(&device,&context,&program,SCR_PROGRAM_FILE);
-	initcl_kernel(&device, &context, &queue, &kernel,&program,DESCR_KERNEL_FUNC);
+//	initcl_context(&device,&context,&program,SCR_PROGRAM_FILE);
+//	initcl_kernel(&device, &context, &queue, &kernel,&program,DESCR_KERNEL_FUNC);
+
+	platform = device_query();
+	device = create_device(&platform);
+	context = clCreateContext(NULL, 1, &device, NULL, NULL, &_err);
+	program = build_program(&context, &device, PROGRAM_FILE);
+	kernel = clCreateKernel(program, DEMOD_KERNEL_FUNC, &_err);
+	queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &_err);
+	
 	/* Create buffers*/
-	cl_mem pDecSeq_buffer,pLLR_buffer,ptable_buffer,idx_table_buffer;
-	pDecSeq_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, in_buf_sz * 2 * sizeof(float), pDecSeq, &err);
-	printf("%d\n", err);
+	pDecSeq_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, in_buf_sz * 2 * sizeof(float), NULL, &_err);
+//	printf("%d\n", _err);
 //	printf("CL_SUCCESS=%d\n", CL_SUCCESS);
 //	printf("CL_INVALID_CONTEXT=%d\n", CL_INVALID_CONTEXT);
 //	printf("CL_INVALID_VALUE=%d\n", CL_INVALID_VALUE);
-	printf("CL_INVALID_BUFFER_SIZE=%d\n", CL_INVALID_BUFFER_SIZE);
+//	printf("CL_INVALID_BUFFER_SIZE=%d\n", CL_INVALID_BUFFER_SIZE);
 //	printf("CL_INVALID_HOST_PTR=%d\n", CL_INVALID_HOST_PTR);
 //	printf("CL_MEM_OBJECT_ALLOCATION_FAILURE=%d\n", CL_MEM_OBJECT_ALLOCATION_FAILURE);
 //	printf("CL_OUT_OF_HOST_MEMORY=%d\n", CL_OUT_OF_HOST_MEMORY);
 	
-	if(err < 0) { perror("Couldn't create pDecSeq_buffer");  exit(1);   };
-	pLLR_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, n * sizeof(float), pLLR, &err);
-	if(err < 0) { perror("Couldn't create pLLR_buffer");  exit(1);   };	
-	ptable_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, mod_table_len*2 *sizeof(float), t, &err);
-	if(err < 0) { perror("Couldn't create ptable_buffer");  exit(1);   };	
-	idx_table_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, MAX_MOD_TABLE_LEN * MAX_MOD_BITS_PER_SAMP*sizeof(int), idx_table, &err);	
-	if(err < 0) { perror("Couldn't create idx_table_buffer");  exit(1);   };	
+	if(_err < 0) { perror("Couldn't create pDecSeq_buffer");  exit(1);   };
+	pLLR_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, out_buf_sz * sizeof(float), NULL, &_err);
+	if(_err < 0) { perror("Couldn't create pLLR_buffer");  exit(1);   };	
+	p_mod_table_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, mod_table_len * 2 * sizeof(float), NULL, &_err);
+	if(_err < 0) { perror("Couldn't create ptable_buffer");  exit(1);   };	
+	p_idx_table_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, mod_table_len * bits_per_samp * sizeof(int), NULL, &_err);	
+	if(_err < 0) { perror("Couldn't create idx_table_buffer");  exit(1);   };	
 	//initcl_kernel(device, context, queue, kernel,program,DESCR_KERNEL_FUNC);
 	
 	/* Set kernel arguments */
-	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pDecSeq_buffer);
-	err |= clSetKernelArg(kernel, 1, sizeof(int), &bits_per_samp);
-	err |= clSetKernelArg(kernel, 2, sizeof(int), &in_buf_sz);
-	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &ptable_buffer);
-	err |= clSetKernelArg(kernel, 4, sizeof(int), &mod_table_len);
-	err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &idx_table_buffer);
-	err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &pLLR_buffer);
-	err |= clSetKernelArg(kernel, 7, sizeof(float), &No);
-	if(err < 0) { perror("Couldn't create a kernel argument");  exit(1);   }
+	_err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pDecSeq_buffer);
+	_err |= clSetKernelArg(kernel, 1, sizeof(int), &bits_per_samp);
+	_err |= clSetKernelArg(kernel, 2, sizeof(int), &in_buf_sz);
+	_err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &p_mod_table_buffer);
+	_err |= clSetKernelArg(kernel, 4, sizeof(int), &mod_table_len);
+	_err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &p_idx_table_buffer);
+	_err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &pLLR_buffer);
+	_err |= clSetKernelArg(kernel, 7, sizeof(float), &No);
+	if(_err < 0) { perror("Couldn't create a kernel argument");  exit(1);   }
 	
 	global_size = in_buf_sz;
-	err = clEnqueueWriteBuffer(queue, pDecSeq_buffer, CL_TRUE, 0, in_buf_sz* 2 * sizeof(float), pDecSeq, 0, NULL, NULL);
-	err |= clEnqueueWriteBuffer(queue, ptable_buffer, CL_TRUE, 0, mod_table_len*2*sizeof(float), t, 0, NULL, NULL);
-	err |= clEnqueueWriteBuffer(queue, idx_table_buffer, CL_TRUE, 0, MAX_MOD_TABLE_LEN * MAX_MOD_BITS_PER_SAMP*sizeof(int), idx_table, 0, NULL, NULL);
+	_err = clEnqueueWriteBuffer(queue, pDecSeq_buffer, CL_TRUE, 0, in_buf_sz * 2 * sizeof(float), pDecSeq, 0, NULL, NULL);
+	_err |= clEnqueueWriteBuffer(queue, p_mod_table_buffer, CL_TRUE, 0, mod_table_len * 2 * sizeof(float), p_mod_table, 0, NULL, NULL);
+	_err |= clEnqueueWriteBuffer(queue, p_idx_table_buffer, CL_TRUE, 0, mod_table_len * bits_per_samp * sizeof(int), p_idx_table, 0, NULL, NULL);
 
-	err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
+	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
 
-	err = clEnqueueReadBuffer(queue, pLLR_buffer, CL_TRUE, 0, n * sizeof(float), pLLR, 0, NULL, NULL);
+	_err = clEnqueueReadBuffer(queue, pLLR_buffer, CL_TRUE, 0, out_buf_sz * sizeof(float), pLLR, 0, NULL, NULL);
 
 	//for(int i = 0; i < n; i++)
 	//	printf("%f ",pLLR[i]);
 	clReleaseMemObject(pDecSeq_buffer);
-	clReleaseMemObject(ptable_buffer);
-	clReleaseMemObject(idx_table_buffer);
+	clReleaseMemObject(p_mod_table_buffer);
+	clReleaseMemObject(p_idx_table_buffer);
 	clReleaseMemObject(pLLR_buffer);
    	clReleaseKernel(kernel);
    	clReleaseCommandQueue(queue);
    	clReleaseProgram(program);
-   	clReleaseContext(context);	
+   	clReleaseContext(context);
+
+	free(p_mod_table);
+	free(p_idx_table);
 }
 
