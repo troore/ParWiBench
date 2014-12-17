@@ -315,12 +315,12 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, 
 
 #ifdef __MIC__
 typedef __attribute__((aligned(64))) union zmmf {
-	            __m512 reg;
-		                    float elems[LEN16];
+	__m512 reg;
+	float elems[LEN16];
 } zmmf_t;
 #endif
 
-void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq_0, float *pDecSeq_1, float *pLLR, int mod_type, float awgnSigma)
+void _Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, int mod_type, float awgnSigma)
 {
 
 	float No = 2.0 * (pow(awgnSigma, 2.0));
@@ -363,8 +363,8 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq_0, float *pDecS
 		zmmf_t a0,a1,b0,b1,tmp1,tmp2,tmp3,result;
 		for(j = 0; j < mod_table_len; j++)
 		{
-			a0.elems[0:16] = pDecSeq_0[0:16];
-			a1.elems[0:16] = pDecSeq_1[0:16];
+			a0.elems[0:16] = pDecSeq[i:16];
+			a1.elems[0:16] = pDecSeq[i+N_MOD_OUT_MAX:16];
 			for(int ii=0;ii<16;ii++)
 			{
 				b0.elems[ii] = p_table[j][0];
@@ -456,7 +456,7 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq_0, float *pDecS
     {
         for(j = 0; j < mod_table_len; j++)
         {
-            metric[j] = pow(abs((std::complex<float>(pDecSeq_0[i], pDecSeq_1[i]) - (std::complex<float>(p_table[j][0], p_table[j][1])))), 2.0);
+            metric[j] = pow(abs((std::complex<float>(pDecSeq[i], pDecSeq[i+N_MOD_OUT_MAX]) - (std::complex<float>(p_table[j][0], p_table[j][1])))), 2.0);
         }
         
         for (j = 0; j < bits_per_samp; j++)

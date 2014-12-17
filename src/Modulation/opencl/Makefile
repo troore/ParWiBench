@@ -1,14 +1,15 @@
 include ../../../common/makefile.config
 
-SRC = ../ModMain.cpp Modulation.cpp
+AMD_SDK_HOME := /opt/AMDAPP
 
-SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/matrix.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/opencl/clutil.cpp $(LIB_DIR)/meas.cpp
+SRC = ../ModMain.cpp Modulation.cpp api.cpp
+
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/matrix.cpp $(LIB_DIR)/GeneralFunc.cpp
 SRC += $(SRC_DIR)/lte_phy.cpp
 
-INC_FLAGS += -I.. -I$(SRC_DIR) -I$(LIB_DIR)
+INC_FLAGS += -I. -I$(SRC_DIR) -I$(AMD_SDK_HOME)/include -I../
 
-LINKFLAGS += -lOpenCL
-
+LINKFLAGS += -L$(AMD_SDK_HOME)/lib -IOpenCL -lOpenCL
 TARGETS = ModDemod.out
 
 OBJS := $(patsubst %.cpp, %.o, $(SRC))

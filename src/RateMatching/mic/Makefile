@@ -4,7 +4,7 @@ SRC = ../RateMatcherMain.cpp  RateMatcher.cpp SubblockInterleaver_lte.cpp
 SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp 
 SRC += $(SRC_DIR)/lte_phy.cpp
 
-INC_FLAGS += -I. -I$(SRC_DIR)
+INC_FLAGS += -I../ -I. -I$(SRC_DIR)
 
 #CXXFLAGS += -DDEBUG_INTL
 

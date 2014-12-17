@@ -52,7 +52,7 @@ void _SubblockInterleaving(int SeqLen, int *InSeq, int *OutSeq, int offset)
                 {
                     pInterMatrix[r * C_sb + c] = InSeq[offset + StrIdx + (k - NumDummy) * 3];
                 }
-	    }
+//	    }
         }
         
         OutIdx=0;

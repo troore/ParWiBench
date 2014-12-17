@@ -171,10 +171,10 @@ void RxRateMatching(LTE_PHY_PARAMS *lte_phy_params, float *pLLRin, float *pLLRou
 
 			}
 		}  
-		double ttime,tbegin;
-		tbegin = ddtime();
+//		double ttime,tbegin;
+//		tbegin = ddtime();
 		SubblockDeInterleaving(cur_blk_len, pInMatrix, pOutMatrix);
-		ttime = ddtime() - tbegin;
+//		ttime = ddtime() - tbegin;
 		//printf("Sub time is %f \n", ttime);
 		for (j = 0; j < cur_blk_len; j++)
 		{
