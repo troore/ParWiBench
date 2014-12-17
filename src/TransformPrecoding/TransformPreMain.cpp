@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
+
+#include "meas.h"
 
 //#define TransformPre
 
@@ -20,7 +21,7 @@ void test_encoder(LTE_PHY_PARAMS *lte_phy_params)
 
 	TransformPrecoding(lte_phy_params, lte_phy_params->trans_encoder_in, lte_phy_params->trans_encoder_out);
 
-	WriteOutputToFiles(lte_phy_params->trans_encoder_out, lte_phy_params->trans_encoder_out_buf_sz, "/home/xblee/ParWiBench/src/TransformPrecoding/testTransformPrecoderOutputReal", "/home/xblee/ParWiBench/src/TransformPrecoding/testTransformPrecoderOutputImag");
+	WriteOutputToFiles(lte_phy_params->trans_encoder_out, lte_phy_params->trans_encoder_out_buf_sz, "testTransformPrecoderOutputReal", "TransformPrecoding/testTransformPrecoderOutputImag");
 
 //	std::cout << "Transform Precoder ends" << std::endl;
 	
@@ -28,26 +29,22 @@ void test_encoder(LTE_PHY_PARAMS *lte_phy_params)
 
 void test_decoder(LTE_PHY_PARAMS *lte_phy_params)
 {
-//	std::cout << "Transform Decoder starts" << std::endl;
+	std::cout << "Transform Decoder starts" << std::endl;
 	
-//	ReadInputFromFiles(rx_decoder_in, in_buf_sz, "TransformDecoderInputReal","TransformDecoderInputImag");
-	ReadInputFromFiles(lte_phy_params->trans_decoder_in, lte_phy_params->trans_decoder_in_buf_sz, "/home/xblee/ParWiBench/src/TransformPrecoding/testTransformPrecoderOutputReal", "/home/xblee/ParWiBench/src/TransformPrecoding/testTransformPrecoderOutputImag");
+	ReadInputFromFiles(lte_phy_params->trans_decoder_in, lte_phy_params->trans_decoder_in_buf_sz, "../TransformDecoderInputReal", "../TransformDecoderInputImag");
+
+	double tbegin, ttime;
+	tbegin = dtime();
 
 	TransformDecoding(lte_phy_params, lte_phy_params->trans_decoder_in, lte_phy_params->trans_decoder_out);
-	
-	WriteOutputToFiles(lte_phy_params->trans_decoder_out, lte_phy_params->trans_decoder_out_buf_sz, "/home/xblee/ParWiBench/src/TransformPrecoding/testTransformDecoderOutputReal", "/home/xblee/ParWiBench/src/TransformPrecoding/testTransformDecoderOutputImag");
-	
-//	std::cout << "Transform Decoder ends" << std::endl;
 
-}
+	ttime = dtime() - tbegin;
+	printf("whole time is %fms\n", ttime * 1000.0);
+	
+	WriteOutputToFiles(lte_phy_params->trans_decoder_out, lte_phy_params->trans_decoder_out_buf_sz, "../testTransformDecoderOutputReal", "../testTransformDecoderOutputImag");
+	
+	std::cout << "Transform Decoder ends" << std::endl;
 
-double dtime()
-{
-	double tseconds = 0.0;
-	struct timeval mytime;
-	gettimeofday(&mytime,(struct timezone*)0);
-	tseconds = (double)(mytime.tv_sec + mytime.tv_usec*1.0e-6);
-	return( tseconds );
 }
 
 int main(int argc, char *argv[])
@@ -69,8 +66,6 @@ int main(int argc, char *argv[])
 	n_tx_ant = atoi(argv[3]);
 	n_rx_ant = atoi(argv[4]);
 	
-	double tbegin, ttime;
-       	tbegin = dtime();
 
 	lte_phy_init(&lte_phy_params, enum_fs, mod_type, n_tx_ant, n_rx_ant);
 	
@@ -84,8 +79,6 @@ int main(int argc, char *argv[])
 
 	#endif
 
-	ttime = dtime() - tbegin;
-	printf("whole time is %f\n", ttime);
 
 	return 0;
 }

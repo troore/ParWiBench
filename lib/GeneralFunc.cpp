@@ -1,5 +1,16 @@
 
-#include "GeneralFunc.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <cmath>
+#include <ctime>
+#include <complex>
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <stdexcept>
+#include "gauss.h"
+
+using namespace std;
 
 extern int RANDOMSEED;
 
@@ -308,10 +319,42 @@ void GeneRandomInput(float *pIn, int Sz, const char *nameReal, const char *nameI
 		float vr = (float)gauss1(&sd);
 		sd-=222;
 		float vi = (float)gauss1(&sd);
+		/*
 		pIn[i*2+0] = vr;
 		pIn[i*2+1] = vi;
 		fprintf(fptr_real, "%f\n", pIn[i*2+0]);
 		fprintf(fptr_imag, "%f\n", pIn[i*2+1]);
+		*/
+		pIn[i] = vr;
+		pIn[i + Sz] = vi;
+		fprintf(fptr_real, "%f\n", pIn[i]);
+		fprintf(fptr_imag, "%f\n", pIn[i + Sz]);
+	}
+
+	fclose(fptr_real);
+	fclose(fptr_imag);
+}
+
+void GeneRandomInput(float *pInReal, float *pInImag, int Sz, const char *nameReal, const char *nameImag)
+{
+    FILE *fptr_real=NULL;
+    FILE *fptr_imag=NULL;
+    int sd = -111;
+
+	fptr_real = fopen(nameReal, "w+");
+	fptr_imag = fopen(nameImag, "w+");
+
+	for(int i=0;i<Sz;i++)
+	{
+		sd-=i;
+		float vr = (float)gauss1(&sd);
+		sd-=222;
+		float vi = (float)gauss1(&sd);
+
+		pInReal[i] = vr;
+		pInImag[i] = vi;
+		fprintf(fptr_real, "%f\n", pInReal[i]);
+		fprintf(fptr_imag, "%f\n", pInImag[i]);
 	}
 
 	fclose(fptr_real);
@@ -347,13 +390,17 @@ void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *n
 	FILE *fptr_real=NULL;
 	FILE *fptr_imag=NULL;
 	
-	fptr_real = fopen(nameReal, "w+");
-	fptr_imag = fopen(nameImag, "w+");
+//	fptr_real = fopen(nameReal, "w+");
+	if ((fptr_real = fopen(nameReal,"w+")) == NULL)
+		throw std::runtime_error ("file open error\n");
+//	fptr_imag = fopen(nameImag, "w+");
+	if ((fptr_imag = fopen(nameImag,"w+")) == NULL)
+		throw std::runtime_error ("file open error\n");
 	
 	for(int i=0;i<Sz;i++)
 	{
-		fprintf(fptr_real,"%f\t",pOut[i]);
-		fprintf(fptr_imag,"%f\t",pOut[i+Sz]);
+		fprintf(fptr_real,"%f\n",pOut[i]);
+		fprintf(fptr_imag,"%f\n",pOut[i+Sz]);
 	}
 	
 	fclose(fptr_real);
@@ -370,8 +417,8 @@ void WriteOutputToFiles(float *pOutReal, float *pOutImag, int Sz, const char *na
 	
 	for(int i=0;i<Sz;i++)
 	{
-		fprintf(fptr_real,"%f\t",pOutReal[i]);
-		fprintf(fptr_imag,"%f\t",pOutImag[i]);
+		fprintf(fptr_real,"%f\n",pOutReal[i]);
+		fprintf(fptr_imag,"%f\n",pOutImag[i]);
 	}
 	
 	fclose(fptr_real);

@@ -2,7 +2,7 @@ include ../../../common/makefile.config
 
 SRC = ../ModMain.cpp Modulation.cpp
 
-SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/matrix.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/opencl/clutil.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/matrix.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/opencl/clutil.cpp $(LIB_DIR)/meas.cpp
 SRC += $(SRC_DIR)/lte_phy.cpp
 
 INC_FLAGS += -I.. -I$(SRC_DIR) -I$(LIB_DIR)

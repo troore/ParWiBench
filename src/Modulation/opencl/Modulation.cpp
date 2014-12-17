@@ -284,7 +284,22 @@ void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, float *pModedSeq,
 	_err = clEnqueueWriteBuffer(queue, pBitsSeq_buffer, CL_TRUE, 0, in_buf_sz * sizeof(int), pBitsSeq, 0, NULL, NULL);
 	_err |= clEnqueueWriteBuffer(queue, p_mod_table_buffer, CL_TRUE, 0, mod_table_len * 2 * sizeof(float), p_mod_table, 0, NULL, NULL);
 
-	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
+	double elapsed_time = 0.0;
+	cl_event prof_event;
+	
+	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, /*NULL*/ &prof_event);
+	
+	cl_ulong ev_start_time = (cl_ulong)0;
+	cl_ulong ev_end_time = (cl_ulong)0;
+	clFinish(queue);
+
+	_err = clWaitForEvents(1, &prof_event);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ev_start_time, NULL);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ev_end_time, NULL);
+
+	elapsed_time = elapsed_time + (double)(ev_end_time - ev_start_time) / 1000000.0;
+
+	printf("Elapsed time of kernel is: %lfms\n", elapsed_time);
 
 	_err = clEnqueueReadBuffer(queue, pModedSeq_buffer, CL_TRUE, 0, 2 * out_buf_sz * sizeof(float), pModedSeq, 0, NULL, NULL);
 
@@ -409,7 +424,22 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, i
 	_err |= clEnqueueWriteBuffer(queue, p_mod_table_buffer, CL_TRUE, 0, mod_table_len * 2 * sizeof(float), p_mod_table, 0, NULL, NULL);
 	_err |= clEnqueueWriteBuffer(queue, p_idx_table_buffer, CL_TRUE, 0, mod_table_len * bits_per_samp * sizeof(int), p_idx_table, 0, NULL, NULL);
 
-	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
+	double elapsed_time = 0.0;
+	cl_event prof_event;
+	
+	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, /*NULL*/ &prof_event);
+
+	cl_ulong ev_start_time = (cl_ulong)0;
+	cl_ulong ev_end_time = (cl_ulong)0;
+	clFinish(queue);
+
+	_err = clWaitForEvents(1, &prof_event);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ev_start_time, NULL);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ev_end_time, NULL);
+
+	elapsed_time = elapsed_time + (double)(ev_end_time - ev_start_time) / 1000000.0;
+
+	printf("Elapsed time of kernel is: %lfms\n", elapsed_time);
 
 	_err = clEnqueueReadBuffer(queue, pLLR_buffer, CL_TRUE, 0, out_buf_sz * sizeof(float), pLLR, 0, NULL, NULL);
 

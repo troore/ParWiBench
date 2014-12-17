@@ -191,11 +191,9 @@ typedef struct
 	int demod_in_buf_sz;
 	int demod_out_buf_sz;
 	*/
-
-	// Transform precoding
   int mod_in[N_MOD_IN_MAX];
   float mod_out[N_MOD_OUT_MAX * 2];
-  float demod_in[N_MOD_IN_MAX * 2];
+  float demod_in[N_MOD_OUT_MAX * 2];
   float demod_LLR[N_MOD_IN_MAX];
   int demod_HD[N_MOD_IN_MAX];
   int mod_in_buf_sz;
@@ -203,6 +201,8 @@ typedef struct
   int demod_in_buf_sz;
   int demod_out_buf_sz;
 
+	
+	// Transform precoding
 #define N_TRANS_ENCODER_IN_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX * (LTE_PHY_N_SYMB_PER_SUBFR - 2))
 #define N_TRANS_ENCODER_OUT_MAX (N_TRANS_ENCODER_IN_MAX)
 #define N_TRANS_DECODER_IN_MAX (N_TRANS_ENCODER_IN_MAX)
@@ -263,10 +263,18 @@ typedef struct
 #define N_OFMOD_OUT_MAX (LTE_PHY_N_ANT_MAX * (LTE_PHY_FFT_SIZE_MAX + LTE_PHY_N_SAMPS_CP_L_0_30_72MHZ) * LTE_PHY_N_SYMB_PER_SUBFR)
 #define N_OFDEMOD_IN_MAX (N_OFMOD_OUT_MAX)
 #define N_OFDEMOD_OUT_MAX (N_OFMOD_IN_MAX)
-	float ofmod_in[N_OFMOD_IN_MAX*2];
-	float ofmod_out[N_OFMOD_OUT_MAX*2];
-	float ofdemod_in[N_OFDEMOD_IN_MAX*2];
-	float ofdemod_out[N_OFDEMOD_OUT_MAX*2];
+	float ofmod_in[N_OFMOD_IN_MAX * 2];
+	float ofmod_out[N_OFMOD_OUT_MAX * 2];
+	float ofdemod_in[N_OFDEMOD_IN_MAX * 2];
+	float ofdemod_out[N_OFDEMOD_OUT_MAX * 2];
+	float ofmod_in_real[N_OFMOD_IN_MAX];
+	float ofmod_in_imag[N_OFMOD_IN_MAX];
+	float ofmod_out_real[N_OFMOD_OUT_MAX];
+	float ofmod_out_imag[N_OFMOD_OUT_MAX];
+	float ofdemod_in_real[N_OFDEMOD_IN_MAX];
+	float ofdemod_in_imag[N_OFDEMOD_IN_MAX];
+	float ofdemod_out_real[N_OFDEMOD_OUT_MAX];
+	float ofdemod_out_imag[N_OFDEMOD_OUT_MAX];
 	int ofmod_in_buf_sz;
 	int ofmod_out_buf_sz;
 	int ofdemod_in_buf_sz;

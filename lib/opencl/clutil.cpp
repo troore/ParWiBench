@@ -17,7 +17,7 @@ cl_platform_id device_query()
 	 * Set platform/device/context
 	 */
 	CL_CHECK(clGetPlatformIDs(MAX_PLATFORMS_NUM, platforms, &platforms_n));
-	printf("=== %d OpenCL platform(s) found: ===\n", platforms_n);
+//	printf("=== %d OpenCL platform(s) found: ===\n", platforms_n);
 
 	if (0 == platforms_n)
 		exit(1);
@@ -26,13 +26,13 @@ cl_platform_id device_query()
 	{
 		char buffer[MAX_BUF_SIZE];
 
-		printf("  -- %d --\n", i);
+//		printf("  -- %d --\n", i);
 		CL_CHECK(clGetPlatformInfo(platforms[i], CL_PLATFORM_PROFILE, MAX_BUF_SIZE, buffer, NULL));
 //		printf("  Platform Profile = %s\n", buffer);
 		CL_CHECK(clGetPlatformInfo(platforms[i], CL_PLATFORM_VERSION, MAX_BUF_SIZE, buffer, NULL));
 //		printf("  Platform Version = %s\n", buffer);
 		CL_CHECK(clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, MAX_BUF_SIZE, buffer, NULL));
-		printf("  Platform Name = %s\n", buffer);
+//		printf("  Platform Name = %s\n", buffer);
 		CL_CHECK(clGetPlatformInfo(platforms[i], CL_PLATFORM_EXTENSIONS, MAX_BUF_SIZE, buffer, NULL));
 //		printf("  Platform Extensions = %s\n", buffer);
 
@@ -45,16 +45,16 @@ cl_platform_id device_query()
 			printf("Device finding error.\n");
 			exit(1);
 		}
-		printf("=== %d OpenCL device(s) found on platform:\n", devices_n);
+//		printf("=== %d OpenCL device(s) found on platform:\n", devices_n);
 		for (j = 0; j < devices_n; j++)
 		{
 			char buffer[MAX_BUF_SIZE];
 			cl_uint buf_uint;
 			cl_ulong buf_ulong;
 
-			printf("  -- %d --\n", j);
+//			printf("  -- %d --\n", j);
 			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL));
-			printf("  Device Name = %s\n", buffer);
+//			printf("  Device Name = %s\n", buffer);
 			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, sizeof(buffer), buffer, NULL));
 //			printf("  Device Vendor = %s\n", buffer);
 			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, sizeof(buffer), buffer, NULL));
