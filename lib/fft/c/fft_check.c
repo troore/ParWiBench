@@ -118,23 +118,29 @@ main(void)
   for(k=0; k<N; k++) {
     v[k].Re = 0.125*cos(2*PI*k/(double)N);
     v[k].Im = 0.125*sin(2*PI*k/(double)N);
-    v1[k].Re =  0.3*cos(2*PI*k/(double)N);
-    v1[k].Im = -0.3*sin(2*PI*k/(double)N);
+//    v1[k].Re =  0.3*cos(2*PI*k/(double)N);
+//    v1[k].Im = -0.3*sin(2*PI*k/(double)N);
   }
     
   /* FFT, iFFT of v[]: */
   print_vector("Orig", v, N);
   fft( v, N, scratch );
+  for (k = 0; k < N; k++)
+  {
+	  v[k].Re = v[k].Re / N;
+	  v[k].Im = v[k].Im / N;
+  }
   print_vector(" FFT", v, N);
   ifft( v, N, scratch );
   print_vector("iFFT", v, N);
 
   /* FFT, iFFT of v1[]: */
+  /*
   print_vector("Orig", v1, N);
   fft( v1, N, scratch );
   print_vector(" FFT", v1, N);
   ifft( v1, N, scratch );
   print_vector("iFFT", v1, N);
-
+*/
   exit(EXIT_SUCCESS);
 }

@@ -1,0 +1,26 @@
+
+#define PI	3.14159265358979323846264338327950288
+
+__kernel void dft_kernel(int n, const __global float *a, __global float *y, int direction)
+{
+    // Row index
+    uint k = get_global_id(0);
+
+	float p[2];
+	float ang;
+	
+    if (k < n)
+	{
+		p[0] = 0.0;
+		p[1] = 0.0;
+		ang = ((float)direction) * 2.0 * PI * ((float)k) / ((float)n);
+		
+        for (int j = 0; j < n; j++)
+		{
+			p[0] += (a[j] * cos(j * ang) - a[j + n] * sin(j * ang));
+			p[1] += (a[j] * sin(j * ang) + a[j + n] * cos(j * ang));
+		}
+		y[k] = p[0];
+		y[k + n] = p[1];
+    }
+}

@@ -10,7 +10,7 @@ void test_turbo_encoding(LTE_PHY_PARAMS *lte_phy_params)
 	std::cout << "Turbo Encoder starts" << std::endl;
 	
 //	ReadInputFromFiles(lte_phy_params->te_in, lte_phy_params->te_in_buf_sz, "../TurboEncoderInput");
-	GeneRandomInput(lte_phy_params->te_in, lte_phy_params->te_in_buf_sz, "TurboEncoderInput");
+	GeneRandomInput(lte_phy_params->te_in, lte_phy_params->te_in_buf_sz, "../TurboEncoderInput");
 //	WriteOutputToFiles(lte_phy_params->te_in, lte_phy_params->te_in_buf_sz, "TurboEncoderInput");
 
 	/*
@@ -20,7 +20,7 @@ void test_turbo_encoding(LTE_PHY_PARAMS *lte_phy_params)
 
 	turbo_encoding(lte_phy_params, lte_phy_params->te_in, lte_phy_params->te_out);
 
-	WriteOutputToFiles(lte_phy_params->te_out, lte_phy_params->te_out_buf_sz, "testTurboEncoderOutput");
+	WriteOutputToFiles(lte_phy_params->te_out, lte_phy_params->te_out_buf_sz, "../testTurboEncoderOutput");
 
 	std::cout << "Turbo Encoder ends" << std::endl;
 }
@@ -29,7 +29,7 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_iters)
 {
 	std::cout << "Turbo Decoder starts" << std::endl;
 	
-	ReadInputFromFiles(lte_phy_params->td_in, lte_phy_params->td_in_buf_sz, "testTurboEncoderOutput");
+	ReadInputFromFiles(lte_phy_params->td_in, lte_phy_params->td_in_buf_sz, "../testTurboEncoderOutput");
 //	GeneRandomInput(lte_phy_params->td_in, lte_phy_params->td_in_buf_sz, "../testsuite/testTurboEncoderOutput");
 	
 	for (int i = 0; i < lte_phy_params->td_in_buf_sz; i++)
@@ -46,7 +46,7 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_iters)
 	}
 //	printf("\n");
 	
-	WriteOutputToFiles(lte_phy_params->td_out, lte_phy_params->td_out_buf_sz, "testTurboDecoderOutput");
+	WriteOutputToFiles(lte_phy_params->td_out, lte_phy_params->td_out_buf_sz, "../testTurboDecoderOutput");
 	
 	std::cout << "Turbo Decoder ends" << std::endl;
 }
