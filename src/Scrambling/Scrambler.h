@@ -7,7 +7,7 @@
 
 #include "lte_phy.h"
 
-//void GenScrambInt(int *pScrambInt, int n);
+void GenScrambInt(int *pScrambInt, int n);
 void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq);
 
 void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutBuf);

@@ -1,32 +1,22 @@
 #include <sys/time.h>
 #include "ModMain.h"
 
-#include "meas.h"
-
 //#define Mod
 
 //int RANDOMSEED;
 
 LTE_PHY_PARAMS lte_phy_params;
 
-
+double dtime();
 void test_mod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 {
 	std::cout << "Modulation starts" << std::endl;
 
 	ReadInputFromFiles(lte_phy_params->mod_in, lte_phy_params->mod_in_buf_sz, "ModulationInput");
-
-	double tstart, tstop, ttime;
-
-	tstart = dtime();
-	Modulating(lte_phy_params, lte_phy_params->mod_in, lte_phy_params->mod_out, mod_type);
-	tstop = dtime();
-
-	ttime = tstop - tstart;
-
-	printf("Elapsed time of Modulating is %lf ms\n", ttime * 1000.0);
+	//printf("%d\n",lte_phy_params->mod_in_buf_sz);
+	//Modulating(lte_phy_params, lte_phy_params->mod_in, lte_phy_params->mod_out, mod_type);
 	
-	WriteOutputToFiles(lte_phy_params->mod_out, lte_phy_params->mod_out_buf_sz, "testModulationOutputReal", "testModulationOutputImag");
+	WriteOutputToFiles(lte_phy_params->mod_out, lte_phy_params->mod_out_buf_sz, "testModulationRandomOutputReal", "testModulationRandomOutputImag");
 
 	std::cout << "Modulation ends" << std::endl;
 
@@ -35,27 +25,36 @@ void test_mod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 {
 		
-	std::cout << "Demodulation starts" << std::endl;
+//	std::cout << "Demodulation starts" << std::endl;
 
 	float awgn_sigma = 0.193649; //this value is for the standard input  see "AWGNSigma"
-	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "testModulationOutputReal", "testModulationOutputImag");
+	//ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "testModulationRandomOutputReal", "testModulationRandomOutputImag");
+	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputReal", "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputImag");
+//	ReadInputFromFiles(lte_phy_params->demod_in_0, lte_phy_params->demod_in_1, lte_phy_params->demod_in_buf_sz, "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputReal", "/home/xblee/ParWiBench/src/Modulation/testModulationRandomOutputImag");
+//	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
+//	GeneRandomInput(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "DemodulationInputReal", "DemodulationInputImag");
+	double ttime,tbegin;
+	tbegin = dtime();
+	for(int i=0;i<1000;i++)
+		_Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
+	ttime = dtime();
+	printf("whole time is %f\n",ttime - tbegin);
+	//	Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
+	WriteOutputToFiles(lte_phy_params->demod_LLR, lte_phy_params->demod_out_buf_sz, "/home/xblee/ParWiBench/src/Modulation/testDemodulationOutput");
+//	WriteOutputToFiles(lte_phy_params->demod_LLR, lte_phy_params->demod_out_buf_sz, "testDemodulationOutput");
 
-	
-	double tstart, tstop, ttime;
-
-	tstart = dtime();
-	Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
-	tstop = dtime();
-
-	ttime = tstop - tstart;
-
-	printf("Elapsed time of Demodulating is %lf ms\n", ttime * 1000.0);
-
-	WriteOutputToFiles(lte_phy_params->demod_LLR, lte_phy_params->demod_out_buf_sz, "testDemodulationOutput");
-
-	std::cout << "Demodulation ends" << std::endl;
+//	std::cout << "Demodulation ends" << std::endl;
 
 
+}
+
+double dtime()
+{
+	double tseconds = 0.0;
+	struct timeval mytime;
+	gettimeofday(&mytime,(struct timezone*)0);
+	tseconds = (double)(mytime.tv_sec +			mytime.tv_usec*1.0e-6);
+	return( tseconds );
 }
 
 int main(int argc, char *argv[])
