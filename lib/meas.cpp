@@ -1,6 +1,7 @@
 
 #include "meas.h"
 
+// ms
 double dtime()
 {
 	double tmseconds = 0.0;
@@ -9,5 +10,5 @@ double dtime()
 	gettimeofday(&mytime, (struct timezone*)0);
 	tmseconds = (double)(mytime.tv_sec + mytime.tv_usec * 1.0e-6);
 
-	return tmseconds;
+	return tmseconds * 1000.0;
 }

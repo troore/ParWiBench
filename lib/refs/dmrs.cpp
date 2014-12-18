@@ -1,5 +1,7 @@
 
-#include "dmrs.h"
+#include <math.h>
+
+#define PI 3.14159265358979
 
 void geneDMRS(float *pDMRS, int N_layer, int N_dft)
 {

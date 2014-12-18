@@ -136,7 +136,7 @@ cl_device_id create_device(cl_platform_id *p_pltfm)
 }
 
 /* Create program from a file and compile it */
-cl_program build_program(cl_context *p_ctx, cl_device_id *p_dev, const char* filename)
+cl_program build_program(cl_context *p_ctx, cl_device_id *p_dev, const char *filename)
 {
 	cl_program program;
 	FILE *program_handle;

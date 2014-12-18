@@ -239,6 +239,14 @@ typedef struct
 	float resm_out[2 * N_RESMAPPER_OUT_MAX];
 	float resdm_in[2 * N_RESDEMAPPER_IN_MAX];
 	float resdm_out[2 * N_RESDEMAPPER_OUT_MAX];
+	float resm_in_real[N_RESMAPPER_IN_MAX];
+	float resm_in_imag[N_RESMAPPER_IN_MAX];
+	float resm_out_real[N_RESMAPPER_OUT_MAX];
+	float resm_out_imag[N_RESMAPPER_OUT_MAX];
+	float resdm_in_real[N_RESDEMAPPER_IN_MAX];
+	float resdm_in_imag[N_RESDEMAPPER_IN_MAX];
+	float resdm_out_real[N_RESDEMAPPER_OUT_MAX];
+	float resdm_out_imag[N_RESDEMAPPER_OUT_MAX];
 	int resm_in_buf_sz;
 	int resm_out_buf_sz;
 	int resdm_in_buf_sz;

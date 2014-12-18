@@ -1,5 +1,12 @@
 
-#include "ResMapMain.h"
+#include <iostream>
+
+#include "gauss.h"
+#include "meas.h"
+#include "GeneralFunc.h"
+#include "meas.h"
+
+#include "ResMapper.h"
 
 
 //#define SCMapper
@@ -14,17 +21,20 @@ void test_SCMapper(LTE_PHY_PARAMS *lte_phy_params)
 
 	double tstart, tstop, ttime;
 
-	ReadInputFromFiles(lte_phy_params->resm_in, lte_phy_params->resm_in_buf_sz, "../SubCarrierMapInputReal", "../SubCarrierMapInputImag");
+//	ReadInputFromFiles(lte_phy_params->resm_in, lte_phy_params->resm_in_buf_sz, "../SubCarrierMapInputReal", "../SubCarrierMapInputImag");
+	ReadInputFromFiles(lte_phy_params->resm_in_real, lte_phy_params->resm_in_imag, lte_phy_params->resm_in_buf_sz, "../SubCarrierMapInputReal", "../SubCarrierMapInputImag");
 
 	tstart = dtime();
 
-	SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in, lte_phy_params->resm_out);
+//	SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in, lte_phy_params->resm_out);
+	SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in_real, lte_phy_params->resm_in_imag, lte_phy_params->resm_out_real, lte_phy_params->resm_out_imag);
 	
 	tstop = dtime();
 
 	ttime = (tstop - tstart);
 
-	WriteOutputToFiles(lte_phy_params->resm_out, lte_phy_params->resm_out_buf_sz, "../testSubCarrierMapOutputReal", "../testSubCarrierMapOutputImag");
+//	WriteOutputToFiles(lte_phy_params->resm_out, lte_phy_params->resm_out_buf_sz, "../testSubCarrierMapOutputReal", "../testSubCarrierMapOutputImag");
+	WriteOutputToFiles(lte_phy_params->resm_out_real, lte_phy_params->resm_out_imag, lte_phy_params->resm_out_buf_sz, "../testSubCarrierMapOutputReal", "../testSubCarrierMapOutputImag");
 	
 	std::cout << "Resource mapping ends" << std::endl;
 
@@ -84,11 +94,11 @@ int main(int argc, char *argv[])
 	
 	test_SCMapper(&lte_phy_params);
 
-	#else
+#else
 
 	test_SCDemapper(&lte_phy_params);
-
-	#endif
+	
+#endif
 	
 	return 0;
 }

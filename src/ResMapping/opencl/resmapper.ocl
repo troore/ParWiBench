@@ -1,0 +1,58 @@
+
+__kernel void mapping(__global float *pInpDataReal, __global float *pInpDataImag,
+					  __global float *pOutDataReal, __global float *pOutDataImag,
+					  __global float *pDMRSReal, __global float *pDMRSImag,
+					  __global int *map_table,
+					  int NumLayer, int NumULSymbSF, int MDFT, int NIFFT, int SCLoc)
+{
+	int tid = get_global_id(0);
+	int nlayer = tid / (NumULSymbSF * MDFT);
+	int nsym = (tid % (NumULSymbSF * MDFT)) / MDFT;
+	int n = SCLoc + tid % MDFT;
+
+	int sym_out_idx = nlayer * NumULSymbSF + nsym;
+
+	if (map_table[nsym] < 0)
+	{
+		int sym_in_idx = ((-1) * map_table[nsym] - 1) * NumLayer + nlayer;
+		pOutDataReal[sym_out_idx * NIFFT + n] = pDMRSReal[sym_in_idx * MDFT + (n - SCLoc)];
+		pOutDataImag[sym_out_idx * NIFFT + n] = pDMRSImag[sym_in_idx * MDFT + (n - SCLoc)];
+		//	printf("%d\t%f\t%f\n", sym_out_idx * NIFFT + n, pOutDataReal[sym_out_idx * NIFFT + n], pOutDataReal[sym_out_idx * NIFFT + n]);
+	}
+	else
+	{
+		int sym_offset = map_table[nsym];
+		pOutDataReal[sym_out_idx * NIFFT + n] = pInpDataReal[nlayer * (NumULSymbSF - 2) * MDFT + sym_offset * MDFT + n - SCLoc];
+		pOutDataImag[sym_out_idx * NIFFT + n] = pInpDataImag[nlayer * (NumULSymbSF - 2) * MDFT + sym_offset * MDFT + n - SCLoc];
+		//	printf("%d\t%f\t%f\n", sym_out_idx * NIFFT + n, pOutDataReal[sym_out_idx * NIFFT + n], pOutDataImag[sym_out_idx * NIFFT + n]);
+	}
+}
+
+__kernel void demapping(__global float *pInpDataReal, __global float *pInpDataImag,
+						__global float *pOutDataReal, __global float *pOutDataImag,
+						__global int *map_table,
+						int NumRxAntenna, int NumULSymbSF, int MDFT, int NIFFT, int SCLoc, int NDMRSslot)
+{
+	int tid = get_global_id(0);
+	int nrx = tid / (NumRxAntenna * MDFT);
+	int nsym = (tid % (NumRxAntenna * MDFT)) / MDFT;
+	int n = tid % MDFT;
+
+	int sym_in_idx = nrx * NumULSymbSF + nsym;
+	if (map_table[nsym] < 0)
+	{
+		// DMRS
+		int sym_out_idx = nrx * NDMRSslot - map_table[nsym] - 1;
+				
+		pOutDataReal[sym_out_idx * MDFT + n] = pInpDataReal[sym_in_idx * NIFFT + (n + SCLoc)];
+		pOutDataImag[sym_out_idx * MDFT + n] = pInpDataImag[sym_in_idx * NIFFT + (n + SCLoc)];
+	}
+	else
+	{
+		// Data
+		int sym_out_idx = (NumULSymbSF - 2) * nrx + map_table[nsym] + NumRxAntenna * NDMRSslot;
+
+		pOutDataReal[sym_out_idx * MDFT + n] = pInpDataReal[sym_in_idx * NIFFT + (n + SCLoc)];
+		pOutDataImag[sym_out_idx * MDFT + n] = pInpDataImag[sym_in_idx * NIFFT + (n + SCLoc)];
+	}
+}
