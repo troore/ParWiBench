@@ -230,6 +230,5 @@ void _SubblockInterleaving(int SeqLen, int *InSeq, int *OutSeq, int offset)
 		}
 	}
 
-
 }
 
