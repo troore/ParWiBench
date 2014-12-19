@@ -39,36 +39,8 @@ void _SubblockInterleaving(int SeqLen, int *InSeq, int *OutSeq, int offset)
 
 	int pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
 	zmmi_t pInterMatrix_simd[((BLOCK_SIZE + 31) / 32) * 2];
-	zmmi_t p_index[2],p_index3[2];
-	int col = InterColumnPattern[0];
-	//p_index[col/16].elems[col%16] = 0;
-	p_index3[col/16].elems[col%16] = 0;
-//	printf("%d %d\n",NumDummy,R_sb);
-	for(int c=1;c<32;c++)
-	{
-		int lastcol = col;
-		col = InterColumnPattern[c];
-		if(col<NumDummy)
-		{
-		//	int lastcol = col;
-		//	col = InterColumnPattern[c];
-	//		p_index[col/16].elems[col%16] = p_index[lastcol/16].elems[lastcol%16] + R_sb - 1;
-			p_index3[col/16].elems[col%16] = p_index3[lastcol/16].elems[lastcol%16] + (R_sb - 1) * 12;
-		}
-		else
-		{
-		//	int lastcol = col;
-		//	col = InterColumnPattern[c];
-	//		p_index[col/16].elems[col%16] = p_index[lastcol/16].elems[lastcol%16] + R_sb;
-			p_index3[col/16].elems[col%16] = p_index3[lastcol/16].elems[lastcol%16] + R_sb*12;
-		}
-//		printf("%d ",p_index[col/16].elems[col%16]);
-	}
-/*	printf("\n");
-	for(int c=0;c<32;c++)
-		printf("%d ",p_index[c/16].elems[c%16]);
-	printf("\n");
-*/	int num_threads=32,StrIdx,r;
+	
+	int num_threads=32,StrIdx,r;
 	//    omp_set_num_threads(num_threads);    
 	//#pragma omp parallel for private(StrIdx,r)
 	//	for (int c = 0; c < num_threads; c++)
@@ -129,34 +101,17 @@ void _SubblockInterleaving(int SeqLen, int *InSeq, int *OutSeq, int offset)
 	//	printf("right\n");
 		OutIdx=0;
 		
-		for(int c=0;c<C_sb;c++)
+/*		for(int c=0;c<C_sb;c++)
 		{
-			//int col = InterColumnPattern[c];
-			int v = pInterMatrix_simd[c / 16].elems[c % 16];
-			if(v!=DummyValue)
-				OutSeq[offset+StrIdx+(p_index3[c/16].elems[c%16]-1)/4]= pInterMatrix_simd[c/16].elems[c%16];
-			else 
-				OutSeq[offset+StrIdx+(p_index3[c/16].elems[c%16]-1)/4]= 100000;
+			int col = InterColumnPattern[c];
+			
 		}
-/*
+
 		for(int k = NumDummy; k < C_sb * R_sb; k+=C_sb)
 		{
 			
 		}
 */
-		for(r =1;r<R_sb;r++)
-		{
-			int* p;
-			p = &OutSeq[offset + StrIdx+(r-1)*3];
-			_mm512_i32scatter_epi32(p,p_index3[0].reg,pInterMatrix_simd[r*2+0].reg,1);
-			_mm512_i32scatter_epi32(p,p_index3[1].reg,pInterMatrix_simd[r*2+1].reg,1);
-		/*	for(int c = 0;c<C_sb;c++)
-			{
-				//int col = InterColumnPattern[c];
-				if(OutSeq[offset + StrIdx + (r-1+p_index[c/16].elems[c%16])*3] != pInterMatrix_simd[r*2+c / 16].elems[c % 16]) printf("wrong\n");
-			}*/
-		}
-		/*
 		for (int c = 0; c < C_sb; c++)
 		{
 			int col = InterColumnPattern[c];
@@ -171,13 +126,11 @@ void _SubblockInterleaving(int SeqLen, int *InSeq, int *OutSeq, int offset)
 				{}
 				else
 				{
-					if(OutSeq[offset + StrIdx + OutIdx * 3] != v) printf("%d %d %d %d %d %d wrong\n",OutIdx,c,r,c+r*C_sb,col,OutSeq[offset + StrIdx + OutIdx * 3]);
-				//	else printf("%d %d %d %d %d %d right\n",OutIdx,c,r,c+r*C_sb,col,OutSeq[offset + StrIdx + OutIdx * 3]); 
 					OutSeq[offset + StrIdx + OutIdx * 3] = v;
 					OutIdx++;
 				}
 			}
-		}*/
+		}
 	}
 
 	//////////////////// Interleaving for i=2 ///////////////////////

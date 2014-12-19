@@ -23,7 +23,7 @@ void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex<floa
 
 void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecQAMSeq, float *pLLR, int mod_type, float awgnSigma);
 
-void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecQAMSeq_0, float *pDecQAMSeq_1, float *pLLR, int mod_type, float awgnSigma);
+void _Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecQAMSeq, float *pLLR, int mod_type, float awgnSigma);
 
 void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecQAMSeq, int *pHD, int mod_type);
 

@@ -1,6 +1,6 @@
 
 #include "RateMatcherMain.h"
-
+#include "meas.h"
 //#define TxRateM
 
 LTE_PHY_PARAMS lte_phy_params;
@@ -11,6 +11,7 @@ void tx_rate_matching(LTE_PHY_PARAMS *lte_phy_params)
 
 	ReadInputFromFiles(lte_phy_params->rm_in, lte_phy_params->rm_in_buf_sz, "TxRateMatchInput");
 
+for(int i=0;i<100000;i++)
 	TxRateMatching(lte_phy_params, lte_phy_params->rm_in, lte_phy_params->rm_out);
 	
 	WriteOutputToFiles(lte_phy_params->rm_out, lte_phy_params->rm_out_buf_sz, "testTxRateMatchOutput");
@@ -62,7 +63,8 @@ int main(int argc, char *argv[])
 	n_rx_ant = atoi(argv[4]);
 	
 	lte_phy_init(&lte_phy_params, enum_fs, mod_type, n_tx_ant, n_rx_ant);
-
+	double ttime,tbegin;
+	tbegin = dtime();
 	#ifdef TxRateM
 	
 	tx_rate_matching(&lte_phy_params);
@@ -72,7 +74,8 @@ int main(int argc, char *argv[])
 	rx_rate_matching(&lte_phy_params);
 	
 	#endif
-	
+	ttime = dtime();
+	printf("whole time is %f\n",ttime - tbegin);
 	return 0;
 }
 
