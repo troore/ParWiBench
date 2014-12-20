@@ -42,8 +42,11 @@ void _SubblockInterleaving(int SeqLen, int *InSeq, int *OutSeq, int offset)
 	zmmi_t p_index[2],p_index3[2];
 	int col = InterColumnPattern[0];
 	//p_index[col/16].elems[col%16] = 0;
-	p_index3[col/16].elems[col%16] = 0;
-//	printf("%d %d\n",NumDummy,R_sb);
+	if(col<NumDummy)
+		p_index3[col/16].elems[col%16] = 0;
+	else
+		p_index3[col/16].elems[col%16] = 1;
+	//	printf("%d %d\n",NumDummy,R_sb);
 	for(int c=1;c<32;c++)
 	{
 		int lastcol = col;
@@ -135,8 +138,8 @@ void _SubblockInterleaving(int SeqLen, int *InSeq, int *OutSeq, int offset)
 			int v = pInterMatrix_simd[c / 16].elems[c % 16];
 			if(v!=DummyValue)
 				OutSeq[offset+StrIdx+(p_index3[c/16].elems[c%16]-1)/4]= pInterMatrix_simd[c/16].elems[c%16];
-			else 
-				OutSeq[offset+StrIdx+(p_index3[c/16].elems[c%16]-1)/4]= 100000;
+//			else 
+//				OutSeq[offset+StrIdx+(p_index3[c/16].elems[c%16]-1)/4]= 100000;
 		}
 /*
 		for(int k = NumDummy; k < C_sb * R_sb; k+=C_sb)
