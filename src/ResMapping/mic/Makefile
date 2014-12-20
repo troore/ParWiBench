@@ -1,6 +1,6 @@
 include ../../../common/makefile.config
 
-SRC = ../ResMapMain.cpp ResMapper.cpp 
+SRC = ../ResMapMain.cpp ResMapper_simd.cpp 
 SRC += $(LIB_DIR)/gauss.cpp  $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/meas.cpp $(LIB_DIR)/refs/dmrs.cpp
 SRC += $(SRC_DIR)/lte_phy.cpp
 

@@ -1,6 +1,13 @@
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <CL/opencl.h>
+
 #include "clutil.h"
 
+#define MAX_PLATFORMS_NUM	100
+#define MAX_DEVICES_NUM		100
+#define MAX_BUF_SIZE		10240
 
 cl_platform_id device_query()
 {
@@ -17,26 +24,29 @@ cl_platform_id device_query()
 	 * Set platform/device/context
 	 */
 	CL_CHECK(clGetPlatformIDs(MAX_PLATFORMS_NUM, platforms, &platforms_n));
-//	printf("=== %d OpenCL platform(s) found: ===\n", platforms_n);
+	printf("=== %d OpenCL platform(s) found: ===\n", platforms_n);
 
 	if (0 == platforms_n)
+	{
+		printf("There is no OpenCL platform found.\n");
 		exit(1);
+	}
 
 	for (i = 0; i < platforms_n; i++)
 	{
 		char buffer[MAX_BUF_SIZE];
 
-//		printf("  -- %d --\n", i);
+		printf("  -- %d --\n", i);
 		CL_CHECK(clGetPlatformInfo(platforms[i], CL_PLATFORM_PROFILE, MAX_BUF_SIZE, buffer, NULL));
-//		printf("  Platform Profile = %s\n", buffer);
+		printf("  Platform Profile = %s\n", buffer);
 		CL_CHECK(clGetPlatformInfo(platforms[i], CL_PLATFORM_VERSION, MAX_BUF_SIZE, buffer, NULL));
-//		printf("  Platform Version = %s\n", buffer);
+		printf("  Platform Version = %s\n", buffer);
 		CL_CHECK(clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, MAX_BUF_SIZE, buffer, NULL));
-//		printf("  Platform Name = %s\n", buffer);
+		printf("  Platform Name = %s\n", buffer);
 		CL_CHECK(clGetPlatformInfo(platforms[i], CL_PLATFORM_EXTENSIONS, MAX_BUF_SIZE, buffer, NULL));
-//		printf("  Platform Extensions = %s\n", buffer);
+		printf("  Platform Extensions = %s\n", buffer);
 
-//		printf("\n");
+		printf("\n");
 
 //		CL_CHECK(clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 100, devices, &devices_n));
 		cl_int dev_info = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 100, devices, &devices_n);
@@ -45,26 +55,26 @@ cl_platform_id device_query()
 			printf("Device finding error.\n");
 			exit(1);
 		}
-//		printf("=== %d OpenCL device(s) found on platform:\n", devices_n);
+		printf("=== %d OpenCL device(s) found on platform:\n", devices_n);
 		for (j = 0; j < devices_n; j++)
 		{
 			char buffer[MAX_BUF_SIZE];
 			cl_uint buf_uint;
 			cl_ulong buf_ulong;
 
-//			printf("  -- %d --\n", j);
+			printf("  -- %d --\n", j);
 			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL));
-//			printf("  Device Name = %s\n", buffer);
+			printf("  Device Name = %s\n", buffer);
 			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, sizeof(buffer), buffer, NULL));
-//			printf("  Device Vendor = %s\n", buffer);
+			printf("  Device Vendor = %s\n", buffer);
 			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_VERSION, sizeof(buffer), buffer, NULL));
-//			printf("  Device Version = %s\n", buffer);
+			printf("  Device Version = %s\n", buffer);
 			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(buf_uint), &buf_uint, NULL));
-//			printf("  Device Max Compute Units = %u\n", buf_uint);
+			printf("  Device Max Compute Units = %u\n", buf_uint);
 			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(buf_uint), &buf_uint, NULL));
-//			printf("  Device Max Clock Frequency = %u\n", buf_uint);
+			printf("  Device Max Clock Frequency = %u\n", buf_uint);
 			CL_CHECK(clGetDeviceInfo(devices[j], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(buf_ulong), &buf_ulong, NULL));
-//			printf("  Device Global Memory Size = %llu\n", buf_ulong);
+			printf("  Device Global Memory Size = %llu\n", buf_ulong);
 		}
 	}
 

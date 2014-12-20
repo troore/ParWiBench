@@ -1,59 +1,16 @@
 
-#ifndef __SUBBLOCKINTERLEAVER_LTE_H_
-#define __SUBBLOCKINTERLEAVER_LTE_H_
-
-#include <stdlib.h>
-#include <cmath>
-#include <iostream>
-
 #include "lte_phy.h"
 
-/*
-template <class U, class T>
-class SubblockInterleaver_lte
-{
-private:
-	int D;
-        int K_pi;
-        int Rate;
-	int C_sb;
-	int R_sb;
-        int NumDummy;
-        T DummyValue;
-
-	int InterColumnPattern[32];
-
-public:
-	SubblockInterleaver_lte(void);
-	void SubblockInterleaving(U SeqLen,T **pInpMtr,T **pOutMtr);
-	void SubblockDeInterleaving(U SeqLen,T **pInpMtr, T **pOutMtr);
-	~SubblockInterleaver_lte(void);
-};
-*/
-
- 
-/*
-template<class U, class T>
-SubblockInterleaver_lte<U,T>::SubblockInterleaver_lte(void)
-{
-	Rate=3;
-	C_sb=32;
-	DummyValue = (T)1000000;
-	int arr[32]={0,16,8,24,4,20,12,28,2,18,10,26,6,22,14,30,1,17,9,25,5,21,13,29,3,19,11,27,7,23,15,31};
-	for(int i=0;i<32;i++){InterColumnPattern[i]=arr[i];}
-}
-*/
-
 static int InterColumnPattern[32] = {0,16,8,24,4,20,12,28,
-									2,18,10,26,6,22,14,30,
-									1,17,9,25,5,21,13,29,3,
-									19,11,27,7,23,15,31};
+									 2,18,10,26,6,22,14,30,
+									 1,17,9,25,5,21,13,29,3,
+									 19,11,27,7,23,15,31};
 
 template <typename T>
 #ifdef DEBUG_INTL
-void SubblockInterleaving(int SeqLen, T **pInpMtr, T **pOutMtr)
+static void SubblockInterleaving(int SeqLen, T **pInpMtr, T **pOutMtr)
 #else
-void SubblockInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
+static void SubblockInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 #endif
 {
 	int D;
@@ -230,9 +187,9 @@ void SubblockInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 
 template<typename T>
 #ifdef DEBUG_INTL
-void SubblockDeInterleaving(int SeqLen, T **pInpMtr, T **pOutMtr)
+static void SubblockDeInterleaving(int SeqLen, T **pInpMtr, T **pOutMtr)
 #else
-void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
+static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 #endif
 {
 	int D;
@@ -344,11 +301,11 @@ void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 				{}
 				else
 				{
-					#ifdef DEBUG_INTL
+#ifdef DEBUG_INTL
 					*(VpOutSeq+OutIdx)=*(*(pInterMatrix+r)+c);
-					#else
+#else
 					pOutMtr[StrIdx * D + OutIdx] = pInterMatrix[r * C_sb + c];
-					#endif
+#endif
 					OutIdx++;
 				}
 			}
@@ -403,11 +360,11 @@ void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 	OutIdx=0;
 	for (int k = NumDummy; k < K_pi; k++)
 	{
-		#ifdef DEBUG_INTL
+#ifdef DEBUG_INTL
 		*(VpOutSeq+OutIdx)=*(pInterSeq+k);
-		#else
+#else
 		pOutMtr[(Rate - 1) * D + OutIdx] = pInterSeq[k];
-		#endif
+#endif
 		OutIdx++;
 	}
 
@@ -417,5 +374,208 @@ void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 #endif
 }
 
+
+void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
+{
+	int in_buf_sz;
+	int out_buf_sz;
+	int n_blocks;
+	int rm_blk_sz;
+	int rm_data_length;
+	int rm_last_blk_len;
+	int out_block_offset;
+	int n_extra_bits;
+	int cur_blk_len;
+
+	#ifdef DEBUG_INTL
+	int **pInMatrix = new int*[RATE];
+	int **pOutMatrix = new int*[RATE];
+	#else
+	int pInMatrix[RATE * (BLOCK_SIZE + 4)];
+	int pOutMatrix[RATE * (BLOCK_SIZE + 4)];
+	#endif
+
+	int i, j, r;
+
+	in_buf_sz = lte_phy_params->rm_in_buf_sz;
+	out_buf_sz = lte_phy_params->rm_out_buf_sz;
+	rm_blk_sz = BLOCK_SIZE + 4;
+	rm_data_length = (in_buf_sz / RATE);
+
+	n_blocks = (rm_data_length + (rm_blk_sz - 1)) / rm_blk_sz;
+	if (rm_data_length % rm_blk_sz)
+	{
+		rm_last_blk_len = (rm_data_length % rm_blk_sz);
+	}
+	else
+	{
+		rm_last_blk_len = rm_blk_sz;
+	}
+	
+#ifdef DEBUG_INTL
+	for (r = 0; r < RATE; r++)
+	{
+		*(pInMatrix + r) = new int[BLOCK_SIZE + 4];
+		*(pOutMatrix + r) = new int[BLOCK_SIZE + 4];
+	}
 #endif
+
+	out_block_offset = 0;
+	for (i = 0; i < n_blocks; i++)
+	{
+		cur_blk_len = (i != (n_blocks - 1)) ? rm_blk_sz : rm_last_blk_len;
+
+		// Transposition
+		for (j = 0; j < cur_blk_len; j++)
+		{
+			for (r = 0; r < RATE; r++)
+			{
+#ifdef DEBUG_INTL
+				pInMatrix[r][j] = piSeq[out_block_offset + RATE * j + r];
+#else
+				pInMatrix[r * cur_blk_len + j] = piSeq[out_block_offset + RATE * j + r];
+#endif
+				//	cout << pInMatrix[r][i];
+			}
+		}
+		//cout << endl;
+			
+		SubblockInterleaving(cur_blk_len, pInMatrix, pOutMatrix);
+		
+		// Transposition again
+		for (j = 0; j < cur_blk_len; j++)
+		{
+			for (r = 0; r < RATE; r++)
+			{
+#ifdef DEBUG_INTL
+				pcSeq[out_block_offset + RATE * j + r] = pOutMatrix[r][j];
+#else
+				pcSeq[out_block_offset + RATE * j + r] = pOutMatrix[r * cur_blk_len + j];
+#endif
+			}
+		}
+
+		out_block_offset += RATE * cur_blk_len;
+	}
+
+	n_extra_bits = out_buf_sz - in_buf_sz;
+	for (i = 0; i < n_extra_bits; i++)
+	{
+		pcSeq[in_buf_sz + i] = 0;
+	}
+
+#ifdef DEBUG_INTL
+	for (r = 0; r < RATE; r++)
+	{
+		delete[] pInMatrix[r];
+		delete[] pOutMatrix[r];
+	}
+	delete[] pInMatrix;
+	delete[] pOutMatrix;
+#endif
+}
+
+void RxRateMatching(LTE_PHY_PARAMS *lte_phy_params, float *pLLRin, float *pLLRout, int *pHD)
+{
+	int n_blocks;
+	int rm_blk_sz;
+	int rm_data_length;
+	int rm_last_blk_len;
+	int out_block_offset;
+	int cur_blk_len;
+	int out_buf_sz;
+	
+#ifdef DEBUG_INTL
+	float **pInMatrix = new float*[RATE];
+	float **pOutMatrix = new float*[RATE];
+#else
+	float pInMatrix[RATE * (BLOCK_SIZE + 4)];
+	float pOutMatrix[RATE * (BLOCK_SIZE + 4)];
+#endif
+
+	int i, j, r;
+
+	out_buf_sz = lte_phy_params->rdm_out_buf_sz;
+	rm_blk_sz = BLOCK_SIZE + 4;
+	rm_data_length = (out_buf_sz / RATE);
+
+	n_blocks = (rm_data_length + (rm_blk_sz - 1)) / rm_blk_sz;
+	if (rm_data_length % rm_blk_sz)
+	{
+		rm_last_blk_len = (rm_data_length % rm_blk_sz);
+	}
+	else
+	{
+		rm_last_blk_len = rm_blk_sz;
+	}
+
+#ifdef DEBUG_INTL
+	for(r = 0; r < RATE; r++)
+	{
+		*(pInMatrix + r) = new float[BLOCK_SIZE + 4];
+		*(pOutMatrix + r) = new float[BLOCK_SIZE + 4];
+	}
+#endif
+
+	out_block_offset = 0;
+	for (i = 0; i < n_blocks; i++)
+	{
+		cur_blk_len = (i != (n_blocks - 1)) ? rm_blk_sz : rm_last_blk_len;
+		
+		for (j = 0; j < cur_blk_len; j++)
+		{
+			for (r = 0; r < RATE; r++)
+			{
+#ifdef DEBUG_INTL
+				*(*(pInMatrix + r) + j) = *(pLLRin + out_block_offset + RATE * j + r);
+#else
+				pInMatrix[r * cur_blk_len + j] = pLLRin[out_block_offset + RATE * j + r];
+#endif
+			}
+		}  
+
+		SubblockDeInterleaving(cur_blk_len, pInMatrix, pOutMatrix);
+
+		for (j = 0; j < cur_blk_len; j++)
+		{
+			for (r = 0; r < RATE; r++)
+			{
+#ifdef DEBUG_INTL
+				*(pLLRin + out_block_offset + RATE * j + r) = *(*(pOutMatrix + r) + j);
+				#else
+				pLLRin[out_block_offset + RATE * j + r] = pOutMatrix[r * cur_blk_len + j];
+				#endif
+			}
+		}
+
+		out_block_offset += RATE * cur_blk_len;
+	}
+
+	for (i = 0; i < out_buf_sz; i++)
+	{
+		if (pLLRin[i] < 0)
+		{
+			pHD[i] = 0;
+		}
+		else
+		{
+			pHD[i] = 1;
+		}
+	}
+
+	for (i = 0; i < out_buf_sz; i++)
+	{
+		pLLRout[i] = pLLRin[i];
+	}
+
+#ifdef DEBUG_INTL
+	for (r = 0; r < RATE; r++)
+	{
+		delete[] *(pInMatrix + r);
+		delete[] *(pOutMatrix + r);
+	}
+	delete[] pInMatrix;
+	delete[] pOutMatrix;
+#endif
+}
 

@@ -6,7 +6,7 @@ SRC += $(SRC_DIR)/lte_phy.cpp
 
 INC_FLAGS += -I. -I$(SRC_DIR) -I$(LIB_DIR)
 
-LINKFLAGS += -lOpenCL
+#LINKFLAGS += -lOpenCL
 
 #$(warning $(SRC))
 #$(warning $(UTIL_DIR))

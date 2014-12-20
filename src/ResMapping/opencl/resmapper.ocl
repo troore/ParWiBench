@@ -34,8 +34,8 @@ __kernel void demapping(__global float *pInpDataReal, __global float *pInpDataIm
 						int NumRxAntenna, int NumULSymbSF, int MDFT, int NIFFT, int SCLoc, int NDMRSslot)
 {
 	int tid = get_global_id(0);
-	int nrx = tid / (NumRxAntenna * MDFT);
-	int nsym = (tid % (NumRxAntenna * MDFT)) / MDFT;
+	int nrx = tid / (NumULSymbSF * MDFT);
+	int nsym = (tid % (NumULSymbSF * MDFT)) / MDFT;
 	int n = tid % MDFT;
 
 	int sym_in_idx = nrx * NumULSymbSF + nsym;

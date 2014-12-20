@@ -25,10 +25,6 @@
 	 _ret;								\
 	 })									\
 
-#define MAX_PLATFORMS_NUM	100
-#define MAX_DEVICES_NUM		100
-#define MAX_BUF_SIZE		10240
-
 cl_platform_id device_query();
 cl_device_id create_device(cl_platform_id *p_pltfm);
 cl_program build_program(cl_context *p_ctx, cl_device_id *p_dev, const char* filename);

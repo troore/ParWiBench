@@ -1,5 +1,10 @@
 
-#include "TurboMain.h"
+#include "Turbo.h"
+#include "Turbo_pardec.h"
+#include "GeneralFunc.h"
+#include "gauss.h"
+
+#include "lte_phy.h"
 
 //#define TurboEnc
 
@@ -36,8 +41,12 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_iters)
 	{
 		lte_phy_params->td_in[i] = (1 - 2 * lte_phy_params->td_in[i]);
 	}
-   
+
+#ifndef PARD
 	turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_iters);
+#else
+	par_turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, 1, n_iters);
+#endif
 	
 	for (int i = 0; i < lte_phy_params->td_out_buf_sz; i++)
 	{

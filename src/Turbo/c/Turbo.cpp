@@ -26,14 +26,12 @@ int g_output_parity[N_STATES * (N_GENS - 1) * 2];
 int g_rev_output_parity[N_STATES * (N_GENS - 1) * 2];
 
 float Lc;
-
-std::string metric;
-float (*com_log)(float, float);
+float (*com_log)(float a, float b);
 
 //! Constant definition to speed up trunc_log() and trunc_exp()
-const double log_double_max = log(std::numeric_limits<double>::max());
+//const double log_double_max = log(std::numeric_limits<double>::max());
 //! Constant definition to speed up trunc_log(), trunc_exp() and log_add()
-const double log_double_min = log(std::numeric_limits<double>::min());
+//const double log_double_min = log(std::numeric_limits<double>::min());
 
 /*****************End of globals*****************/
 
@@ -97,36 +95,7 @@ float max_log(float a, float b)
 	return (a > b) ? a : b;
 }
 
-float add_log(float a, float b)
-{
-	float negdelta;
-	
-	if (a < b)
-	{
-		float tmp = a;
-		
-		a = b;
-		b = tmp;
-	}
-	
-	negdelta = b - a;
-	if ((negdelta < log_double_min) || isnan(negdelta))
-		return a;
-	else
-		return (a + log1p(exp(negdelta)));
-}
-
-/*
-void turbo_init()
-{
-	set_generator_polynomials(g_gens, N_GENS, CST_LEN);
-	
-	Lc = 1.0;
-	com_log = max_log;
-}
-*/
-
-void set_generator_polynomials(int gens[N_GENS], int n_gens, int constraint_length)
+void set_generator_polynomials(int *gens, int n_gens, int constraint_length)
 {
 	int i, j;
 	int K = constraint_length;
@@ -171,7 +140,7 @@ void set_generator_polynomials(int gens[N_GENS], int n_gens, int constraint_leng
 
 //void internal_interleaver(int in[BLOCK_SIZE], int out[BLOCK_SIZE], int m)
 template <typename T>
-void internal_interleaver(T in[BLOCK_SIZE], T out[BLOCK_SIZE], int m)
+void internal_interleaver(T *in, T *out, int m)
 {
     int i;
     int f1 = 0;
@@ -209,7 +178,7 @@ void internal_interleaver(T in[BLOCK_SIZE], T out[BLOCK_SIZE], int m)
 }
 
 /*
-void internal_interleaver(float in[BLOCK_SIZE], float out[BLOCK_SIZE], int m)
+void internal_interleaver(float *in, float *out, int m)
 {
     int i;
     int f1 = 0;
@@ -245,7 +214,7 @@ void internal_interleaver(float in[BLOCK_SIZE], float out[BLOCK_SIZE], int m)
 
 //void internal_deinterleaver(int in[BLOCK_SIZE], int out[BLOCK_SIZE], int m)
  template <typename T>
- void internal_deinterleaver(T in[BLOCK_SIZE], T out[BLOCK_SIZE], int m)
+ void internal_deinterleaver(T *in, T *out, int m)
 {
     int i;
     int f1 = 0;
@@ -279,7 +248,7 @@ void internal_interleaver(float in[BLOCK_SIZE], float out[BLOCK_SIZE], int m)
 }
 
 /*
-void internal_deinterleaver(float in[BLOCK_SIZE], float out[BLOCK_SIZE], int m)
+void internal_deinterleaver(float *in, float *out, int m)
 {
     int i;
     int f1 = 0;
@@ -312,7 +281,7 @@ void internal_deinterleaver(float in[BLOCK_SIZE], float out[BLOCK_SIZE], int m)
 }
 */
 
-void constituent_encoder(int input[BLOCK_SIZE], int input_len, int tail[N_TAIL], int parity[(N_UNCODED + N_TAIL) * (N_GENS - 1)])
+void constituent_encoder(int *input, int input_len, int *tail, int *parity)
 {
 	int i, j;
 	int encoder_state = 0, target_state;
@@ -346,7 +315,7 @@ void constituent_encoder(int input[BLOCK_SIZE], int input_len, int tail[N_TAIL],
 	}
 }
 
-void turbo_encoding(LTE_PHY_PARAMS *lte_phy_params, int piSeq[N_TURBO_IN_MAX], int pcSeq[N_TURBO_OUT_MAX])
+void turbo_encoding(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 {
 	int input_data_length;
 	int n_blocks;
@@ -465,12 +434,12 @@ void turbo_encoding(LTE_PHY_PARAMS *lte_phy_params, int piSeq[N_TURBO_IN_MAX], i
 	}
 }
 
-void encode_block(int input_bits[BLOCK_SIZE],
-		int interleaved_input_bits[BLOCK_SIZE],
-		int parity1[(N_UNCODED + N_TAIL) * (N_GENS - 1)], 
-		int tail1[N_TAIL],
-		int parity2[(N_UNCODED + N_TAIL) * (N_GENS - 1)],
-		int tail2[N_TAIL], 
+void encode_block(int *input_bits,
+		int *interleaved_input_bits,
+		int *parity1, 
+		int *tail1,
+		int *parity2,
+		int *tail2, 
 		int blk_len)
 {
 
@@ -491,7 +460,7 @@ void encode_block(int input_bits[BLOCK_SIZE],
 }
 
 
-int calc_state_transition(int instate, int input, int parity[N_GENS - 1])
+int calc_state_transition(int instate, int input, int *parity)
 {
 	int in = 0;
 	int temp = (g_gen_pols[0] & instate), parity_temp, parity_bit;
@@ -540,7 +509,7 @@ int reverse_int(int length, int in)
  * FIXME: How to determine output buffer size from
  * input buffer size? But it doesn't matter for now...
  */
-void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float pInpData[N_TURBO_OUT_MAX], int pOutBits[N_TURBO_IN_MAX], int n_iters)
+void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, int *pOutBits, int n_iters)
 {
 	int out_data_length;
 	int n_blocks;
@@ -617,11 +586,11 @@ void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float pInpData[N_TURBO_OUT_M
 }
 
 
-void decode_block(float recv_syst1[N_UNCODED + N_TAIL], 
-		float recv_syst2[N_UNCODED + N_TAIL],
-		float recv_parity1[(N_UNCODED + N_TAIL) * (N_GENS - 1)],
-		float recv_parity2[(N_UNCODED + N_TAIL) * (N_GENS - 1)],
-		int decoded_bits_i[BLOCK_SIZE], 
+void decode_block(float *recv_syst1, 
+		float *recv_syst2,
+		float *recv_parity1,
+		float *recv_parity2,
+		int *decoded_bits_i, 
 		int interleaver_size,
 		int n_iters)
 {
@@ -697,10 +666,10 @@ void decode_block(float recv_syst1[N_UNCODED + N_TAIL],
 	}
 }
 
-void log_decoder(float recv_syst[N_UNCODED + N_TAIL],
-		float recv_parity[(N_UNCODED + N_TAIL) * (N_GENS - 1)],
-		float apriori[BLOCK_SIZE + N_TAIL],
-		float extrinsic[BLOCK_SIZE + N_TAIL],
+void log_decoder(float *recv_syst,
+		float *recv_parity,
+		float *apriori,
+		float *extrinsic,
 		int interleaver_size)
 {
 

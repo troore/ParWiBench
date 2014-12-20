@@ -1,6 +1,6 @@
-include ../../common/makefile.config
+include ../../../common/makefile.config
 
-SRC = RateMatcherMain.cpp  RateMatcher.cpp 
+SRC = ../RateMatcherMain.cpp  RateMatcher.cpp 
 SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp 
 SRC += $(SRC_DIR)/lte_phy.cpp
 
