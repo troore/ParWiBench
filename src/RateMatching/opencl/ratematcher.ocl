@@ -1,0 +1,74 @@
+__kernel void ratematcher(__global int *piSeq, __global int *pcSeq,
+						  int in_buf_sz, int rm_blk_sz,
+						  __constant int *InterColumnPattern,
+						  __constant int *InverseColumnPattern,
+						  __local int *pInterMatrix)
+{
+	int group_id = get_group_id(0);
+	int global_size = get_global_size(0);
+	int global_id = get_global_id(0);
+	int local_id = get_local_id(0);
+
+	int D;
+	int K_pi;
+	int R_sb, C_sb;
+	int NumDummy;
+	int DummyValue;
+	int Rate;
+
+	D = cnt_blk_len;
+	Rate = 3;
+	C_sb = 32;
+	
+	R_sb = (D + (C_sb - 1)) / C_sb;
+	
+	K_pi = R_sb * C_sb;
+	NumDummy = K_pi - D;
+	DummyValue = 1000000;
+
+	int task_num = ((in_buf_sz / Rate) + global_size - 1) / global_size;
+
+	for (int i = 0; i < task_num; i++)
+	{
+		int out_task_offset = i * (rm_blk_sz * Rate * global_size);
+
+		// 1 and 2
+		for (int StrIdx = 0; StrIdx < (Rate - 1); StrIdx++)
+		{
+			int r = (local_id + NumDummy) / C_sb;
+			int c = (local_id + NumDummy) % C_sb;
+			int k = r * C_sb + c;
+		
+			if (0 == local_id)
+			{
+				for (int i = 0; i < NumDummy; i++)
+					pInterMatrix[i] = DummyValue;
+			}
+			pInterMatrix[k] = piSeq[out_blk_offset + StrIdx + (k - NumDummy) * Rate];
+
+			barrier();
+		
+			int out_idx = 0;
+			int ptn_id = InverseColumnPattern[c];
+			for (int i = 0; i < ptn_id; i++)
+			{
+				if (InterColumnPattern[i] < NumDummy)
+					out_idx += (R_sb - 1);
+				else
+					out_idx += R_sb;
+			}
+			if (c < NumDummy)
+				out_idx += (r - 1);
+			else
+				out_idx += r;
+
+			pcSeq[out_blk_offset + StrIdx + out_idx * Rate] = pInterMatrix[k];
+
+			barrier();
+		}
+
+		// 3
+	}
+}
+__kernel void ratedematcher()
+{}

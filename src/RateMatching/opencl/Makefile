@@ -1,12 +1,13 @@
 include ../../../common/makefile.config
 
 SRC = ../RateMatcherMain.cpp  RateMatcher_ntp.cpp 
-SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/meas.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/meas.cpp $(LIB_DIR)/opencl/clutil.cpp
 SRC += $(SRC_DIR)/lte_phy.cpp
 
-INC_FLAGS += -I. -I$(SRC_DIR)
+INC_FLAGS += -I. -I$(SRC_DIR) -I$(LIB_DIR)
 
-#CXXFLAGS += -DDEBUG_INTL
+LINKFLAGS += -lOpenCL
+
 
 TARGETS = RM.out
 
