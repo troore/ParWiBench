@@ -17,13 +17,13 @@ void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 	double tstart, tstop, ttime;
 	tstart = dtime();
 
-	std::cout << tstart << std::endl;
+//	std::cout << tstart << std::endl;
 	
 	Scrambling(lte_phy_params, lte_phy_params->scramb_in, lte_phy_params->scramb_out);
 
 	tstop = dtime();
 
-	std::cout << tstop << std::endl;
+//	std::cout << tstop << std::endl;
 
 	ttime = tstop - tstart;
 

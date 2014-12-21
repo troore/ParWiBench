@@ -1,5 +1,10 @@
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "EqualizerMain.h"
+#include "lte_phy.h"
+#include "GeneralFunc.h"
+#include "Equalizer.h"
 
 //int RANDOMSEED;
 

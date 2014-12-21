@@ -86,7 +86,7 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 
 	ttime = tstop - tstart;
 
-	printf("Elapsed time of GenScrambInt is %lfms\n", ttime);
+//	printf("Elapsed time of GenScrambInt is %lfms\n", ttime);
 
 	_err = clEnqueueWriteBuffer(queue, input_buffer, CL_TRUE, 0, n * sizeof(int), pInpSeq, 0, NULL, NULL);
 	_err = clEnqueueWriteBuffer(queue, scramb_buffer, CL_TRUE, 0, n * sizeof(int), scramb_seq_int, 0, NULL, NULL);
@@ -105,6 +105,9 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 	_err = clWaitForEvents(1, &prof_event);
 	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ev_start_time, NULL);
 	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ev_end_time, NULL);
+
+	printf("%d\n", ev_start_time);
+	printf("%d\n", ev_end_time);
 
 	elapsed_time = elapsed_time + (double)(ev_end_time - ev_start_time) / 1000000.0;
 
