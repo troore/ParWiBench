@@ -1,74 +1,116 @@
 __kernel void ratematcher(__global int *piSeq, __global int *pcSeq,
-						  int in_buf_sz, int rm_blk_sz,
-						  __constant int *InterColumnPattern,
-						  __constant int *InverseColumnPattern,
-						  __local int *pInterMatrix)
+						int in_buf_sz, 
+						int rm_blk_sz,
+						int rm_last_blk_len,
+						__constant int *InterColumnPattern,
+						 __constant int *InverseColumnPattern,
+						int rm_data_length,
+						int n_blocks,
+						 __local int *pInterMatrix)
 {
 	int group_id = get_group_id(0);
 	int global_size = get_global_size(0);
 	int global_id = get_global_id(0);
-	int local_id = get_local_id(0);
+	//int local_id_original = get_local_id(0);
+	int local_size = get_local_size(0);
+	int num_groups = get_num_groups(0);
 
-	int D;
-	int K_pi;
-	int R_sb, C_sb;
-	int NumDummy;
-	int DummyValue;
-	int Rate;
+	int groups_each_block = (rm_blk_sz + (local_size-1)) / local_size;
 
-	D = cnt_blk_len;
-	Rate = 3;
-	C_sb = 32;
+	int local_id = global_id % (local_size * groups_each_block);
+
+	int cur_blk_len = ((group_id / groups_each_block) != (n_blocks  - 1)) ? rm_blk_sz : rm_last_blk_len;
+
+//	printf("cur_blk_len:%d\n",cur_blk_len);	
+
+//	printf("%d %d\n", global_id, local_id);
+	if(local_id < cur_blk_len){	
+
+		int D = cur_blk_len;
+		int C_sb = 32;
+		int Rate = 3;	
+		int R_sb = (D + (C_sb - 1)) / C_sb;	
+		int K_pi = R_sb * C_sb;
+		int NumDummy = K_pi - D;
+		int DummyValue = 1000000;
+		int out_blk_offset = (group_id / groups_each_block) * Rate *rm_blk_sz;
 	
-	R_sb = (D + (C_sb - 1)) / C_sb;
-	
-	K_pi = R_sb * C_sb;
-	NumDummy = K_pi - D;
-	DummyValue = 1000000;
-
-	int task_num = ((in_buf_sz / Rate) + global_size - 1) / global_size;
-
-	for (int i = 0; i < task_num; i++)
-	{
-		int out_task_offset = i * (rm_blk_sz * Rate * global_size);
-
 		// 1 and 2
-		for (int StrIdx = 0; StrIdx < (Rate - 1); StrIdx++)
+		for (int StrIdx = 0; StrIdx < Rate - 1; StrIdx++)
 		{
-			int r = (local_id + NumDummy) / C_sb;
-			int c = (local_id + NumDummy) % C_sb;
-			int k = r * C_sb + c;
-		
+
 			if (0 == local_id)
-			{
+			{	
 				for (int i = 0; i < NumDummy; i++)
 					pInterMatrix[i] = DummyValue;
 			}
-			pInterMatrix[k] = piSeq[out_blk_offset + StrIdx + (k - NumDummy) * Rate];
+			pInterMatrix[local_id+NumDummy] = piSeq[out_blk_offset + StrIdx + local_id * Rate];
 
-			barrier();
-		
+			barrier(CLK_LOCAL_MEM_FENCE);
+				
+			int r = (local_id+NumDummy)/C_sb;
+			int c = local_id+NumDummy - r * C_sb;
+
 			int out_idx = 0;
 			int ptn_id = InverseColumnPattern[c];
-			for (int i = 0; i < ptn_id; i++)
+			for (int i = 0; i <= /*c*/ptn_id; i++)
 			{
 				if (InterColumnPattern[i] < NumDummy)
 					out_idx += (R_sb - 1);
 				else
 					out_idx += R_sb;
 			}
-			if (c < NumDummy)
-				out_idx += (r - 1);
-			else
-				out_idx += r;
-
-			pcSeq[out_blk_offset + StrIdx + out_idx * Rate] = pInterMatrix[k];
-
-			barrier();
+			out_idx -= R_sb - r;
+			/*
+			if (out_idx == 74)
+			{
+			//	printf("%d\n", NumDummy);
+				printf("%d %d %d\n", local_id, r, c);
+				printf("%d\n", pInterMatrix[local_id+NumDummy]);
+			}
+			*/
+			pcSeq[out_blk_offset + StrIdx + out_idx * Rate] = pInterMatrix[local_id+NumDummy];
+			barrier(CLK_LOCAL_MEM_FENCE);
 		}
 
-		// 3
+		if (0 == local_id)
+		{
+			for (int i = 0; i < NumDummy; i++)
+				pInterMatrix[i] = DummyValue;
+		}
+		pInterMatrix[local_id+NumDummy] = piSeq[out_blk_offset + 2 + local_id * Rate];
+	
+		barrier(CLK_LOCAL_MEM_FENCE);
+
+		int r = (local_id+NumDummy)/C_sb;
+		int c = local_id+NumDummy - r * C_sb;
+		
+		int rr,cc;
+		if(c == 0){
+			rr = r -1;
+			cc = InverseColumnPattern[C_sb-1];
+		}
+		else{
+			rr = r;
+			cc = InverseColumnPattern[c-1];
+		}
+	
+		int out_idx = 0;
+		for (int i = 0; i < cc; i++)
+		{
+			if (InterColumnPattern[i] < NumDummy-1 || InterColumnPattern[i] == C_sb-1)
+				out_idx += (R_sb - 1);
+			else
+				out_idx += R_sb;
+		}
+		if (InterColumnPattern[cc] < NumDummy-1)
+			out_idx += (rr - 1);
+		else
+			out_idx += rr;
+		pcSeq[out_blk_offset + 2 + out_idx * Rate] = pInterMatrix[local_id+NumDummy];
+		barrier(CLK_LOCAL_MEM_FENCE);
 	}
 }
+
 __kernel void ratedematcher()
 {}

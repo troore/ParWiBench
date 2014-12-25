@@ -272,9 +272,12 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 	in_buf_sz = lte_phy_params->rm_in_buf_sz;
 	out_buf_sz = lte_phy_params->rm_out_buf_sz;
 	rm_blk_sz = BLOCK_SIZE + 4;
+
+	//printf("%d\n",CL_DEVICE_MAX_WORK_GROUP_SIZE);
 	rm_data_length = (in_buf_sz / RATE);
 
 	n_blocks = (rm_data_length + (rm_blk_sz - 1)) / rm_blk_sz;
+	printf("n_blocks:%d\n",n_blocks);
 	if (rm_data_length % rm_blk_sz)
 	{
 		rm_last_blk_len = (rm_data_length % rm_blk_sz);
@@ -302,7 +305,7 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 
 	/* Create buffers*/
 	piSeq_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, in_buf_sz * sizeof(int), NULL, &_err);
-	pcSeq_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, in_buf_sz * sizeof(int), NULL, &_err);
+	pcSeq_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, in_buf_sz * sizeof(int), NULL, &_err);
 	InterColumnPattern_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, 32 * sizeof(int), NULL, &_err);
 	InverseColumnPattern_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, 32 * sizeof(int), NULL, &_err);
 
@@ -311,22 +314,34 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 	_err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &pcSeq_buffer);
 	_err |= clSetKernelArg(kernel, 2, sizeof(int), &in_buf_sz);
 	_err |= clSetKernelArg(kernel, 3, sizeof(int), &rm_blk_sz);
-	_err |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &InterColumnPattern_buffer);
-	_err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &InverseColumnPattern_buffer);
-	_err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), NULL);
+	_err |= clSetKernelArg(kernel, 4, sizeof(int), &rm_last_blk_len);
+	_err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &InterColumnPattern_buffer);
+	_err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &InverseColumnPattern_buffer);
+	_err |= clSetKernelArg(kernel, 7, sizeof(int), &rm_data_length);
+	_err |= clSetKernelArg(kernel, 8, sizeof(int), &n_blocks);
+	_err |= clSetKernelArg(kernel, 9, sizeof(int) * ((rm_blk_sz+31)/32) * 32, NULL);
+	if(_err < 0) {printf("err set args:%d\n",_err);exit(1);}
 
 	/* Kernel */
 	_err = clEnqueueWriteBuffer(queue, piSeq_buffer, CL_TRUE, 0, in_buf_sz * sizeof(int), piSeq, 0, NULL, NULL);
 	_err = clEnqueueWriteBuffer(queue, InterColumnPattern_buffer, CL_TRUE, 0, 32 * sizeof(int), InterColumnPattern, 0, NULL, NULL);
-	_err = clEnqueueWriteBuffer(queue, InverseColumnPattern_buffer, CL_TRUE, 0, 32 * sizeof(int), InterColumnPattern, 0, NULL, NULL);
+	_err = clEnqueueWriteBuffer(queue, InverseColumnPattern_buffer, CL_TRUE, 0, 32 * sizeof(int), InverseColumnPattern, 0, NULL, NULL);
+	if(_err < 0) {printf("err write buffer:%d\n",_err);exit(1);}
 
-	global_size = rm_data_length;
-	local_size = rm_blk_sz;
+	local_size = 64;
+	printf("local_size:%d\n",local_size);
+	int groups = (rm_blk_sz + (local_size -1))/local_size;
+	
+	//global_size = ((rm_data_length + (local_size-1))/local_size)*local_size;
+	global_size = n_blocks * groups * local_size;
+
+	printf("global_size:%d\n",global_size);
 
 	double elapsed_time = 0.0;
 	cl_event prof_event;
 
 	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, &local_size, 0, NULL, /*NULL*/&prof_event);
+	if(_err < 0) {printf("err in kernel:%d\n",_err);exit(1);}
 
 	cl_ulong ev_start_time = (cl_ulong)0;
 	cl_ulong ev_end_time = (cl_ulong)0;
@@ -342,7 +357,6 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 
 	_err = clEnqueueReadBuffer(queue, pcSeq_buffer, CL_TRUE, 0, in_buf_sz * sizeof(int), pcSeq, 0, NULL, NULL);
 
-
 	n_extra_bits = out_buf_sz - in_buf_sz;
 	for (i = 0; i < n_extra_bits; i++)
 	{
@@ -353,6 +367,10 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 	clReleaseMemObject(pcSeq_buffer);
 	clReleaseMemObject(InterColumnPattern_buffer);
 	clReleaseMemObject(InverseColumnPattern_buffer);
+	clReleaseKernel(kernel);
+   	clReleaseCommandQueue(queue);
+   	clReleaseProgram(program);
+   	clReleaseContext(context);
 }
 
 void RxRateMatching(LTE_PHY_PARAMS *lte_phy_params, float *pLLRin, float *pLLRout, int *pHD)
