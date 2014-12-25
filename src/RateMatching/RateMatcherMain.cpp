@@ -15,7 +15,7 @@ void tx_rate_matching(LTE_PHY_PARAMS *lte_phy_params)
 
 	ReadInputFromFiles(lte_phy_params->rm_in, lte_phy_params->rm_in_buf_sz, "../TxRateMatchInput");
 
-for(int i=0;i<100000;i++)
+//for(int i=0;i<100000;i++)
 	TxRateMatching(lte_phy_params, lte_phy_params->rm_in, lte_phy_params->rm_out);
 	
 	WriteOutputToFiles(lte_phy_params->rm_out, lte_phy_params->rm_out_buf_sz, "../testTxRateMatchOutput");
