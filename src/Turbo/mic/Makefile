@@ -11,7 +11,7 @@ endif
 SRC += $(SRC_DIR)/lte_phy.cpp
 
 
-INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)/check -I$(LIB_DIR)
+INC_FLAGS += -I$(LIB_DIR)/check -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)
 
 CXXFLAGS += 
 LINKFLAGS += 
@@ -25,10 +25,10 @@ ifeq ($(TX),1)
 endif
 
 Turbo.out: $(OBJS)
-	$(CXX) $^ $(LINKFLAGS) -o $@
+	$(ICC) $(MMIC) -openmp $^ $(LINKFLAGS) -o $@
 
 %.o: %.cpp
-	$(CXX) -c $< -o $@ $(CXXFLAGS)
+	$(ICC) $(MMIC) -openmp -c $< -o $@ $(ICCFLAGS)
 
 clean:
 	rm -rf $(TARGETS) $(OBJS)
