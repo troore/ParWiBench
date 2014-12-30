@@ -3,9 +3,9 @@
 #include "Turbo_pardec.h"
 #include "GeneralFunc.h"
 #include "gauss.h"
-
+#include "meas.h"
 #include "lte_phy.h"
-
+#include "check.h"
 //#define TurboEnc
 
 LTE_PHY_PARAMS lte_phy_params;
@@ -42,9 +42,17 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_iters)
 		lte_phy_params->td_in[i] = (1 - 2 * lte_phy_params->td_in[i]);
 	}
 
+//for(int i=0;i<1000;i++)
 #ifndef PARD
+//	printf("tuobo\n");
+	double tbegin,ttime;
 	turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_iters);
+	tbegin = dtime();
+	turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_iters);
+	ttime = dtime();
+	printf("real time is %f\n",ttime - tbegin);
 #else
+//	printf("par\n");
 	par_turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, 1, n_iters);
 #endif
 	
@@ -81,7 +89,8 @@ int main(int argc, char *argv[])
 	n_rx_ant = atoi(argv[4]);
 		
 	lte_phy_init(&lte_phy_params, enum_fs, mod_type, n_tx_ant, n_rx_ant);
-	
+	double ttime,tbegin;
+	tbegin = dtime();
 #ifdef TurboEnc
 
 	test_turbo_encoding(&lte_phy_params);
@@ -93,7 +102,11 @@ int main(int argc, char *argv[])
 	test_turbo_decoding(&lte_phy_params, n_iters);
 
 #endif
-
+	ttime = dtime();
+	printf("whole time is %f\n",ttime - tbegin);
+	char s1[100] = "../TurboEncoderInput";
+	char s2[100] = "../testTurboDecoderOutput";
+	printf("%d\n",check_float(s1,s2));
 	return 0;
 }
 
