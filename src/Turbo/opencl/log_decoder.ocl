@@ -1,0 +1,179 @@
+
+#define N_TAIL	3
+#define N_GENS	2
+#define LOG_INFINITY 1e30
+#define N_STATES	8
+
+inline float max_log(float a, float b)
+{
+	return (a > b) ? a : b;
+}
+
+__kernel void log_decoder_kernel(__global float *recv_syst,
+								 __global float *recv_parity,
+								 __global float *apriori,
+								 __global float *extrinsic,
+								 int interleaver_size,
+								 __global float *alpha,
+								 __global float *beta,
+								 __global float *gamma,
+								 __global float *denom,
+								 __global int *g_output_parity,
+								 __global int *g_state_trans,
+								 __global int *g_rev_state_trans,
+								 __local float *nom,
+								 __local float *den)
+{
+	int tid = get_global_id(0);
+	float /*nom, den, */temp0, temp1, exp_temp0, exp_temp1, rp;
+	int i, j, s0, s1, k, kk, l, s, s_prim, s_prim0, s_prim1;
+	int stage;
+	
+	int block_length = (interleaver_size + N_TAIL);
+
+	float Lc = 1.0;
+	
+// Calculate gamma
+	for (k = 1; k <= block_length; k++)
+	{
+		kk = k - 1;
+		s_prim = tid;
+
+//		for (s_prim = 0; s_prim < N_STATES; s_prim++)
+		if (s_prim < N_STATES)
+		{
+			exp_temp0 = 0.0;
+			exp_temp1 = 0.0;
+
+			for (j = 0; j < (N_GENS - 1); j++)
+			{
+				rp = recv_parity[kk * (N_GENS - 1) + j];
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+				{
+					exp_temp0 += rp;
+				}
+				else
+				{ 
+					exp_temp0 -= rp;
+				}
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+				{
+					exp_temp1 += rp;
+				}
+				else
+				{
+					exp_temp1 -= rp; 
+				}
+			}
+
+			gamma[(2 * s_prim + 0) * (block_length + 1) + k] =  0.5 * ((apriori[kk] + recv_syst[kk]) + exp_temp0);
+			gamma[(2 * s_prim + 1) * (block_length + 1) + k] = -0.5 * ((apriori[kk] + recv_syst[kk]) - exp_temp1);
+		}
+		barrier(CLK_GLOBAL_MEM_FENCE);
+	}
+
+// Calculate alpha, going forward through the trellis
+	for (k = 1; k <= block_length; k++)
+	{
+		s = tid;
+//		for (s = 0; s < N_STATES; s++)
+		if (s < N_STATES)
+		{
+			s_prim0 = g_rev_state_trans[s * 2 + 0];
+			s_prim1 = g_rev_state_trans[s * 2 + 1];
+			temp0 = alpha[s_prim0 * (block_length + 1) + k - 1] + gamma[(2 * s_prim0 + 0) * (block_length + 1) + k];
+			temp1 = alpha[s_prim1 * (block_length + 1) + k - 1] + gamma[(2 * s_prim1 + 1) * (block_length + 1) + k];
+			alpha[s * (block_length + 1) + k] = max_log(temp0, temp1);
+			denom[k] = max_log(alpha[s * (block_length + 1) + k], denom[k]);
+		}
+
+		// Normalization of alpha
+		l = tid;
+//		for (l = 0; l < N_STATES; l++)
+		if (l < N_STATES)
+		{
+			alpha[l * (block_length + 1) + k] -= denom[k];
+		}
+		barrier(CLK_GLOBAL_MEM_FENCE);
+	}
+
+// Calculate beta going backward in the trellis
+	for (k = block_length; k >= 2; k--)
+	{
+		s_prim = tid;
+		//	for (s_prim = 0; s_prim < N_STATES; s_prim++)
+		if (s_prim < N_STATES)
+		{
+			s0 = g_state_trans[s_prim * 2 + 0];
+			s1 = g_state_trans[s_prim * 2 + 1];
+			beta[s_prim * (block_length + 1) + k - 1] = max_log(beta[s0 * (block_length + 1) + k] + gamma[(2 * s_prim + 0) * (block_length + 1) + k], beta[s1 * (block_length + 1) + k] + gamma[(2 * s_prim + 1) * (block_length + 1) + k]);
+		}
+		l = tid;
+		// Normalization of beta
+		//	for (l = 0; l < N_STATES; l++)
+		if (l < N_STATES)
+		{
+			beta[l * (block_length + 1) + k - 1] -= denom[k];
+		}
+		barrier(CLK_GLOBAL_MEM_FENCE);
+	}
+
+// Calculate extrinsic output for each bit
+	for (k = 1; k <= block_length; k++)
+	{
+		kk = k - 1;
+		//	nom = -LOG_INFINITY;
+		//	den = -LOG_INFINITY;
+		s_prim = tid;
+		//	for (s_prim = 0; s_prim < N_STATES; s_prim++)
+		if (s_prim < N_STATES)
+		{
+			s0 = g_state_trans[s_prim * 2 + 0];
+			s1 = g_state_trans[s_prim * 2 + 1];
+			exp_temp0 = 0.0;
+			exp_temp1 = 0.0;
+			for (j = 0; j < (N_GENS - 1); j++)
+			{
+				rp = recv_parity[kk * (N_GENS - 1) + j];
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+				{
+					exp_temp0 += rp;
+				}
+				else
+				{
+					exp_temp0 -= rp; 
+				}
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+				{ 
+					exp_temp1 += rp;
+				}
+				else
+				{
+					exp_temp1 -= rp;
+				}
+			}
+			//	nom = max_log(nom, alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp0 + beta[s0 * (block_length + 1) + k]);
+			//	den = max_log(den, alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp1 + beta[s1 * (block_length + 1) + k]);
+			nom[s_prim] = alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp0 + beta[s0 * (block_length + 1) + k];
+			den[s_prim] = alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp1 + beta[s1 * (block_length + 1) + k];
+		}
+		barrier(CLK_GLOBAL_MEM_FENCE);
+		
+		for (stage = (N_STATES / 2); stage >= 1; stage >>= 1)
+		{
+			if (tid < stage)
+			{
+				nom[tid] = max_log(nom[tid], nom[tid + stage]);
+				den[tid] = max_log(den[tid], den[tid + stage]);
+			}
+			barrier(CLK_GLOBAL_MEM_FENCE);
+		}
+		
+		extrinsic[kk] = nom[0] - den[0];
+		//	std::cout << nom << "\t" << den << std::endl;
+		//	std::cout << extrinsic[kk] << std::endl;
+		//	printf("%f %f\n", nom[0], den[0]);
+		//	printf("%f\n", extrinsic[kk]);
+		barrier(CLK_GLOBAL_MEM_FENCE);
+	}
+}

@@ -1,23 +1,19 @@
-include ../../../../common/makefile.config
+include ../../../common/makefile.config
 
-SRC = ../TurboMain.cpp ../c/Turbo.cpp ParTurbo.cpp
-SRC += $(LIB_DIR)/FIFO.cpp $(LIB_DIR)/gauss.cpp $(LIB_DIR)/matrix.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/opencl/clutil.cpp
+SRC = ../TurboMain.cpp Turbo.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/opencl/clutil.cpp $(LIB_DIR)/meas.cpp $(LIB_DIR)/check/check.cpp
 
-SRC += $(LTE_DIR)/src/LTEUplink/lte_phy.cpp
+SRC += $(SRC_DIR)/lte_phy.cpp
 
-INC_FLAGS += -I. -I$(LTE_DIR)/include -I$(LIB_DIR) -I$(LIB_DIR)/opencl -I$(AMD_SDK_HOME)/include
+INC_FLAGS += -I. -I.. -I$(SRC_DIR)/ -I$(LIB_DIR)/check -I$(LIB_DIR)/opencl
 
-#CXXFLAGS +=
-CXXFLAGS += -DPARTURBO
-CXXFLAGS += -DGOLD
-#CXXFLAGS += -DDEBUG
-LINKFLAGS += -L$(AMD_SDK_HOME)/lib -lOpenCL
+LINKFLAGS += -L$(OPENCL_SDK_HOME)/lib -lOpenCL
 
-TARGETS = ParTurbo.out
+TARGETS = Turbo.out
 
 OBJS := $(patsubst %.cpp, %.o, $(SRC))
 
-ParTurbo.out: $(OBJS)
+Turbo.out: $(OBJS)
 	$(CXX) $^ $(LINKFLAGS) -o $@
 
 %.o: %.cpp
