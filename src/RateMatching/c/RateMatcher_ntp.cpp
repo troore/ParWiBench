@@ -1,4 +1,6 @@
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "lte_phy.h"
 
 static int InterColumnPattern[32] = {0,16,8,24,4,20,12,28,
@@ -28,7 +30,8 @@ static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 	NumDummy = K_pi - D;
 	DummyValue = (T)1000000;
 
-	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
+//	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
+	T *pInterMatrix = (T *)malloc(K_pi * sizeof(float));
 
 	for (int StrIdx = 0; StrIdx < (Rate - 1); StrIdx++)
 	{
@@ -70,8 +73,10 @@ static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 	
 //////////////////// Interleaving for i=2 ///////////////////////
 
-	int Pi[((BLOCK_SIZE + 31) / 32) * 32];
-	T pInterSeq[((BLOCK_SIZE + 31) / 32) * 32];
+//	int Pi[((BLOCK_SIZE + 31) / 32) * 32];
+//	T pInterSeq[((BLOCK_SIZE + 31) / 32) * 32];
+	int *Pi = (int *)malloc(K_pi * sizeof(int));
+	T *pInterSeq = (T *)malloc(K_pi * sizeof(T));
 	
 	for (int k = 0;k < NumDummy; k++)
 	{
@@ -100,11 +105,15 @@ static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 			OutIdx++;
 		}
 	}
+
+	free(pInterMatrix);
+	free(Pi);
+	free(pInterSeq);
 }
 
 
 template<typename T>
-static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
+static void SubblockDeInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 {
 	int D;
 	int K_pi;
@@ -127,7 +136,8 @@ static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 	DummyValue = (T)1000000;
 	
 //////////////////// DeInterleaving for i=0,1 ///////////////////////
-	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
+//	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
+	T *pInterMatrix = (T *)malloc(K_pi * sizeof(float));
 	
 	for (int StrIdx = 0; StrIdx < (Rate - 1); StrIdx++)
 	{
@@ -160,7 +170,8 @@ static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 				{}
 				else
 				{
-					pInterMatrix[r * C_sb + col] = pInpMtr[StrIdx * D + InIdx];
+					//	pInterMatrix[r * C_sb + col] = pInpMtr[StrIdx * D + InIdx];
+					pInterMatrix[r * C_sb + col] = pInpMtr[StrIdx + InIdx * Rate];
 					InIdx++;
 				}  
 			}
@@ -176,7 +187,8 @@ static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 				{}
 				else
 				{
-					pOutMtr[StrIdx * D + OutIdx] = pInterMatrix[r * C_sb + c];
+					//	pOutMtr[StrIdx * D + OutIdx] = pInterMatrix[r * C_sb + c];
+					pOutMtr[StrIdx + OutIdx * Rate] = pInterMatrix[r * C_sb + c];
 					OutIdx++;
 				}
 			}
@@ -184,37 +196,48 @@ static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 	}
 
 //////////////////// DeInterleaving for i=2 ///////////////////////
-	int Pi[((BLOCK_SIZE + 31) / 32) * 32];
-	T pInterSeq[((BLOCK_SIZE + 31) / 32) * 32];
+//	int Pi[((BLOCK_SIZE + 31) / 32) * 32];
+//	T pInterSeq[((BLOCK_SIZE + 31) / 32) * 32];
+	int *Pi = (int *)malloc(K_pi * sizeof(int));
+	T *pInterSeq = (T *)malloc(K_pi * sizeof(T));
 	
 	for (int k = 0; k < NumDummy; k++)
 		pInterSeq[k] = DummyValue;
 //////////////// Pi & DePi//////////////////
-	for(int k=0;k<K_pi;k++)
+	for (int k = 0; k < K_pi; k++)
 	{
 		int idxP = k / R_sb;
 		int idx = (InterColumnPattern[idxP] + (C_sb * (k % R_sb)) + 1) % K_pi;
 		Pi[k]=idx;
 	}
+
 /////////////// DeInterleaving ////////////////////
 	InIdx=0;
-	for(int k=0;k<K_pi;k++)
+	for (int k = 0; k < K_pi; k++)
 	{
 		T v = pInterSeq[Pi[k]];
+		//	printf("%d %f\n", Pi[k], v);
 		if (v == DummyValue)
 		{}
 		else
 		{
-			pInterSeq[Pi[k]] = pInpMtr[(Rate - 1) * D + InIdx];
+			//	pInterSeq[Pi[k]] = pInpMtr[(Rate - 1) * D + InIdx];
+			pInterSeq[Pi[k]] = pInpMtr[(Rate - 1) + InIdx * Rate];
 			InIdx++;
 		}
 	}
+
 	OutIdx=0;
 	for (int k = NumDummy; k < K_pi; k++)
 	{
-		pOutMtr[(Rate - 1) * D + OutIdx] = pInterSeq[k];
+		//	pOutMtr[(Rate - 1) * D + OutIdx] = pInterSeq[k];
+		pOutMtr[(Rate - 1) + OutIdx * Rate] = pInterSeq[k];
 		OutIdx++;
 	}
+	
+	free(pInterMatrix);
+	free(Pi);
+	free(pInterSeq);
 }
 
 
@@ -302,8 +325,11 @@ void RxRateMatching(LTE_PHY_PARAMS *lte_phy_params, float *pLLRin, float *pLLRou
 	int cur_blk_len;
 	int out_buf_sz;
 	
-	float pInMatrix[RATE * (BLOCK_SIZE + 4)];
-	float pOutMatrix[RATE * (BLOCK_SIZE + 4)];
+//	float pInMatrix[RATE * (BLOCK_SIZE + 4)];
+//	float pOutMatrix[RATE * (BLOCK_SIZE + 4)];
+
+//	float *pInMatrix = (float *)malloc(RATE * (BLOCK_SIZE + 4) * sizeof(float));
+//	float *pOutMatrix = (float *)malloc(RATE * (BLOCK_SIZE + 4) * sizeof(float));
 
 	int i, j, r;
 
@@ -325,17 +351,21 @@ void RxRateMatching(LTE_PHY_PARAMS *lte_phy_params, float *pLLRin, float *pLLRou
 	for (i = 0; i < n_blocks; i++)
 	{
 		cur_blk_len = (i != (n_blocks - 1)) ? rm_blk_sz : rm_last_blk_len;
-		
+
+		/*
 		for (j = 0; j < cur_blk_len; j++)
 		{
 			for (r = 0; r < RATE; r++)
 			{
 				pInMatrix[r * cur_blk_len + j] = pLLRin[out_block_offset + RATE * j + r];
 			}
-		}  
+		}
+		*/
 
-		SubblockDeInterleaving(cur_blk_len, pInMatrix, pOutMatrix);
+		//	SubblockDeInterleaving(cur_blk_len, pInMatrix, pOutMatrix);
+		SubblockDeInterleaving(cur_blk_len, pLLRin + out_block_offset, pLLRout + out_block_offset);
 
+		/*
 		for (j = 0; j < cur_blk_len; j++)
 		{
 			for (r = 0; r < RATE; r++)
@@ -343,6 +373,7 @@ void RxRateMatching(LTE_PHY_PARAMS *lte_phy_params, float *pLLRin, float *pLLRou
 				pLLRin[out_block_offset + RATE * j + r] = pOutMatrix[r * cur_blk_len + j];
 			}
 		}
+		*/
 
 		out_block_offset += RATE * cur_blk_len;
 	}
@@ -359,9 +390,14 @@ void RxRateMatching(LTE_PHY_PARAMS *lte_phy_params, float *pLLRin, float *pLLRou
 		}
 	}
 
+	/*
 	for (i = 0; i < out_buf_sz; i++)
 	{
 		pLLRout[i] = pLLRin[i];
 	}
+	*/
+
+//	free(pInMatrix);
+//	free(pOutMatrix);
 }
 

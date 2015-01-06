@@ -94,6 +94,10 @@ void ReadInputFromFiles(float *pIn, int Sz, const char *nameReal, const char *na
 	{
 		pIn[i]=pReadInReal[i];
 		pIn[i+Sz] = pReadInImag[i];
+		/*
+		pIn[2 * i + 0]=pReadInReal[i];
+		pIn[2 * i + 1] = pReadInImag[i];
+		*/
 	}
 
 	delete[] pReadInReal;
@@ -143,6 +147,50 @@ void ReadInputFromFiles(float *pInReal, float *pInImag, int Sz, const char *name
 	delete[] pReadInReal;
 	delete[] pReadInImag;
 }
+
+void ReadInputFromFiles(std::complex<float> *pIn, int Sz, const char *nameReal, const char *nameImag)
+{
+	FILE *file;
+
+	if((file=fopen(nameReal,"r"))==NULL)
+	throw std::runtime_error ("file open error\n");
+
+	float *pReadInReal=new float[Sz];
+
+	for(int i=0;i<Sz;i++)
+	{
+		if(fscanf(file,"%f",(pReadInReal+i)) == EOF)
+		{
+			if(ferror(file) != 0)
+				throw std::runtime_error ("file read error\n");
+		}
+
+	}
+	fclose(file);
+
+	if((file=fopen(nameImag,"r"))==NULL)
+		throw std::runtime_error ("file open error\n");
+	float *pReadInImag=new float[Sz];
+	for(int i=0;i<Sz;i++)
+	{
+		if(fscanf(file,"%f",(pReadInImag+i)) == EOF)
+		{
+			if(ferror(file) != 0)
+				throw std::runtime_error ("file read error\n");
+		}
+
+	}
+	fclose(file);
+
+	for(int i=0;i<Sz;i++)
+	{
+		pIn[i] = std::complex<float>(pReadInReal[i], pReadInImag[i]);
+	}
+
+	delete[] pReadInReal;
+	delete[] pReadInImag;
+}
+
 
 /*void ReadInputFromFiles(float *pIn, int Sz, const char *nameReal, const char *nameImag)
 {
@@ -401,6 +449,10 @@ void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *n
 	{
 		fprintf(fptr_real,"%f\n",pOut[i]);
 		fprintf(fptr_imag,"%f\n",pOut[i+Sz]);
+		/*
+		fprintf(fptr_real, "%f\n", pOut[2 * i + 0]);
+		fprintf(fptr_imag, "%f\n", pOut[2 * i + 1]);
+		*/
 	}
 	
 	fclose(fptr_real);
@@ -424,6 +476,25 @@ void WriteOutputToFiles(float *pOutReal, float *pOutImag, int Sz, const char *na
 	fclose(fptr_real);
 	fclose(fptr_imag);
 }
+
+void WriteOutputToFiles(std::complex<float> *pOut,  int Sz, const char *nameReal, const char *nameImag)
+{
+	FILE *fptr_real=NULL;
+	FILE *fptr_imag=NULL;
+	
+	fptr_real = fopen(nameReal, "w+");
+	fptr_imag = fopen(nameImag, "w+");
+	
+	for(int i=0;i<Sz;i++)
+	{
+		fprintf(fptr_real,"%f\n", std::real(pOut[i]));
+		fprintf(fptr_imag,"%f\n", std::imag(pOut[i]));
+	}
+	
+	fclose(fptr_real);
+	fclose(fptr_imag);
+}
+
 
 /*void WriteOutputToFiles(float *pOut, int Sz, const char *nameReal, const char *nameImag)
 {

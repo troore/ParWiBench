@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "lte_phy.h"
-#include "dmrs.h"
+#include "refs/dmrs.h"
 
 static void MatrixProd(int d1, int d2, int d3, float M1[], float M2[], float oM[])
 {
@@ -307,11 +307,13 @@ void FDLSEstimation(float *pXt,
 
 	MatrixProd(NumLayer, NumLayer, NumRxAntenna, pInvXDX, pXDY, pHTranspose);
 								
+	/*
 	for (int i = 0; i < 4; i++)
 	{
 		printf("%f\n", pHTranspose[i]);
 		printf("%f\n", pHTranspose[i + 4]);
 	}
+	*/
 }
 
 void FDLSEstimation(float *pXtReal, float *pXtImag,

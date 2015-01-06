@@ -6,8 +6,6 @@
 
 #define LOG_INFINITY 1e30
 
-#define TURBO_INT_K_TABLE_SIZE 188
-
 //void turbo_init();
 
 void turbo_encoding(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq);
@@ -64,8 +62,4 @@ extern float (*com_log)(float, float);
 extern const double log_double_max;
 extern const double log_double_min;
 
-extern int TURBO_INT_K_TABLE[TURBO_INT_K_TABLE_SIZE];
-extern int TURBO_INT_F1_TABLE[TURBO_INT_K_TABLE_SIZE];
-extern int TURBO_INT_F2_TABLE[TURBO_INT_K_TABLE_SIZE];
-	
 #endif

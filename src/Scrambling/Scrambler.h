@@ -2,8 +2,8 @@
 #ifndef __SCRAMBLER_H_
 #define __SCRAMBLER_H_
 
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
 
 #include "lte_phy.h"
 

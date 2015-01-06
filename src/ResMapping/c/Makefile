@@ -1,10 +1,10 @@
-include ../../common/makefile.config
+include ../../../common/makefile.config
 
-SRC = ResMapMain.cpp ResMapper.cpp 
-SRC += $(LIB_DIR)/gauss.cpp  $(LIB_DIR)/GeneralFunc.cpp
+SRC = ../ResMapMain.cpp ResMapper.cpp $(LIB_DIR)/refs/dmrs.cpp
+SRC += $(LIB_DIR)/gauss.cpp  $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp
 SRC += $(SRC_DIR)/lte_phy.cpp
 
-INC_FLAGS += -I. -I$(SRC_DIR)
+INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)
 
 #$(warning $(SRC))
 #$(warning $(UTIL_DIR))

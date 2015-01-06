@@ -44,6 +44,7 @@ void dft(int n, float a[], float y[], int direction)
 	}
 }
 
+/*
 int main(int argc, char *argv[])
 {
 	int k;
@@ -73,4 +74,4 @@ int main(int argc, char *argv[])
 	print_vector(" FFT", v, N);
 	return 0;
 }
-
+*/

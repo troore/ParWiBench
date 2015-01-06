@@ -9,7 +9,7 @@ int check_float(char *s1,char *s2)
 	while(fscanf(fp1,"%f",&s_1)!=EOF&&fscanf(fp2,"%f",&s_2)!=EOF)
 	{
 //		printf("x");
-		if(fabs(s_1-s_2)> 0.00001) 
+		if(fabs(s_1-s_2) > 0.01) 
 		{
 	//		return -1;
 			printf("%d\n", cnt);

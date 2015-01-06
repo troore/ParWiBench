@@ -1,2 +1,9 @@
 *.o
 *.out
+*Input
+*Output
+*InputReal
+*InputImag
+*OutputReal
+*OutputImag
+testsuite/

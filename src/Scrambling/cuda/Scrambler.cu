@@ -1,6 +1,6 @@
 
-//#include "Scrambler.h"
-#include "lte_phy.h"
+#include "Scrambler.h"
+
 
 void GenScrambInt(int *pScrambInt, int n)
 {
@@ -33,23 +33,72 @@ void GenScrambInt(int *pScrambInt, int n)
 	/////////////////////END Generate ScrambSeq///////////////////////
 }
 
+__global__ void scramb_kernel(int *pInpSeq, int *scramb_seq_int, int *pOutSeq, int n_inp)
+{
+	int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+	if (i < n_inp)
+	{
+		pOutSeq[i] = (pInpSeq[i] + scramb_seq_int[i]) % 2;
+	}
+}
+
 void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 {
 	int n_inp;
-	int scramb_seq_int[N_SCRAMB_IN_MAX];
+//	int scramb_seq_int[N_SCRAMB_IN_MAX];
+	int *scramb_seq_int;
+	int *d_pInpSeq, *d_pOutSeq, *d_scramb_seq_int;
 
-	int i;
+	int bdimx, gdimx;
+//	int i;
 
 	n_inp = lte_phy_params->scramb_in_buf_sz;
+	bdimx = 32;
+	gdimx = (n_inp + (bdimx - 1)) / bdimx;
 
+	scramb_seq_int = (int *)malloc(n_inp * sizeof(int));
+
+	cudaMalloc((void **)&d_pInpSeq, n_inp * sizeof(int));
+	cudaMalloc((void **)&d_pOutSeq, n_inp * sizeof(int));
+	cudaMalloc((void **)&d_scramb_seq_int, n_inp * sizeof(int));
+	
 	GenScrambInt(scramb_seq_int, n_inp);
 
-	////////////////////////Scrambling////////////////////////////
+	cudaMemcpy(d_pInpSeq, pInpSeq, n_inp * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_scramb_seq_int, scramb_seq_int, n_inp * sizeof(int), cudaMemcpyHostToDevice);
+
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+	cudaEventRecord(start, 0);
+
+	scramb_kernel<<<gdimx, bdimx>>>(d_pInpSeq, d_scramb_seq_int, d_pOutSeq, n_inp);
+
+	cudaEventRecord(stop, 0);
+	cudaEventSynchronize(stop);
+	float time;
+	cudaEventElapsedTime(&time, start, stop);
+	cudaEventDestroy(start);
+	cudaEventDestroy(stop);
+	printf("Elapsed time: %.3fms", time);
+
+	//////////////////////// scrambling kernel ////////////////////////////
+	/*
 	for (i = 0; i < n_inp; i++)
 	{
 		pOutSeq[i] = (pInpSeq[i] + scramb_seq_int[i]) % 2;
 	}
-	////////////////////////END Scrambling////////////////////////////
+	*/
+	////////////////////////END scrambling kernel ////////////////////////////
+
+	cudaMemcpy(pOutSeq, d_pOutSeq, n_inp * sizeof(int), cudaMemcpyDeviceToHost);
+
+	free(scramb_seq_int);
+
+	cudaFree(d_pInpSeq);
+	cudaFree(d_pOutSeq);
+	cudaFree(d_scramb_seq_int);
 }
 
 
@@ -87,4 +136,3 @@ void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq
 		pOutSeq[i] = (pInpSeq[i] * (scramb_seq_int[i] * (-2.0) + 1.0));
 	}
 }
-

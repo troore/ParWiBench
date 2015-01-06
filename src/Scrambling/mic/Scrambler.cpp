@@ -1,21 +1,16 @@
-#include <immintrin.h>
-#include "Scrambler.h"
-#include "timer.h"
-#define MIC_DEV 1
-#define LEN8 8
-#define LEN16 16
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <omp.h>
-#include <sys/time.h>
-double ddtime()
-{
-	    double tseconds = 0.0;
-	    struct timeval mytime;
-	    gettimeofday(&mytime,(struct timezone*)0);
-            tseconds = (double)(mytime.tv_sec + mytime.tv_usec*1.0e-6);			    return( tseconds );
-}
+
+#include <immintrin.h>
+#include "Scrambler.h"
+#include "meas.h"
+#include "micpower.h"
+
+#define MIC_DEV 1
+#define LEN8 8
+#define LEN16 16
 
 typedef __attribute__((aligned(64))) union zmmi {
 		__m512i reg;
@@ -26,6 +21,38 @@ typedef __attribute__((aligned(64))) union zmmf {
     __m512 reg;
     float elems[LEN16];
 } zmmf_t;
+
+
+void GenScrambInt(int *pScrambInt, int n)
+{
+	int i;
+	int N_c = 1600;
+	
+	int n_init[31] = { 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0};
+
+	/////////////////////Generate ScrambSeq///////////////////////
+	int px1[N_SCRAMB_IN_MAX + 1600];
+	int px2[N_SCRAMB_IN_MAX + 1600];
+
+	for (i = 0; i < 31; i++)
+	{
+		px1[i] = 0;
+		px2[i] = n_init[i];
+	}
+	px1[0] = 1;
+	
+	for (i = 0; i < n + N_c - 31; i++)
+	{
+		px1[i + 31] =(px1[i + 3] + px1[i]) % 2;
+		px2[i + 31] = (px2[i + 3] + px2[i + 2] + px2[i + 1] + px2[i]) % 2;
+	}
+	for (i = 0; i < n; i++)
+	{
+		pScrambInt[i] = 3; // What is this? Any use?
+		pScrambInt[i] = (px1[i + N_c] + px2[i + N_c]) % 2;
+	}
+	/////////////////////END Generate ScrambSeq///////////////////////
+}
 
 void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 {
@@ -38,6 +65,10 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 
 	GenScrambInt(scramb_seq_int, n_inp);
 
+	micpower_start();
+	
+	double tstart, tstop, ttime;
+	tstart = dtime();
 	////////////////////////Scrambling////////////////////////////
 
 //#pragma offload_transfer target(mic:MIC_DEV) \
@@ -76,11 +107,13 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 		pOutSeq[i] = (pInpSeq[i] + scramb_seq_int[i]) % 2;
 	}*/
 	////////////////////////END Scrambling////////////////////////////
+	tstop = dtime();
+	ttime = tstop - tstart;
+
+	double energy = micpower_finalize();
+	printf("Energy used is %fJ\n", energy);
+	printf("Elapsed time of Scrambling is %lfms\n", ttime);
 }
-
-
-
-
 
 void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq)
 {
@@ -136,34 +169,3 @@ void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq
 	//printf("%f s\n",ttime);
 }
 //#endif
-void GenScrambInt(int *pScrambInt, int n)
-{
-	int i;
-	int N_c = 1600;
-	
-	int n_init[31] = { 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0};
-
-	/////////////////////Generate ScrambSeq///////////////////////
-	int px1[N_SCRAMB_IN_MAX + 1600];
-	int px2[N_SCRAMB_IN_MAX + 1600];
-
-	for (i = 0; i < 31; i++)
-	{
-		px1[i] = 0;
-		px2[i] = n_init[i];
-	}
-	px1[0] = 1;
-	
-	for (i = 0; i < n + N_c - 31; i++)
-	{
-		px1[i + 31] =(px1[i + 3] + px1[i]) % 2;
-		px2[i + 31] = (px2[i + 3] + px2[i + 2] + px2[i + 1] + px2[i]) % 2;
-	}
-	for (i = 0; i < n; i++)
-	{
-		pScrambInt[i] = 3; // What is this? Any use?
-		pScrambInt[i] = (px1[i + N_c] + px2[i + N_c]) % 2;
-	}
-	/////////////////////END Generate ScrambSeq///////////////////////
-}
-

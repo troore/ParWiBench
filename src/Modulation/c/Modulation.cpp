@@ -199,7 +199,7 @@ void set_mod_params(/*float (*mod_table)[2]*/ p_a *pp_table, int *bits_per_samp,
 	}
 }
 
-void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex<float> *pModedSeq, int mod_type)
+void Modulating_cplx(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex<float> *pModedSeq, int mod_type)
 {
 	float I, Q;
 	float (*p_table)[2];
@@ -252,7 +252,7 @@ float eudist(float a, float b, float c, float d)
 	return sqrt((a - c) * (a - c) + (b - d) * (b - d));
 }
 
-void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, int *pHD, int mod_type)
+void Demodulating_cplx(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, int *pHD, int mod_type)
 {
 	float dist, mindist;
 	int closest;
@@ -309,7 +309,7 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, 
 	/* End demodulation*/
 }
 
-void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, float *pLLR, int mod_type, float awgnSigma)
+void Demodulating_cplx(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, float *pLLR, int mod_type, float awgnSigma)
 {
 
 	float No = 2.0 * (pow(awgnSigma, 2.0));

@@ -1,7 +1,8 @@
 include ../../../common/makefile.config
+
 SRC = $(LIB_DIR)/check/check.cpp
 SRC += ../TurboMain.cpp Turbo.cpp
-SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/meas.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp
 
 ifeq ($(PARD),1)
 	SRC += Turbo_pardec.cpp
@@ -11,7 +12,7 @@ endif
 SRC += $(SRC_DIR)/lte_phy.cpp
 
 
-INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)/check -I$(LIB_DIR)
+INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)/check -I$(LIB_DIR)/timer/
 
 CXXFLAGS += 
 LINKFLAGS += 
