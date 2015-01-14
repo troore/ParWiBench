@@ -6,7 +6,8 @@ __kernel void ratematcher(__global int *piSeq, __global int *pcSeq,
 						 __constant int *InverseColumnPattern,
 						int rm_data_length,
 						int n_blocks,
-						 __local int *pInterMatrix)
+						  __local int *pInterMatrix,
+						  int n_iters)
 {
 	int group_id = get_group_id(0);
 	int global_size = get_global_size(0);
@@ -24,6 +25,7 @@ __kernel void ratematcher(__global int *piSeq, __global int *pcSeq,
 //	printf("cur_blk_len:%d\n",cur_blk_len);	
 
 //	printf("%d %d\n", global_id, local_id);
+	for (int k = 0; k < n_iters; k++) {
 	if(local_id < cur_blk_len){	
 
 		int D = cur_blk_len;
@@ -109,6 +111,8 @@ __kernel void ratematcher(__global int *piSeq, __global int *pcSeq,
 			out_idx += rr;
 		pcSeq[out_blk_offset + 2 + out_idx * Rate] = pInterMatrix[local_id+NumDummy];
 		barrier(CLK_LOCAL_MEM_FENCE);
+	}
+	barrier(CLK_GLOBAL_MEM_FENCE);
 	}
 }
 

@@ -1,5 +1,16 @@
-dft: dft.cpp ../../opencl/clutil.cpp ../../meas.cpp
-	$(CXX) -o $@ $^ -g -Wall -I/opt/AMDAPP/include -I../../ -L/opt/AMDAPP/lib -lOpenCL
+
+CXXFLAGS = -g -Wall -I../../ -I.
+LINKFLAGS = -lOpenCL
+
+ifeq ($(NV),1)
+	CXXFLAGS += -I/usr/local/cuda/include
+	CXXFLAGS += -DNV
+else
+	CXXFLAGS += -I/opt/AMDAPP/include
+endif
+
+dft: dft.cpp ../../opencl/clutil.cpp
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LINKFLAGS)
 
 clean:
 	rm -rf dft *.o

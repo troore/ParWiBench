@@ -7,3 +7,5 @@
 *OutputReal
 *OutputImag
 testsuite/
+*.trace
+*log

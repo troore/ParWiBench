@@ -199,21 +199,21 @@ typedef struct
 #define N_MOD_OUT_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX * (LTE_PHY_N_SYMB_PER_SUBFR - 2))
 
 
-  int mod_in[N_MOD_IN_MAX];
-   std::complex<float> mod_out_cplx[N_MOD_OUT_MAX];
-  float mod_out[N_MOD_OUT_MAX * 2];
+	int mod_in[N_MOD_IN_MAX];
+	std::complex<float> mod_out_cplx[N_MOD_OUT_MAX];
+	float mod_out[N_MOD_OUT_MAX * 2];
 	float mod_out_real[N_MOD_OUT_MAX];
 	float mod_out_imag[N_MOD_OUT_MAX];
 	std::complex<float> demod_in_cplx[N_MOD_OUT_MAX];
-  float demod_in[N_MOD_OUT_MAX * 2];
+	float demod_in[N_MOD_OUT_MAX * 2];
 	float demod_in_real[N_MOD_IN_MAX];
 	float demod_in_imag[N_MOD_IN_MAX];
-  float demod_LLR[N_MOD_IN_MAX];
-  int demod_HD[N_MOD_IN_MAX];
-  int mod_in_buf_sz;
-  int mod_out_buf_sz;
-  int demod_in_buf_sz;
-  int demod_out_buf_sz;
+	float demod_LLR[N_MOD_IN_MAX];
+	int demod_HD[N_MOD_IN_MAX];
+	int mod_in_buf_sz;
+	int mod_out_buf_sz;
+	int demod_in_buf_sz;
+	int demod_out_buf_sz;
 
 	
 	// Transform precoding
@@ -222,15 +222,17 @@ typedef struct
 #define N_TRANS_DECODER_IN_MAX (N_TRANS_ENCODER_IN_MAX)
 #define N_TRANS_DECODER_OUT_MAX (N_TRANS_ENCODER_IN_MAX)
 
-	std::complex<float> trans_encoder_in_cplx[N_TRANS_ENCODER_IN_MAX];
-	std::complex<float> trans_encoder_out_cplx[N_TRANS_ENCODER_OUT_MAX];
-	std::complex<float> trans_decoder_in_cplx[N_TRANS_DECODER_IN_MAX];
-	std::complex<float> trans_decoder_out_cplx[N_TRANS_DECODER_OUT_MAX];
+	/*
+	  std::complex<float> trans_encoder_in_cplx[N_TRANS_ENCODER_IN_MAX];
+	  std::complex<float> trans_encoder_out_cplx[N_TRANS_ENCODER_OUT_MAX];
+	  std::complex<float> trans_decoder_in_cplx[N_TRANS_DECODER_IN_MAX];
+	  std::complex<float> trans_decoder_out_cplx[N_TRANS_DECODER_OUT_MAX];
+	*/
 	
-  float trans_encoder_in[N_TRANS_ENCODER_IN_MAX * 2];
-  float trans_encoder_out[N_TRANS_ENCODER_OUT_MAX * 2];
-  float trans_decoder_in[N_TRANS_DECODER_IN_MAX * 2];
-  float trans_decoder_out[N_TRANS_DECODER_OUT_MAX * 2];
+	float trans_encoder_in[N_TRANS_ENCODER_IN_MAX * 2];
+	float trans_encoder_out[N_TRANS_ENCODER_OUT_MAX * 2];
+	float trans_decoder_in[N_TRANS_DECODER_IN_MAX * 2];
+	float trans_decoder_out[N_TRANS_DECODER_OUT_MAX * 2];
  
 	float trans_encoder_in_real[N_TRANS_ENCODER_IN_MAX];
 	float trans_encoder_in_imag[N_TRANS_ENCODER_IN_MAX];
@@ -252,10 +254,10 @@ typedef struct
 #define N_RESDEMAPPER_IN_MAX (N_RESMAPPER_OUT_MAX)
 #define N_RESDEMAPPER_OUT_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_30_72MHZ * LTE_PHY_N_SYMB_PER_SUBFR)
 	/*
-	std::complex<float> resm_in[N_RESMAPPER_IN_MAX];
-	std::complex<float> resm_out[N_RESMAPPER_OUT_MAX];
-	std::complex<float> resdm_in[N_RESDEMAPPER_IN_MAX];
-	std::complex<float> resdm_out[N_RESDEMAPPER_OUT_MAX];
+	  std::complex<float> resm_in[N_RESMAPPER_IN_MAX];
+	  std::complex<float> resm_out[N_RESMAPPER_OUT_MAX];
+	  std::complex<float> resdm_in[N_RESDEMAPPER_IN_MAX];
+	  std::complex<float> resdm_out[N_RESDEMAPPER_OUT_MAX];
 	*/
 	
 	float resm_in[2 * N_RESMAPPER_IN_MAX];
@@ -295,10 +297,10 @@ typedef struct
 #define N_OFDEMOD_IN_MAX (N_OFMOD_OUT_MAX)
 #define N_OFDEMOD_OUT_MAX (N_OFMOD_IN_MAX)
 	/*
-	std::complex<float> ofmod_in[N_OFMOD_IN_MAX];
-	std::complex<float> ofmod_out[N_OFMOD_OUT_MAX];
-	std::complex<float> ofdemod_in[N_OFDEMOD_IN_MAX];
-	std::complex<float> ofdemod_out[N_OFDEMOD_OUT_MAX];
+	  std::complex<float> ofmod_in[N_OFMOD_IN_MAX];
+	  std::complex<float> ofmod_out[N_OFMOD_OUT_MAX];
+	  std::complex<float> ofdemod_in[N_OFDEMOD_IN_MAX];
+	  std::complex<float> ofdemod_out[N_OFDEMOD_OUT_MAX];
 	*/
 	float ofmod_in[N_OFMOD_IN_MAX * 2];
 	float ofmod_out[N_OFMOD_OUT_MAX * 2];

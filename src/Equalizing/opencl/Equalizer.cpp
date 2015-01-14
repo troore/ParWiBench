@@ -4,14 +4,15 @@
 #include <stdlib.h>
 
 #include "lte_phy.h"
-#include "dmrs.h"
+#include "refs/dmrs.h"
 #include "CL/opencl.h"
 #include "opencl/clutil.h"
-#include "meas.h"
+#include "timer/meas.h"
 
 #define PROGRAM_FILE "equalizer.ocl"
 #define KERNEL_FUNC "lsfreqdomain"
 
+/*
 static void MatrixProd(int d1, int d2, int d3, float M1[], float M2[], float oM[])
 {
 	int r, c, i;
@@ -291,6 +292,7 @@ static void MatrixInv(int sz,
 	free(pCurRowReal);
 	free(pCurRowImag);
 }
+*/
 
 void Equalizing(LTE_PHY_PARAMS *lte_phy_params,
 				float *pInpDataReal, float *pInpDataImag,
@@ -349,6 +351,8 @@ void Equalizing(LTE_PHY_PARAMS *lte_phy_params,
 	_err |= clSetKernelArg(kernel, 7, sizeof(int), &NumLayer);
 	_err |= clSetKernelArg(kernel, 8, sizeof(int), &NumRxAntenna);
 	_err |= clSetKernelArg(kernel, 9, sizeof(int), &NumULSymbSF);
+	int n_iters = 10000;
+	_err |= clSetKernelArg(kernel, 10, sizeof(int), &n_iters);
 
 	_err = clEnqueueWriteBuffer(queue, pInpDataReal_buffer, CL_TRUE, 0, (NumRxAntenna * NumULSymbSF * MDFT) * sizeof(int), pInpDataReal, 0, NULL, NULL);
 	_err |= clEnqueueWriteBuffer(queue, pInpDataImag_buffer, CL_TRUE, 0, (NumRxAntenna * NumULSymbSF * MDFT) * sizeof(int), pInpDataImag, 0, NULL, NULL);

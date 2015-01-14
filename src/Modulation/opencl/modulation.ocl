@@ -1,0 +1,104 @@
+
+//#include "../../lte_phy.h"
+#define MAX_MOD_BITS_PER_SAMP 6
+#define MAX_MOD_TABLE_LEN  64
+
+//typedef float (*p_a)[2];
+
+__kernel void modulating(__global int *pBitsSeq, __global float *pModedSeq, int bits_per_samp, int n, __global float *p_mod_table, int mod_table_len, int n_iters)
+{
+	int task_id = get_global_id(0);
+
+	for (int k = 0; k < n_iters; k++)
+	{
+		if (task_id < n)
+		{
+			int idx = 0;
+			for (int b = 0; b < bits_per_samp; b++)
+			{
+				idx += pBitsSeq[task_id * bits_per_samp + b] * /*pow(2.0, (float)(bits_per_samp - 1 - b))*/ (1 << (bits_per_samp - 1 - b));
+			}
+			//pModedSeq[task_id] = idx*1.0;
+			//pModedSeq[task_id+n] = -idx*1.0;
+			pModedSeq[task_id] = p_mod_table[idx];
+			pModedSeq[task_id + n] = p_mod_table[idx + mod_table_len];
+			//pModedSeq[task_id] = std::complex<float>(I, Q);
+		}
+	}
+}
+
+__kernel void demodulating(__global float *pDecSeq, int bits_per_samp, int in_buf_sz, __global float *p_mod_table, int mod_table_len, __global int *p_idx_table, __global float *pLLR, float No, int n_iters)
+{
+	int task_id = get_global_id(0);
+	int i, j, k;
+	float metric[MAX_MOD_TABLE_LEN];
+	float metric_set[2][(MAX_MOD_TABLE_LEN / 2)];
+	//float No = 2.0 * (pow(awgnSigma, 2.0));
+
+	for (int c = 0; c < n_iters; c++) {
+	if (task_id < in_buf_sz){
+		//	printf("tid = %d\n", task_id);
+		for(j = 0; j < mod_table_len; j++)
+		{
+			//metric[j] = pow(abs((pDecSeq[task_id] - (std::complex<float>(p_table[j][0], p_table[j][1])))), 2.0);
+			float tmp[2];
+			tmp[0] = pDecSeq[task_id] - p_mod_table[j];
+			tmp[1] = pDecSeq[task_id + in_buf_sz] - p_mod_table[j + mod_table_len];
+			metric[j] = tmp[0] * tmp[0] + tmp[1] * tmp[1];
+		}
+		for (j = 0; j < bits_per_samp; j++)
+		{
+			for (k = 0; k < mod_table_len; k++)
+			{
+				//	printf("%d", p_idx_table[k * bits_per_samp + j]);
+			}
+			//	printf("\n");
+		}
+		for (j = 0; j < bits_per_samp; j++)
+		{
+			float min0, min1;
+			//	int idx0 = 0, idx1 = 0;
+			int idx[2] = {0, 0};
+			//	int cnt;
+
+			for (k = 0; k < mod_table_len; k++)
+			{
+				//	printf("%d", p_idx_table[k * bits_per_samp + j]);
+				int	cnt = p_idx_table[k * bits_per_samp + j];
+				//	printf("%d", cnt);
+				
+				metric_set[cnt][idx[cnt]] = metric[k];
+				//	printf("metric_set[%d][%d] = %f\n", cnt, idx[cnt], metric_set[cnt][idx[cnt]]);
+				idx[cnt]++;
+			}
+	//		printf("\n");
+
+		//	min0 = vecmin(metric_set[0], mod_table_len / 2);
+		//	min1  = vecmin(metric_set[1], mod_table_len / 2);
+			min0 = metric_set[0][0];
+			min1 = metric_set[1][0];
+			for(k = 1; k < mod_table_len / 2; k++)
+			{
+				min0 = fmin(metric_set[0][k], min0);
+			}
+			for(k = 1; k < mod_table_len / 2; k++)
+			{
+				min1 = fmin(metric_set[1][k], min1);
+			}
+			//	printf("%f %f\n", min0, min1);
+			if (No == (float)0)
+			{
+				pLLR[task_id * bits_per_samp + j] = (min0 - min1);
+			}
+			else
+			{
+				pLLR[task_id * bits_per_samp + j] = (min0 - min1) / No;
+			//	pLLR[task_id * bits_per_samp+j] = 1.1;
+			}
+		}
+	}
+
+//	barrier(CLK_GLOBAL_MEM_FENCE);
+	}
+}
+		

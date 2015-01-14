@@ -1,14 +1,15 @@
 
 #define PI	3.14159265358979323846264338327950288
 
-__kernel void dft_kernel(int n, const __global float *a, __global float *y, int direction)
+__kernel void dft_kernel(int n, const __global float *a, __global float *y, int direction, int n_iters)
 {
     // Row index
     uint k = get_global_id(0);
 
 	float p[2];
 	float ang;
-	
+
+	for (int i = 0; i < n_iters; i++) {
     if (k < n)
 	{
 		p[0] = 0.0;
@@ -23,4 +24,5 @@ __kernel void dft_kernel(int n, const __global float *a, __global float *y, int 
 		y[k] = p[0];
 		y[k + n] = p[1];
     }
+	}
 }

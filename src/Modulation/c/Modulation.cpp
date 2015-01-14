@@ -6,7 +6,7 @@ float BPSK_table[2][2]; float QPSK_table[4][2];
 float QAM16_table[16][2];
 float QAM64_table[64][2];
 
-void init_mod_tables()
+static void init_mod_tables()
 {
 	int i, j;
 	
@@ -150,7 +150,7 @@ void init_mod_tables()
  * n: width of bit sequence
  * bvec: vector to contain the sequence
  */
-void dec2bits(int i, int n, int *bvec)
+static void dec2bits(int i, int n, int *bvec)
 {
 	int j;
 	
@@ -161,7 +161,7 @@ void dec2bits(int i, int n, int *bvec)
 	}
 }
 
-void set_mod_params(/*float (*mod_table)[2]*/ p_a *pp_table, int *bits_per_samp, int *mod_table_len, int mod_type)
+static void set_mod_params(/*float (*mod_table)[2]*/ p_a *pp_table, int *bits_per_samp, int *mod_table_len, int mod_type)
 {
 	init_mod_tables();
 
@@ -189,7 +189,7 @@ void set_mod_params(/*float (*mod_table)[2]*/ p_a *pp_table, int *bits_per_samp,
 		break;
 	case LTE_QAM64:
 		*pp_table = &QAM64_table[0];
-		*bits_per_samp = QAM16_BITS_PER_SAMP;	//177,why 16,not 64
+		*bits_per_samp = QAM64_BITS_PER_SAMP;
 		*mod_table_len = QAM64_TABLE_LEN;
 		break;
 	default:
@@ -226,7 +226,7 @@ void Modulating_cplx(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex
 	}
 }
 
-float vecmin(float* pV, int len)
+static float vecmin(float* pV, int len)
 {
 	float minValue = INF;
 	int i;
@@ -247,7 +247,7 @@ float vecmin(float* pV, int len)
 /*
  * Euclidean distance of two complex values: a+bi and c+di
  */
-float eudist(float a, float b, float c, float d)
+static float eudist(float a, float b, float c, float d)
 {
 	return sqrt((a - c) * (a - c) + (b - d) * (b - d));
 }

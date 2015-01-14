@@ -6,8 +6,8 @@
 #include <string.h>
 
 #include "GeneralFunc.h"
-#include "meas.h"
-#include "check.h"
+#include "timer/meas.h"
+#include "check/check.h"
 
 #include "Modulation.h"
 
@@ -26,7 +26,9 @@ void test_mod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 	GeneRandomInput(lte_phy_params->mod_in, lte_phy_params->mod_in_buf_sz, "../testsuite/RandomModulationInput");
 	
 	Modulating_cplx(lte_phy_params, lte_phy_params->mod_in, lte_phy_params->mod_out_cplx, mod_type);
+//	Modulating(lte_phy_params, lte_phy_params->mod_in, lte_phy_params->mod_out, mod_type);
 	
+//	WriteOutputToFiles(lte_phy_params->mod_out, lte_phy_params->mod_out_buf_sz, "../testsuite/testModulationRandomOutputReal", "../testsuite/testModulationRandomOutputImag");
 	WriteOutputToFiles(lte_phy_params->mod_out_cplx, lte_phy_params->mod_out_buf_sz, "../testsuite/testModulationRandomOutputReal", "../testsuite/testModulationRandomOutputImag");
 
 	std::cout << "Modulation ends" << std::endl;
@@ -41,15 +43,10 @@ void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 	float awgn_sigma = 0.193649; //this value is for the standard input  see "AWGNSigma"
 	
 	ReadInputFromFiles(lte_phy_params->demod_in_cplx, lte_phy_params->demod_in_buf_sz, "../testsuite/testModulationRandomOutputReal", "../testsuite/testModulationRandomOutputImag");
+//	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "../testsuite/testModulationRandomOutputReal", "../testsuite/testModulationRandomOutputImag");
 
-	double ttime,tbegin;
-	tbegin = dtime();
-	for (int i = 0; i < 1; i++)
-	{
-		Demodulating_cplx(lte_phy_params, lte_phy_params->demod_in_cplx, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
-	}
-	ttime = dtime();
-	printf("whole time is %fms\n", ttime - tbegin);
+	Demodulating_cplx(lte_phy_params, lte_phy_params->demod_in_cplx, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
+//	Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
 
 	for (int i = 0; i < lte_phy_params->demod_out_buf_sz; i++)
 	{

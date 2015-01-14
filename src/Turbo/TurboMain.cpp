@@ -9,9 +9,9 @@
 #include "Turbo_pardec.h"
 #include "GeneralFunc.h"
 #include "gauss.h"
-#include "meas.h"
+#include "timer/meas.h"
 #include "lte_phy.h"
-#include "check.h"
+#include "check/check.h"
 
 //#define TurboEnc
 

@@ -140,8 +140,9 @@ static void MatrixInv(int sz,
 __kernel void lsfreqdomain(__global float *pInpDataReal, __global float *pInpDataImag,
 						   __global float *pOutDataReal, __global float *pOutDataImag,				   
 						   __constant float *pDMRSReal, __constant float *pDMRSImag,
-						   int MDFT, int NumLayer, int NumRxAntenna, int NumULSymbSF)
+						   int MDFT, int NumLayer, int NumRxAntenna, int NumULSymbSF, int n_iters)
 {
+	for (int i = 0; i < n_iters; i++) {
 	int m = get_global_id(0);
 
 //	printf("tid = %d\n", m);
@@ -266,5 +267,6 @@ __kernel void lsfreqdomain(__global float *pInpDataReal, __global float *pInpDat
 			pOutDataReal[IDX * MDFT + m] = pXDataReal[layer];
 			pOutDataImag[IDX * MDFT + m] = pXDataImag[layer];
 		}
+	}
 	}
 }

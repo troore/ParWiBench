@@ -7,8 +7,8 @@
 #include "lte_phy.h"
 #include "RateMatcher.h"
 #include "GeneralFunc.h"
-#include "meas.h"
-#include "check.h"
+#include "timer/meas.h"
+#include "check/check.h"
 
 //#define TxRateM
 

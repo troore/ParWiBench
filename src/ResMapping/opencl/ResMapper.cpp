@@ -116,6 +116,8 @@ void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, float *pInpDataReal, floa
 	_err |= clSetKernelArg(kernel, 9, sizeof(int), &MDFT);
 	_err |= clSetKernelArg(kernel, 10, sizeof(int), &NIFFT);
 	_err |= clSetKernelArg(kernel, 11, sizeof(int), &SCLoc);
+	int n_iters = 100000;
+	_err |= clSetKernelArg(kernel, 12, sizeof(int), &n_iters);
 	if (_err < 0) { perror("Couldn't create one of the kernel arguments");  exit(1); }
 
 	global_size = NumLayer * NumULSymbSF * MDFT;

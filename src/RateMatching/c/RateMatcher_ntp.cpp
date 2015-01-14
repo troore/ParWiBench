@@ -31,7 +31,7 @@ static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 	DummyValue = (T)1000000;
 
 //	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
-	T *pInterMatrix = (T *)malloc(K_pi * sizeof(float));
+	T *pInterMatrix = (T *)malloc(K_pi * sizeof(T));
 
 	for (int StrIdx = 0; StrIdx < (Rate - 1); StrIdx++)
 	{

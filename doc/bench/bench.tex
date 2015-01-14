@@ -782,6 +782,23 @@ Time synchronize sequence containing 96 samplings
 
 另外，虽然Turbo可以作为一个独立的算法使用，这时其输入输出长度不受上述参数的影响。但是当作为PHY流水线的一个模块时，比如对于Encoding，其输出长度也必须由其下游模块的长度决定。
 
+\subsection{Power Measurement}
+
+在MIC和K20上测量power和energy的总体思路如图\ref{fig:micgpupower}所示。要用一个监测MIC和GPU上温度传感器的进程和线程来对power不断的采样与收集，然后设置一个合理的时间窗口，最后累加得到energy值。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[height=3.14159in]{micgpupower}
+  \caption{Power measurement on MIC and GPU}
+\end{figure}
+
+如果程序的运行时间很短，比如LTE PHY层模块运行一帧的时间就很短，甚至都无法达到时间窗口或和时间窗口在同一个数量级，我们就必须增加运行时间使其远大于时间窗口值，以使测得的energy值足够准确。
+
+目前检测K20的power值只能在host端进行，所以我们用host端的一个进程通过调用NVIDIA提供的API来获取device端的power数据。这里有一个power值的threshold，只有device上的power值达到或超过这个threshold才进行采样，并在统计的同时累加采样时间，将这个时间称为device活动的时间（active time）。增加程序运行时间我们目前有两种思路：1）调用kernel多次；2）在kernel中让一个线程重复执行相同任务多次。思路1得到的时间是kernel运行一次时间的线性倍数，所以这个时间能够理想的模拟线性扩大kernel执行时间，但是这样做得到的active time要比kernel执行多次的时间累加值大，这可能是由于kernel的launch和retire引起的power上升时间，也被统计到了kernel执行时间中。对于第二种思路，由于GPU上线程调度，其实线性增加一个线程的执行时间并不意味着kernel执行时间的线性增加，但是由于kernel只被launch了一次，因此得到的active time和kernel的运行时间较为吻合；经过实验测试，这种方法测得的kernel执行时间与第一种方法通过多次调用kernel得到的时间相比得到的误差，要比第一种方法中active time和kernel执行多次得到的时间相比的差值要小很多。因此目前我们使用第二种思路来测量energy。另外，我们可以在第二种方法中的kernel中，在当一个线程重复执行相同任务的迭代之间加同步操作来进一步减小误差值，使得到的时间更接近kernel执行一次的线性倍数。
+
+在MIC上，我们目前使用native模式运行程序，所以直接在device端使用一个监测sensor的线程，采样和统计的思路和GPU上的做法类似。不过说是监测sensor，其实是不断的读device上“/sys/class/micras/power”这个文件来获取其中的power数据，这个读文件的操作会给我们采样时间窗口增加误差。也就是说，我们的初衷是要让采样时间窗口的累加值和MIC上计算线程的运行时间大致相同，但是由于监测线程中除采样时间之外的其它开销（例如上述的读文件操作），使得线程的运行时间要大于采样时间的累加值，因此我们在最后计算energy时要适当修正采样时间窗口值，让每个时间窗口值加上这些其它操作的开销。
+
+在测dft和fft的energy时，当数据集较小时（如dft的长度为75和150时），power的active time要比设计kernel的运行时间小不少，当数据集逐渐增大时，二者的差距逐渐减小趋近相等。我想这时因为数据集较小时，活动的线程数据较少，芯片上的能耗也较小；当活动线程数目随着数据集增多，能耗值也随之增大，采样power值超过threshold的次数越来越多。
 
 \bibliographystyle{plain}
 \bibliography{../ref}

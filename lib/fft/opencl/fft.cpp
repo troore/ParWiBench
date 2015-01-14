@@ -11,11 +11,11 @@
 
 #include "CL/cl.h"
 
-#include "clutil.h"
-#include "fft.h"
-#include "meas.h"
+#include "opencl/clutil.h"
+//#include "fft/fft.h"
+#include "timer/meas.h"
 
-#define N (1 << 10)
+#define N (1 << 12)
 #define PI	3.14159265358979323846264338327950288
 
 float v[N][2], v1[N][2], vout[N][2], v1out[N][2];
@@ -100,7 +100,7 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 		exit(1);   
 	};
 //	printf("Maximum work-group size is: %d\n", local_size);
-	local_size = (int)pow(2, trunc(log2(local_size)));
+//	local_size = (int)pow(2, trunc(log2(local_size)));
 
 	/* Determine local memory size */
 	_err = clGetDeviceInfo(device, CL_DEVICE_LOCAL_MEM_SIZE, 
@@ -120,12 +120,14 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	*/
 
 	global_size = num_points / 2;
-	local_size = global_size;
+	local_size = 32;
 
 	/* Set kernel arguments */
 	_err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &input_buffer);
 	_err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &output_buffer);
 	_err |= clSetKernelArg(kernel, 3, sizeof(int), &direction);
+	int n_iters = 10000;
+	_err |= clSetKernelArg(kernel, 4, sizeof(int), &n_iters);
 	if (_err < 0)
 	{
 		printf("Couldn't set a kernel argument");
@@ -141,7 +143,8 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 		_err = clEnqueueWriteBuffer(queue, input_buffer, CL_TRUE, 0, 2 * n * sizeof(float), input, 0, NULL, NULL);
 		
 	//	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL); 
-		_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, &prof_event); 
+		_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, /*NULL*/&local_size, 0, NULL, &prof_event);
+		
 		if (_err < 0)
 		{
 			perror("Invalid kernel");
@@ -190,11 +193,11 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	free(output);
 }
 
-/*
-int main(void)
+int main(int argc, char *argv[])
 {
 //	float v[N][2], v1[N][2], vout[N][2], v1out[N][2];
 	int k;
+	int n = atoi(argv[1]);
 
 //	FILE *fptr_real, *fptr_imag;
 
@@ -202,10 +205,10 @@ int main(void)
 //	fptr_imag = fopen("../lte/src/OFDM/testsuite/ModulationInputImag", "r");
 
 	// Fill v[] with a function of known FFT:
-	for(k=0; k<N; k++)
+	for (k = 0; k < n; k++)
 	{
-		v[k][0] = 0.125*cos(2*PI*k/(float)N);
-		v[k][1] = 0.125*sin(2*PI*k/(float)N);
+		v[k][0] = 0.125 * cos(2 * PI * k / (float)n);
+		v[k][1] = 0.125 * sin(2 * PI * k / (float)n);
 //		v1[k][0] =  0.3*cos(2*PI*k/(float)N);
 //		v1[k][1] = -0.3*sin(2*PI*k/(float)N);
 
@@ -214,14 +217,14 @@ int main(void)
 	}
 
 //	print_vector("Orig", v, N);
-	TIME_MEASURE_WRAPPER_SCALAR(fft(N, v, vout, -1))
-	for (k = 0; k < N; k++)
-	{
-		vout[k][0] /= N;
-		vout[k][1] /= N;
-	}
+//	TIME_MEASURE_WRAPPER_SCALAR(fft(N, v, vout, -1))
+//	for (k = 0; k < N; k++)
+//	{
+//		vout[k][0] /= N;
+//		vout[k][1] /= N;
+//	}
 //	print_vector("FFT", vout, N);
-	fft(N, vout, v, 1);
+	fft(n, vout, v, 1);
 //	print_vector("iFFT", v, N);
 
 //	print_vector("Orig", v1, N);
@@ -232,4 +235,3 @@ int main(void)
 
 	return 0;
 }
-*/

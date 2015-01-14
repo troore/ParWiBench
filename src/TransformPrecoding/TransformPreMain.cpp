@@ -6,11 +6,10 @@
 #include <iostream>
 
 #include "GeneralFunc.h"
-#include "meas.h"
-#include "check.h"
+#include "timer/meas.h"
+#include "check/check.h"
 
 #include "TransformPrecoder.h"
-
 
 //#define TransformPre
 
@@ -36,14 +35,8 @@ void test_decoder(LTE_PHY_PARAMS *lte_phy_params)
 	
 	ReadInputFromFiles(lte_phy_params->trans_decoder_in, lte_phy_params->trans_decoder_in_buf_sz, "../testsuite/testTransformPrecoderOutputReal", "../testsuite/testTransformPrecoderOutputImag");
 
-	double tbegin, ttime;
-	tbegin = dtime();
-
 	TransformDecoding(lte_phy_params, lte_phy_params->trans_decoder_in, lte_phy_params->trans_decoder_out);
 
-	ttime = dtime() - tbegin;
-	printf("whole time is %fms\n", ttime);
-	
 	WriteOutputToFiles(lte_phy_params->trans_decoder_out, lte_phy_params->trans_decoder_out_buf_sz, "../testsuite/testTransformDecoderOutputReal", "../testsuite/testTransformDecoderOutputImag");
 	
 	std::cout << "Transform Decoder ends" << std::endl;

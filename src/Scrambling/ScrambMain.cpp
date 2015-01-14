@@ -7,8 +7,8 @@
 #include "GeneralFunc.h"
 
 #include "Scrambler.h"
-#include "meas.h"
-#include "check.h"
+#include "timer/meas.h"
+#include "check/check.h"
 
 //#define Scramb
 

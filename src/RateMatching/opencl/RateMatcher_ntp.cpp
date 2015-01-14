@@ -35,7 +35,8 @@ static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 	NumDummy = K_pi - D;
 	DummyValue = (T)1000000;
 
-	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
+//	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
+	T *pInterMatrix = (T *)malloc(K_pi * sizeof(T));
 
 	for (int StrIdx = 0; StrIdx < (Rate - 1); StrIdx++)
 	{
@@ -77,8 +78,11 @@ static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 	
 //////////////////// Interleaving for i=2 ///////////////////////
 
-	int Pi[((BLOCK_SIZE + 31) / 32) * 32];
-	T pInterSeq[((BLOCK_SIZE + 31) / 32) * 32];
+//	int Pi[((BLOCK_SIZE + 31) / 32) * 32];
+//	T pInterSeq[((BLOCK_SIZE + 31) / 32) * 32];
+
+	int *Pi = (int *)malloc(K_pi * sizeof(int));
+	T *pInterSeq = (T *)malloc(K_pi * sizeof(T));
 	
 	for (int k = 0;k < NumDummy; k++)
 	{
@@ -107,6 +111,10 @@ static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 			OutIdx++;
 		}
 	}
+
+	free(pInterMatrix);
+	free(Pi);
+	free(pInterSeq);
 }
 
 
@@ -134,7 +142,8 @@ static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 	DummyValue = (T)1000000;
 	
 //////////////////// DeInterleaving for i=0,1 ///////////////////////
-	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
+//	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
+	T *pInterMatrix = (T *)malloc(K_pi * sizeof(T));
 	
 	for (int StrIdx = 0; StrIdx < (Rate - 1); StrIdx++)
 	{
@@ -191,8 +200,10 @@ static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 	}
 
 //////////////////// DeInterleaving for i=2 ///////////////////////
-	int Pi[((BLOCK_SIZE + 31) / 32) * 32];
-	T pInterSeq[((BLOCK_SIZE + 31) / 32) * 32];
+//	int Pi[((BLOCK_SIZE + 31) / 32) * 32];
+//	T pInterSeq[((BLOCK_SIZE + 31) / 32) * 32];
+	int *Pi = (int *)malloc(K_pi * sizeof(int));
+	T *pInterSeq = (T *)malloc(K_pi * sizeof(T));
 	
 	for (int k = 0; k < NumDummy; k++)
 		pInterSeq[k] = DummyValue;
@@ -222,6 +233,10 @@ static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 		pOutMtr[(Rate - 1) * D + OutIdx] = pInterSeq[k];
 		OutIdx++;
 	}
+		
+	free(pInterMatrix);
+	free(Pi);
+	free(pInterSeq);
 }
 
 
@@ -320,6 +335,8 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 	_err |= clSetKernelArg(kernel, 7, sizeof(int), &rm_data_length);
 	_err |= clSetKernelArg(kernel, 8, sizeof(int), &n_blocks);
 	_err |= clSetKernelArg(kernel, 9, sizeof(int) * ((rm_blk_sz+31)/32) * 32, NULL);
+	int n_iters = 10000;
+	_err |= clSetKernelArg(kernel, 10, sizeof(int), &n_iters);
 	if(_err < 0) {printf("err set args:%d\n",_err);exit(1);}
 
 	/* Kernel */

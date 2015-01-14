@@ -12,7 +12,7 @@
 /*
  * p = 1, 2, ..., N/2
  */
-__kernel void fft_radix2_kernel(__global float2 *a, __global float2 *y, int p, int direction)
+__kernel void fft_radix2_kernel(__global float2 *a, __global float2 *y, int p, int direction, int n_iters)
 {
 	int i = get_global_id(0); // current thread id
 	int t = get_global_size(0); // number of threads
@@ -24,6 +24,8 @@ __kernel void fft_radix2_kernel(__global float2 *a, __global float2 *y, int p, i
 	float2 tmp;
 
 //	printf("Thread #%d:%d\n", i, p);
+
+	for (int n = 0; n < n_iters; n++) {
 
 	twiddle.x = cos((2 * PI * k) / (2 * p));
 	twiddle.y = (float)direction * sin((2 * PI * k) / (2 * p));
@@ -49,5 +51,8 @@ __kernel void fft_radix2_kernel(__global float2 *a, __global float2 *y, int p, i
 //	printf("%d\t%d\n", j, j+p);
 	y[j] = u0;
 	y[j + p] = u1;
+
+	barrier(CLK_GLOBAL_MEM_FENCE);
+	}
 }
 
