@@ -786,7 +786,7 @@ Time synchronize sequence containing 96 samplings
 
 在MIC和K20上测量power和energy的总体思路如图\ref{fig:micgpupower}所示。要用一个监测MIC和GPU上温度传感器的进程和线程来对power不断的采样与收集，然后设置一个合理的时间窗口，最后累加得到energy值。
 
-\begin{figure}[htbp]
+\begin{figure}[htbp]\label{fig:micgpupower}
   \centering
   \includegraphics[height=3.14159in]{micgpupower}
   \caption{Power measurement on MIC and GPU}
@@ -799,6 +799,12 @@ Time synchronize sequence containing 96 samplings
 在MIC上，我们目前使用native模式运行程序，所以直接在device端使用一个监测sensor的线程，采样和统计的思路和GPU上的做法类似。不过说是监测sensor，其实是不断的读device上“/sys/class/micras/power”这个文件来获取其中的power数据，这个读文件的操作会给我们采样时间窗口增加误差。也就是说，我们的初衷是要让采样时间窗口的累加值和MIC上计算线程的运行时间大致相同，但是由于监测线程中除采样时间之外的其它开销（例如上述的读文件操作），使得线程的运行时间要大于采样时间的累加值，因此我们在最后计算energy时要适当修正采样时间窗口值，让每个时间窗口值加上这些其它操作的开销。
 
 在测dft和fft的energy时，当数据集较小时（如dft的长度为75和150时），power的active time要比设计kernel的运行时间小不少，当数据集逐渐增大时，二者的差距逐渐减小趋近相等。我想这时因为数据集较小时，活动的线程数据较少，芯片上的能耗也较小；当活动线程数目随着数据集增多，能耗值也随之增大，采样power值超过threshold的次数越来越多。
+
+\subsection{TODO List}
+
+统计在K20上哪些模块的energy active time当让kernel执行次数增多时与perf time差别较大，哪些模块的kernel执行时间不随线程重复执行次数的增多而呈线性变化。分别分析原因。
+
+给MIC power的测试程序加一个threshold，当超过这个threshold时再开始采样，看一下MIC上的energy是否会随着线程的增多而增加。
 
 \bibliographystyle{plain}
 \bibliography{../ref}
