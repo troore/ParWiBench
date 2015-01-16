@@ -41,7 +41,7 @@ static void SubblockInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 	T **pInterMatrix=new T*[R_sb];
 	for(int r=0;r<R_sb;r++){*(pInterMatrix+r)=new T[C_sb];}
 #else
-	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
+	T pInterMatrix[((BLOCK_SIZE + 4 + 31) / 32) * 32];
 #endif
 
 #ifdef DEBUG_INTL
@@ -115,8 +115,8 @@ static void SubblockInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 	int *Pi=new int[K_pi];
 	T *pInterSeq=new T[K_pi];
 #else
-	int Pi[((BLOCK_SIZE + 31) / 32) * 32];
-	T pInterSeq[((BLOCK_SIZE + 31) / 32) * 32];
+	int Pi[((BLOCK_SIZE + 4 + 31) / 32) * 32];
+	T pInterSeq[((BLOCK_SIZE + 4 + 31) / 32) * 32];
 #endif
 
 #ifdef DEBUG_INTL
@@ -221,7 +221,7 @@ static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 	T **pInterMatrix=new T*[R_sb];
 	for(int r=0;r<R_sb;r++){*(pInterMatrix+r)=new T[C_sb];}
 #else
-	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
+	T pInterMatrix[((BLOCK_SIZE + 4 + 31) / 32) * 32];
 #endif
 
 #ifdef DEBUG_INTL
@@ -323,8 +323,8 @@ static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 	VpInpSeq=*(pInpMtr+(Rate-1));
 	VpOutSeq=*(pOutMtr+(Rate-1));
 #else
-	int Pi[((BLOCK_SIZE + 31) / 32) * 32];
-	T pInterSeq[((BLOCK_SIZE + 31) / 32) * 32];
+	int Pi[((BLOCK_SIZE + 4 + 31) / 32) * 32];
+	T pInterSeq[((BLOCK_SIZE + 4 + 31) / 32) * 32];
 #endif
 	
 	for (int k = 0; k < NumDummy; k++)

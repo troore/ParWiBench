@@ -61,26 +61,24 @@ void ofdemodulating(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOut
 
 	int nrx, nsym, i;
 
-//	float *p_samp_in_buf = (float *)malloc(2 * NIFFT * sizeof(float));
-//	float *p_samp_out_buf = (float *)malloc(2 * NIFFT * sizeof(float));
+	float *p_samp_in_buf = (float *)malloc(2 * NIFFT * sizeof(float));
+	float *p_samp_out_buf = (float *)malloc(2 * NIFFT * sizeof(float));
 
 
-/*	for (nrx=0;nrx<NumRxAntenna;nrx++)
-	{
-		for (nsym=0;nsym<NumULSymbSF;nsym++)
-		{
-*/
+//	for (nrx=0;nrx<NumRxAntenna;nrx++)
+//	{
+//		for (nsym=0;nsym<NumULSymbSF;nsym++)
+//		{
+
 	int num_threads=236,sum=0,quotient=0,remain=0;
 	int ii,j,k;
 	sum = NumRxAntenna*NumULSymbSF;
 	quotient = sum / num_threads;
 	remain = sum % num_threads;
 	
-#pragma omp parallel for private(j,ii,nrx,nsym)
+#pragma omp parallel for private(j,k)
 	for(i=0;i<num_threads;i++)
 	{
-		float *p_samp_in_buf = (float *)malloc(2 * NIFFT * sizeof(float));
-	      	float *p_samp_out_buf = (float *)malloc(2 * NIFFT * sizeof(float));
 		int i_begin,num_j;
 		if(i>=remain)
 		{
@@ -93,13 +91,12 @@ void ofdemodulating(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOut
 			num_j = quotient + 1;
 		} 
 		for(j=0;j<num_j;j++)
-		{	
-			float p_samp_in_buf[2*NIFFT];
-			float p_samp_out_buf[2*NIFFT];
+		{
 			nrx = (i_begin + j) / NumULSymbSF;
 			nsym = (i_begin + j) % NumULSymbSF;
 			int symb_idx = nrx * NumULSymbSF + nsym;
 			float norm = (float)sqrt((float)NIFFT)/*(float)1*/;
+
 			for (ii = 0; ii < NIFFT; ii++)
 			{
 				p_samp_in_buf[ii] = pInpData[symb_idx * (CPLen + NIFFT) + CPLen + ii];
@@ -115,12 +112,10 @@ void ofdemodulating(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOut
 				pOutData[symb_idx * NIFFT + ii + out_buf_sz] = p_samp_out_buf[ii + NIFFT] / norm;
 			}
 		}
-		free(p_samp_in_buf);
-	      	free(p_samp_out_buf);
 	}
 
-//	free(p_samp_in_buf);
-//	free(p_samp_out_buf);
+	free(p_samp_in_buf);
+	free(p_samp_out_buf);
 }
 
 /*
@@ -164,7 +159,7 @@ void ofdemodulating(LTE_PHY_PARAMS *lte_phy_params, float *pInpDataReal, float *
 			nrx = (i_begin + j) / NumULSymbSF;
 			nsym = (i_begin + j) % NumULSymbSF;
 			int symb_idx = nrx * NumULSymbSF + nsym;
-			float norm = (float)sqrt((float)NIFFT)/*(float)1*/
+			float norm = (float)sqrt((float)NIFFT)/*(float)1*/;
 /*			
 			fft_nrvs(NIFFT, pInpDataReal + symb_idx * (CPLen + NIFFT) + CPLen, pInpDataImag + symb_idx * (CPLen + NIFFT) + CPLen,
 					 pOutDataReal + symb_idx * NIFFT, pOutDataReal + symb_idx * NIFFT,

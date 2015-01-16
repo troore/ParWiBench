@@ -60,6 +60,8 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 		cur_blk_len = (i != (n_blocks - 1)) ? rm_blk_sz : rm_last_blk_len;
 //		printf("b");
 		// Transposition
+		_SubblockInterleaving(cur_blk_len, piSeq + out_block_offset, pcSeq + out_block_offset, 0);
+//		_SubblockInterleaving(cur_blk_len, piSeq, pcSeq, out_block_offset);
 /*		for (j = 0; j < cur_blk_len; j++)
 		{
 			for (r = 0; r < RATE; r++)
@@ -68,15 +70,15 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 				//	cout << pInMatrix[r][i];
 			}
 		}
-*/		//cout << endl;
-		_SubblockInterleaving(cur_blk_len, piSeq, pcSeq, out_block_offset);
+		//cout << endl;
+//		_SubblockInterleaving(cur_blk_len, piSeq, pcSeq, out_block_offset);
 //		double ttime,tbegin;
 //		tbegin=ddtime();
 //		SubblockInterleaving(cur_blk_len, pInMatrix, pOutMatrix);
 //		ttime = ddtime();
 //		printf("Sub time is %f\n",ttime - tbegin);
 		// Transposition again
-/*		for (j = 0; j < cur_blk_len; j++)
+		for (j = 0; j < cur_blk_len; j++)
 		{
 			//printf("old\n");
 			for (r = 0; r < RATE; r++)

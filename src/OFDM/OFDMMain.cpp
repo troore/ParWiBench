@@ -21,14 +21,15 @@ void test_mod(LTE_PHY_PARAMS *lte_phy_params)
 //	ReadInputFromFiles(lte_phy_params->ofmod_in, lte_phy_params->ofmod_in_buf_sz, "../testsuite/ModulationInputReal", "../testsuite/ModulationInputImag");
 //	ReadInputFromFiles(lte_phy_params->ofmod_in_real, lte_phy_params->ofmod_in_imag, lte_phy_params->ofmod_in_buf_sz, "../testsuite/ModulationInputReal", "../testsuite/ModulationInputImag");
 //	GeneRandomInput(lte_phy_params->ofmod_in, lte_phy_params->ofmod_in_buf_sz, "../testsuite/RandomModulationInputReal", "../testsuite/RandomModulationInputImag");
-	GeneRandomInput(lte_phy_params->ofmod_in_real, lte_phy_params->ofmod_in_imag, lte_phy_params->ofmod_in_buf_sz, "../testsuite/RandomModulationInputReal", "../testsuite/RandomModulationInputImag");
 #ifdef __MIC__
+	GeneRandomInput(lte_phy_params->ofmod_in, lte_phy_params->ofmod_in_buf_sz, "../testsuite/RandomModulationInputReal", "../testsuite/RandomModulationInputImag");
 	ofmodulating(lte_phy_params, lte_phy_params->ofmod_in, lte_phy_params->ofmod_out);
+	WriteOutputToFiles(lte_phy_params->ofmod_out, lte_phy_params->ofmod_out_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
 #else
+	GeneRandomInput(lte_phy_params->ofmod_in_real, lte_phy_params->ofmod_in_imag, lte_phy_params->ofmod_in_buf_sz, "../testsuite/RandomModulationInputReal", "../testsuite/RandomModulationInputImag");
 	ofmodulating(lte_phy_params, lte_phy_params->ofmod_in_real, lte_phy_params->ofmod_in_imag, lte_phy_params->ofmod_out_real, lte_phy_params->ofmod_out_imag);
-#endif	
-//	WriteOutputToFiles(lte_phy_params->ofmod_out, lte_phy_params->ofmod_out_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
 	WriteOutputToFiles(lte_phy_params->ofmod_out_real, lte_phy_params->ofmod_out_imag, lte_phy_params->ofmod_out_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
+#endif	
 
 	std::cout << "OFDM modulation ends" << std::endl;
 }
@@ -38,8 +39,20 @@ void test_demod(LTE_PHY_PARAMS *lte_phy_params)
 	
 	std::cout <<"OFDM demodulation starts"<< std::endl;
 
-//	ReadInputFromFiles(lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_in_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
+#ifdef __MIC__
+	ReadInputFromFiles(lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_in_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
+	ofdemodulating(lte_phy_params, lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_out);
+	double energy,ttime,tbegin;
+	micpower_start();
+	tbegin = dtime();
+	for(int i = 0;i < 100000; i++)
+		ofdemodulating(lte_phy_params, lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_out);
+#else
+	//	ofdemodulating(lte_phy_params, lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_out);
 	ReadInputFromFiles(lte_phy_params->ofdemod_in_real, lte_phy_params->ofdemod_in_imag, lte_phy_params->ofdemod_in_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
+<<<<<<< HEAD
+	ofdemodulating(lte_phy_params, lte_phy_params->ofdemod_in_real, lte_phy_params->ofdemod_in_imag, lte_phy_params->ofdemod_out_real, lte_phy_params->ofdemod_out_imag);
+=======
 //	ReadInputFromFiles(lte_phy_params->ofdemod_in_real, lte_phy_params->ofdemod_in_imag, lte_phy_params->ofdemod_in_buf_sz, "../testsuite/DemodulationInputReal", "../testsuite/DemodulationInputImag");
 #ifdef __MIC__
 	ofdemodulating(lte_phy_params, lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_out);
@@ -59,7 +72,16 @@ void test_demod(LTE_PHY_PARAMS *lte_phy_params)
 	printf("whole time is %fms\n", ttime);
 #endif
 //	WriteOutputToFiles(lte_phy_params->ofdemod_out, lte_phy_params->ofdemod_out_buf_sz, "../testsuite/testDemodulationOutputReal", "../testsuite/testDemodulationOutputImag");
+>>>>>>> origin/mic_power
 	WriteOutputToFiles(lte_phy_params->ofdemod_out_real, lte_phy_params->ofdemod_out_imag, lte_phy_params->ofdemod_out_buf_sz, "../testsuite/testDemodulationOutputReal", "../testsuite/testDemodulationOutputImag");
+#endif
+#ifdef __MIC__
+	ttime = dtime() - tbegin;
+	energy = micpower_finalize();
+	printf("Energy used in %lf\n", energy);
+	printf("whole time is %fms\n", ttime);
+	WriteOutputToFiles(lte_phy_params->ofdemod_out, lte_phy_params->ofdemod_out_buf_sz, "../testsuite/testDemodulationOutputReal", "../testsuite/testDemodulationOutputImag");
+#endif
 	
 	std::cout << "OFDM demodulation ends" << std::endl;
 }
