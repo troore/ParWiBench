@@ -6,9 +6,11 @@
 #include <iostream>
 
 #include "GeneralFunc.h"
-#include "timer/meas.h"
-#include "check/check.h"
-
+//#include "timer/meas.h"
+//#include "check/check.h"
+#include "meas.h"
+#include "check.h"
+#include "micpower.h"
 #include "TransformPrecoder.h"
 
 //#define TransformPre
@@ -34,9 +36,24 @@ void test_decoder(LTE_PHY_PARAMS *lte_phy_params)
 	std::cout << "Transform Decoder starts" << std::endl;
 	
 	ReadInputFromFiles(lte_phy_params->trans_decoder_in, lte_phy_params->trans_decoder_in_buf_sz, "../testsuite/testTransformPrecoderOutputReal", "../testsuite/testTransformPrecoderOutputImag");
+//<<<<<<< HEAD
 
+//	TransformDecoding(lte_phy_params, lte_phy_params->trans_decoder_in, lte_phy_params->trans_decoder_out);
+
+//======= Hibbert's test
+	
 	TransformDecoding(lte_phy_params, lte_phy_params->trans_decoder_in, lte_phy_params->trans_decoder_out);
-
+	double energy,tbegin, ttime;
+	micpower_start();
+	tbegin = dtime();
+	for(int i=0;i<10000;i++)
+		TransformDecoding(lte_phy_params, lte_phy_params->trans_decoder_in, lte_phy_params->trans_decoder_out);
+	ttime = dtime() - tbegin;
+	energy = micpower_finalize();
+	printf("Energy used in %lf\n", energy);
+	printf("whole time is %fms\n", ttime);
+	
+//>>>>>>> github/mic_power
 	WriteOutputToFiles(lte_phy_params->trans_decoder_out, lte_phy_params->trans_decoder_out_buf_sz, "../testsuite/testTransformDecoderOutputReal", "../testsuite/testTransformDecoderOutputImag");
 	
 	std::cout << "Transform Decoder ends" << std::endl;
@@ -76,14 +93,13 @@ int main(int argc, char *argv[])
 		lte_phy_init(&lte_phy_params, fs_id);
 	}
 
+
 #ifdef TransformPre
 
 	test_encoder(&lte_phy_params);
-	
-#else
 
+#else
 	test_decoder(&lte_phy_params);
-	
 	strcpy(tx_in_fname, "../testsuite/TransformPrecoderInputReal");
 	strcpy(rx_out_fname, "../testsuite/testTransformDecoderOutputReal");
 	err_n = check_float(tx_in_fname, rx_out_fname);

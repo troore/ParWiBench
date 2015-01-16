@@ -6,9 +6,17 @@
 #include <string.h>
 
 #include "GeneralFunc.h"
-#include "timer/meas.h"
-#include "check/check.h"
+//<<<<<<< HEAD
+//#include "timer/meas.h"
+//#include "check/check.h"
 
+//======= reserve for Hibbert
+#include "meas.h"
+#include "check.h"
+#ifdef __MIC__
+#include "micpower.h"
+#endif
+//>>>>>>> github/mic_power
 #include "Modulation.h"
 
 
@@ -25,10 +33,14 @@ void test_mod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 //	ReadInputFromFiles(lte_phy_params->mod_in, lte_phy_params->mod_in_buf_sz, "ModulationInput");
 	GeneRandomInput(lte_phy_params->mod_in, lte_phy_params->mod_in_buf_sz, "../testsuite/RandomModulationInput");
 	
-	Modulating_cplx(lte_phy_params, lte_phy_params->mod_in, lte_phy_params->mod_out_cplx, mod_type);
+//<<<<<<< HEAD
+//	Modulating_cplx(lte_phy_params, lte_phy_params->mod_in, lte_phy_params->mod_out_cplx, mod_type);
 //	Modulating(lte_phy_params, lte_phy_params->mod_in, lte_phy_params->mod_out, mod_type);
 	
 //	WriteOutputToFiles(lte_phy_params->mod_out, lte_phy_params->mod_out_buf_sz, "../testsuite/testModulationRandomOutputReal", "../testsuite/testModulationRandomOutputImag");
+//======= for Hibbert
+//	Modulating_cplx(lte_phy_params, lte_phy_params->mod_in, lte_phy_params->mod_out_cplx, mod_type);
+//>>>>>>> github/mic_power
 	WriteOutputToFiles(lte_phy_params->mod_out_cplx, lte_phy_params->mod_out_buf_sz, "../testsuite/testModulationRandomOutputReal", "../testsuite/testModulationRandomOutputImag");
 
 	std::cout << "Modulation ends" << std::endl;
@@ -41,13 +53,38 @@ void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 	std::cout << "Demodulation starts" << std::endl;
 
 	float awgn_sigma = 0.193649; //this value is for the standard input  see "AWGNSigma"
-	
+#ifdef __MIC__
+	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "../testsuite/testModulationRandomOutputReal", "../testsuite/testModulationRandomOutputImag");
+#else
 	ReadInputFromFiles(lte_phy_params->demod_in_cplx, lte_phy_params->demod_in_buf_sz, "../testsuite/testModulationRandomOutputReal", "../testsuite/testModulationRandomOutputImag");
+//<<<<<<< HEAD
 //	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "../testsuite/testModulationRandomOutputReal", "../testsuite/testModulationRandomOutputImag");
 
-	Demodulating_cplx(lte_phy_params, lte_phy_params->demod_in_cplx, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
+//	Demodulating_cplx(lte_phy_params, lte_phy_params->demod_in_cplx, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
 //	Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
 
+//======= for Hibbert
+#endif
+#ifdef __MIC__	
+	_Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
+	double ttime,tbegin,energy;
+	micpower_start();
+	tbegin = dtime();
+#endif
+
+#ifndef __MIC__
+		Demodulating_cplx(lte_phy_params, lte_phy_params->demod_in_cplx, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
+#else
+	for(int i = 0;i < 10000; i++)	
+		_Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
+#endif
+#ifdef __MIC__
+	ttime = dtime();
+	energy = micpower_finalize();
+	printf("Energy used in %lf\n", energy);
+	printf("whole time is %fms\n", ttime - tbegin);
+#endif
+//>>>>>>> github/mic_power
 	for (int i = 0; i < lte_phy_params->demod_out_buf_sz; i++)
 	{
 		if (lte_phy_params->demod_LLR[i] > 0)

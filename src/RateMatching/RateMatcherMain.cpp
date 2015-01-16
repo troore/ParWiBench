@@ -7,9 +7,15 @@
 #include "lte_phy.h"
 #include "RateMatcher.h"
 #include "GeneralFunc.h"
-#include "timer/meas.h"
-#include "check/check.h"
+//<<<<<<< HEAD
+//#include "timer/meas.h"
+//#include "check/check.h"
 
+//======= reserve for Hibbert
+#include "meas.h"
+#include "check.h"
+#include "micpower.h"
+//>>>>>>> github/mic_power
 //#define TxRateM
 
 LTE_PHY_PARAMS lte_phy_params;
@@ -20,8 +26,20 @@ void tx_rate_matching(LTE_PHY_PARAMS *lte_phy_params)
 
 	ReadInputFromFiles(lte_phy_params->rm_in, lte_phy_params->rm_in_buf_sz, "../testsuite/TxRateMatchInput");
 
+#ifdef __MIC__
 	TxRateMatching(lte_phy_params, lte_phy_params->rm_in, lte_phy_params->rm_out);
-	
+	double energy,ttime,tbegin;
+	micpower_start();
+	tbegin = dtime();
+	for(int i=0;i<10000;i++)
+		TxRateMatching(lte_phy_params, lte_phy_params->rm_in, lte_phy_params->rm_out);
+	ttime = dtime() - tbegin;
+	energy = micpower_finalize();
+	printf("Energy used in %lf\n", energy);
+	printf("whole time is %fms\n", ttime);
+#else
+	TxRateMatching(lte_phy_params, lte_phy_params->rm_in, lte_phy_params->rm_out);
+#endif
 	WriteOutputToFiles(lte_phy_params->rm_out, lte_phy_params->rm_out_buf_sz, "../testsuite/testTxRateMatchOutput");
 
 	std::cout << "Tx RateMatching ends" << std::endl;

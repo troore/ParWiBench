@@ -4,9 +4,9 @@ SRC = ../OFDMMain.cpp $(LIB_DIR)/fft/mic/fft.cpp OFDM.cpp
 
 SRC += $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/gauss.cpp $(LIB_DIR)/matrix.cpp
 
-SRC += $(SRC_DIR)/lte_phy.cpp
+SRC += $(SRC_DIR)/lte_phy.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/power/micpower/micpower.cpp $(LIB_DIR)/check/check.cpp
 
-INC_FLAGS += -I. -I../ -I$(SRC_DIR) -I$(LIB_DIR)/fft/mic -I$(LIB_DIR)/fft -I$(LIB_DIR)
+INC_FLAGS += -I. -I../ -I$(SRC_DIR) -I$(LIB_DIR)/fft/mic -I$(LIB_DIR)/fft -I$(LIB_DIR) -I$(LIB_DIR)/power/micpower -I$(LIB_DIR)/timer -I$(LIB_DIR)/check
 
 OBJS := $(patsubst %.cpp, %.o, $(SRC))
 

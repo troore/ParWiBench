@@ -11,7 +11,11 @@
 #include "gauss.h"
 #include "timer/meas.h"
 #include "lte_phy.h"
-#include "check/check.h"
+//#include "check/check.h"
+#include "check.h"
+#ifdef __MIC__
+#include "micpower.h"
+#endif
 
 //#define TurboEnc
 
@@ -46,19 +50,25 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_iters)
 	{
 		lte_phy_params->td_in[i] = (1 - 2 * lte_phy_params->td_in[i]);
 	}
-
-	double tbegin,ttime;
+#ifdef __MIC__
+	turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_iters);
+	double tbegin,ttime,energy;
+	micpower_start();
 	tbegin = dtime();
+
+	for(int i=0;i<1000;i++)
 	turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_iters);
 	ttime = dtime();
+	energy = micpower_finalize();
+	printf("Energy used in %lf\n", energy);
 	printf("real time is %fms\n", ttime - tbegin);
-	
+#else
+	turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_iters);
+#endif	
 	for (int i = 0; i < lte_phy_params->td_out_buf_sz; i++)
 	{
 		lte_phy_params->td_out[i] = (1 - lte_phy_params->td_out[i]) / 2;
-		//	printf("%d", lte_phy_params->td_out[i]);
 	}
-//	printf("\n");
 	
 	WriteOutputToFiles(lte_phy_params->td_out, lte_phy_params->td_out_buf_sz, "../testsuite/testTurboDecoderOutput");
 	

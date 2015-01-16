@@ -37,8 +37,8 @@ void _SubblockInterleaving(int SeqLen, int *InSeq, int *OutSeq, int offset)
 	NumDummy = K_pi - D;
 	DummyValue = (int)1000000;
 
-	int pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
-	zmmi_t pInterMatrix_simd[((BLOCK_SIZE + 31) / 32) * 2];
+	int pInterMatrix[((BLOCK_SIZE + 4 + 31) / 32) * 32];
+	zmmi_t pInterMatrix_simd[((BLOCK_SIZE + 4 + 31) / 32) * 2];
 	zmmi_t p_index[2],p_index3[2];
 	int col = InterColumnPattern[0];
 	//p_index[col/16].elems[col%16] = 0;
@@ -182,8 +182,8 @@ void _SubblockInterleaving(int SeqLen, int *InSeq, int *OutSeq, int offset)
 
 	//////////////////// Interleaving for i=2 ///////////////////////
 
-	int Pi[((BLOCK_SIZE + 31) / 32) * 32];
-	int pInterSeq[((BLOCK_SIZE + 31) / 32) * 32];
+	int Pi[((BLOCK_SIZE + 4 + 31) / 32) * 32];
+	int pInterSeq[((BLOCK_SIZE + 4 + 31) / 32) * 32];
 
 
 

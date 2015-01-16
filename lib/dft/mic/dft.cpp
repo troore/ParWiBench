@@ -44,7 +44,6 @@ void dft(int n, float a[], float y[], int direction)
 	float p[2];
 #ifdef __MIC__
     zmmf_t tmp0,tmp1,result3,result0, result1, a0, a1, cos_, sin_, ang_;
-    printf("MIC\n");
 	for (k = 0; k < n-16; k+=16)
 	{
 //		p[0] = 0.0;
@@ -155,7 +154,6 @@ void dft(int n, float a[], float y[], int direction)
     }
 
 #else
-    	printf("no mic");
 	for (k = 0; k < n; k++) 
 	{
 		p[0] = 0.0;

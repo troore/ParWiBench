@@ -26,7 +26,7 @@ void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, float *pQAMSeqRea
 void Demodulating_cplx(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, float *pLLR, int mod_type, float awgnSigma);
 void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecQAMSeq, float *pLLR, int mod_type, float awgnSigma);
 void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecQAMSeqReal, float *pDecQAMSeqImag, float *pLLR, int mod_type, float awgnSigma);
-
+void _Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecQAMSeq, float *pLLR, int mod_type, float awgnSigma);
 
 void Demodulating_cplx(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, int *pHD, int mod_type);
 void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecQAMSeq, int *pHD, int mod_type);
