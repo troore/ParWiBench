@@ -3,13 +3,12 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string.h>
-
 #include "GeneralFunc.h"
 
 #include "Scrambler.h"
 #include "meas.h"
 #include "check.h"
-
+#include "micpower.h"
 //#define Scramb
 
 LTE_PHY_PARAMS lte_phy_params;
@@ -60,10 +59,17 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 		else
 			rx_scramb_in[i] = 1.0;
 	 }
-	
-//	Descrambling(lte_phy_params, lte_phy_params->descramb_in, lte_phy_params->descramb_out);
 	Descrambling(lte_phy_params, rx_scramb_in, rx_scramb_out);
-	
+	double energy,ttime,tbegin;
+	micpower_start();
+	tbegin = dtime();
+	//	Descrambling(lte_phy_params, lte_phy_params->descramb_in, lte_phy_params->descramb_out);
+	for(i = 0;i < 100000; i++)
+		Descrambling(lte_phy_params, rx_scramb_in, rx_scramb_out);
+	ttime = dtime() - tbegin;
+	energy = micpower_finalize();
+	printf("Energy used in %lf\n", energy);
+	printf("whole time is %fms\n", ttime);
 	for (i = 0; i < lte_phy_params->descramb_out_buf_sz; i++)
 	{
 		if (rx_scramb_out[i] > 0)
@@ -111,17 +117,15 @@ int main(int argc, char *argv[])
 
 		lte_phy_init(&lte_phy_params, fs_id);
 	}
-
+	double energy;
 #ifdef Scramb
 	test_scrambling(&lte_phy_params);
 #else
 	test_descrambling(&lte_phy_params);
-
 	strcpy(tx_in_fname, "../testsuite/ScrambleInput");
 	strcpy(rx_out_fname, "../testsuite/testDescrambleOutput");
 	err_n = check_float(tx_in_fname, rx_out_fname);
 	printf("%d\n", err_n);
 #endif
-
 	return 0;
 }

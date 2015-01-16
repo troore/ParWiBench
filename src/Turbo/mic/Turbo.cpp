@@ -37,7 +37,7 @@ float (*com_log)(float a, float b);
 /*****************End of globals*****************/
 
 // Turbo Internal Interleaver from 3GPP TS 36.212 v10.0.0 table 5.1.3-3
-
+/*
 int TURBO_INT_K_TABLE[TURBO_INT_K_TABLE_SIZE] = {  40,  48,  56,  64,  72,  80,  88,  96, 104, 112,
 														120, 128, 136, 144, 152, 160, 168, 176, 184, 192,
 														200, 208, 216, 224, 232, 240, 248, 256, 264, 272,
@@ -89,7 +89,7 @@ int TURBO_INT_F2_TABLE[TURBO_INT_K_TABLE_SIZE] = { 10, 12, 42, 16, 18, 20, 22, 2
 												   130,264,134,408,138,280,142,480,146,444,120,152,462,
 												   234,158, 80, 96,902,166,336,170, 86,174,176,178,120,
 												   182,184,186, 94,190,480};
-
+*/
 
 float max_log(float a, float b)
 {
@@ -147,8 +147,8 @@ void internal_interleaver(T *in, T *out, int m)
     int f1 = 0;
     int f2 = 0;
     int idx;
-    double ttime,tbegin;
-    tbegin = dtime();
+//    double ttime,tbegin;
+//    tbegin = dtime();
     // Determine f1 and f2
     for(i = 0; i < TURBO_INT_K_TABLE_SIZE; i++)
     {
@@ -159,8 +159,8 @@ void internal_interleaver(T *in, T *out, int m)
             break;
         }
     }
-    ttime = dtime();
-    printf("inter 1 time is %f\n",ttime - tbegin);
+//    ttime = dtime();
+//    printf("inter 1 time is %f\n",ttime - tbegin);
     for(i = 0; i < m; i++)
     {
 		if ((0 == f1) && (0 == f2))
@@ -178,8 +178,8 @@ void internal_interleaver(T *in, T *out, int m)
 		}
         out[i] = in[idx];
     }
-    tbegin = dtime();
-    printf("inter 2 time is %f\n",tbegin - ttime);
+//    tbegin = dtime();
+//    printf("inter 2 time is %f\n",tbegin - ttime);
 }
 
 
@@ -400,7 +400,6 @@ void turbo_encoding(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 
 	inp_blk_offset = 0;
 	out_bit_offset = 0;
-
 	// encode all code blocks
 	for (i = 0; i < n_blocks; i++)
 	{
@@ -597,7 +596,7 @@ void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, int *pOutBi
 
 	out_bit_offset = 0;
 	out_block_offset = 0;
-
+	int ppOutBits[BLOCK_SIZE];
 	for (i = 0; i < n_blocks; i++)
 	{
 		cur_blk_len = (i != (n_blocks - 1)) ? BLOCK_SIZE : last_block_length;
@@ -736,6 +735,160 @@ typedef __attribute__((aligned(64))) union zmmi {
 	int elems[LEN16];
 } zmmi_t;
 #endif
+/*
+void log_decoder(float *recv_syst,
+                 float *recv_parity,
+                 float *apriori,
+                 float *extrinsic,
+                 int interleaver_size)
+{
+    
+    float nom, den, temp0, temp1, exp_temp0, exp_temp1, rp;
+    int i, j, s0, s1, k, kk, l, s, s_prim, s_prim0, s_prim1;
+    int block_length = (interleaver_size + N_TAIL);
+    
+    float alpha[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
+    float beta[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
+    float gamma[N_STATES * 2 * (BLOCK_SIZE + N_TAIL + 1)];
+    float denom[BLOCK_SIZE + N_TAIL + 1];
+    
+    Lc = 1.0;
+    com_log = max_log;
+    
+    for (k = 0; k <= block_length; k++)
+    {
+        denom[k] = -LOG_INFINITY;
+    }
+    
+    // Calculate gamma
+    for (k = 1; k <= block_length; k++)
+    {
+        kk = k - 1;
+        
+        for (s_prim = 0; s_prim < N_STATES; s_prim++)
+        {
+            exp_temp0 = 0.0;
+            exp_temp1 = 0.0;
+            
+            for (j = 0; j < (N_GENS - 1); j++)
+            {
+                rp = recv_parity[kk * (N_GENS - 1) + j];
+                if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+                {
+                    exp_temp0 += rp;
+                }
+                else
+                {
+                    exp_temp0 -= rp;
+                }
+                if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+                {
+                    exp_temp1 += rp;
+                }
+                else
+                {
+                    exp_temp1 -= rp;
+                }
+            }
+            
+            gamma[(2 * s_prim + 0) * (block_length + 1) + k] =  0.5 * ((apriori[kk] + recv_syst[kk]) + exp_temp0);
+            //	std::cout << gamma[(2 * s_prim + 0) * (block_length + 1) + k] << "\t";
+            gamma[(2 * s_prim + 1) * (block_length + 1) + k] = -0.5 * ((apriori[kk] + recv_syst[kk]) - exp_temp1);
+            //	std::cout << gamma[(2 * s_prim + 1) * (block_length + 1) + k] << std::endl;
+        }
+    }
+    
+    // Initiate alpha
+    for (int i = 1; i < N_STATES; i++)
+    {
+        alpha[i * (block_length + 1) + 0] = -LOG_INFINITY;
+    }
+    alpha[0 * (block_length + 1) + 0] = 0.0;
+    
+    // Calculate alpha, going forward through the trellis
+    for (k = 1; k <= block_length; k++)
+    {
+        for (s = 0; s < N_STATES; s++)
+        {
+            s_prim0 = g_rev_state_trans[s * 2 + 0];
+            s_prim1 = g_rev_state_trans[s * 2 + 1];
+            temp0 = alpha[s_prim0 * (block_length + 1) + k - 1] + gamma[(2 * s_prim0 + 0) * (block_length + 1) + k];
+            temp1 = alpha[s_prim1 * (block_length + 1) + k - 1] + gamma[(2 * s_prim1 + 1) * (block_length + 1) + k];
+            alpha[s * (block_length + 1) + k] = com_log(temp0, temp1);
+            denom[k] = com_log(alpha[s * (block_length + 1) + k], denom[k]);
+        }
+        
+        // Normalization of alpha
+        for (l = 0; l < N_STATES; l++)
+        {
+            alpha[l * (block_length + 1) + k] -= denom[k];
+        }
+    }
+    
+    // Initiate beta
+    for (i = 1; i < N_STATES; i++)
+    {
+        beta[i * (block_length + 1) + block_length] = -LOG_INFINITY;
+    }
+    beta[0 * (block_length + 1) + block_length] = 0.0;
+    
+    // Calculate beta going backward in the trellis
+    for (k = block_length; k >= 2; k--)
+    {
+        for (s_prim = 0; s_prim < N_STATES; s_prim++)
+        {
+            s0 = g_state_trans[s_prim * 2 + 0];
+            s1 = g_state_trans[s_prim * 2 + 1];
+            beta[s_prim * (block_length + 1) + k - 1] = com_log(beta[s0 * (block_length + 1) + k] + gamma[(2 * s_prim + 0) * (block_length + 1) + k], beta[s1 * (block_length + 1) + k] + gamma[(2 * s_prim + 1) * (block_length + 1) + k]);
+        }
+        // Normalization of beta
+        for (l = 0; l < N_STATES; l++)
+        {
+            beta[l * (block_length + 1) + k - 1] -= denom[k];
+        }
+    }
+    
+    // Calculate extrinsic output for each bit
+    for (k = 1; k <= block_length; k++)
+    {
+        kk = k - 1;
+        nom = -LOG_INFINITY;
+        den = -LOG_INFINITY;
+        for (s_prim = 0; s_prim < N_STATES; s_prim++)
+        {
+            s0 = g_state_trans[s_prim * 2 + 0];
+            s1 = g_state_trans[s_prim * 2 + 1];
+            exp_temp0 = 0.0;
+            exp_temp1 = 0.0;
+            for (j = 0; j < (N_GENS - 1); j++)
+            {
+                rp = recv_parity[kk * (N_GENS - 1) + j];
+                if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+                {
+                    exp_temp0 += rp;
+                }
+                else
+                {
+                    exp_temp0 -= rp; 
+                }
+                if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+                { 
+                    exp_temp1 += rp;
+                }
+                else
+                {
+                    exp_temp1 -= rp;
+                }
+            }
+            nom = com_log(nom, alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp0 + beta[s0 * (block_length + 1) + k]);
+            den = com_log(den, alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp1 + beta[s1 * (block_length + 1) + k]);
+        }
+        extrinsic[kk] = nom - den;
+        //	std::cout << nom << "\t" << den << std::endl;
+        //	std::cout << extrinsic[kk] << std::endl;
+    }
+}*/
+
 
 void log_decoder(float *recv_syst,
 		float *recv_parity,
@@ -752,7 +905,10 @@ void log_decoder(float *recv_syst,
 	float beta[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
 	float gamma[N_STATES * 2 * (BLOCK_SIZE + N_TAIL + 1)];
 	float denom[BLOCK_SIZE + N_TAIL + 1];
-
+//	memset(alpha,0,sizeof(alpha));
+//	memset(gamma,0,sizeof(gamma));
+//	memset(beta,0,sizeof(beta));
+//	memset(denom,0,sizeof(denom));
 	Lc = 1.0;
 	com_log = max_log;
 	int m,jj,id,num_threads=236,sum=0,quotient=0,remain=0;
@@ -762,6 +918,7 @@ void log_decoder(float *recv_syst,
 //	double beginn;
 //	beginn = dtime();
 #pragma omp parallel default(shared) num_threads(num_threads)
+//	for(id=0;id<236;id++)
 	{
 		id = omp_get_thread_num();
 		int i_begin,num_j;
@@ -832,82 +989,9 @@ void log_decoder(float *recv_syst,
 			}
 			beta[0 + block_length * N_STATES] = 0.0;
 		}
-/*#pragma omp barrier
-		for (jj = 0; jj < num_j; jj++)
-		{
-			k=i_begin+jj+1;
-			for (s = 0; s < N_STATES; s++)
-			{
-				s_prim0 = g_rev_state_trans[s * 2 + 0];
-				s_prim1 = g_rev_state_trans[s * 2 + 1];
-				temp0 = alpha[s_prim0 * (block_length + 1) + k - 1] + gamma[(2 * s_prim0 + 0) * (block_length + 1) + k];
-				temp1 = alpha[s_prim1 * (block_length + 1) + k - 1] + gamma[(2 * s_prim1 + 1) * (block_length + 1) + k];
-				alpha[s * (block_length + 1) + k] = com_log(temp0, temp1);
-				denom[k] = com_log(alpha[s * (block_length + 1) + k], denom[k]);
-			}
-
-			// Normalization of alpha
-			for (l = 0; l < N_STATES; l++)
-			{
-				alpha[l * (block_length + 1) + k] -= denom[k];
-			}
-		}
-*/	}
-/*		for (k = 0; k <= block_length; k++)
-		{
-			denom[k] = -LOG_INFINITY;
-			
-		}
-	
-	// Calculate gamma
-	for (k = 1; k <= block_length; k++)
-	{
-		kk = k - 1;
-
-		for (s_prim = 0; s_prim < N_STATES; s_prim++)
-		{
-			exp_temp0 = 0.0;
-			exp_temp1 = 0.0;
-
-			for (j = 0; j < (N_GENS - 1); j++)
-			{
-				rp = recv_parity[kk * (N_GENS - 1) + j];
-				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
-				{
-					exp_temp0 += rp;
-				}
-				else
-				{ 
-					exp_temp0 -= rp;
-				}
-				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
-				{
-					exp_temp1 += rp;
-				}
-				else
-				{
-					exp_temp1 -= rp; 
-				}
-			}
-
-			gamma[(2 * s_prim + 0) * (block_length + 1) + k] =  0.5 * ((apriori[kk] + recv_syst[kk]) + exp_temp0);
-		//	std::cout << gamma[(2 * s_prim + 0) * (block_length + 1) + k] << "\t";
-			gamma[(2 * s_prim + 1) * (block_length + 1) + k] = -0.5 * ((apriori[kk] + recv_syst[kk]) - exp_temp1);
-		//	std::cout << gamma[(2 * s_prim + 1) * (block_length + 1) + k] << std::endl;
-		}
 	}
-
-	// Initiate alpha
-	for (int i = 1; i < N_STATES; i++)
-	{
-		alpha[i * (block_length + 1) + 0] = -LOG_INFINITY;
-	}
-	alpha[0 * (block_length + 1) + 0] = 0.0;
-*/	// Calculate alpha, going forward through the trellis
-/*	double ttime,tbegin;
-	tbegin = dtime();
-	printf("first time is %f\n",tbegin - beginn);
-*/	zmmi_t block_vector,zero_one_vector,two_vector,N_STATES_vector,num_vector;
+	// Calculate alpha, going forward through the trellis
+	zmmi_t block_vector,zero_one_vector,two_vector,N_STATES_vector,num_vector;
 	for(int tmpx=0;tmpx<16;tmpx++)
 	{
 		N_STATES_vector.elems[tmpx] = N_STATES;
@@ -969,13 +1053,7 @@ void log_decoder(float *recv_syst,
 //	ttime = dtime();
 //	printf("alpha time is %f\n",ttime - tbegin);
 	// Initiate beta
-	/*
-	for (i = 1; i < N_STATES; i++)
-	{
-		beta[i * (block_length + 1) + block_length] = -LOG_INFINITY;
-	}
-	beta[0 * (block_length + 1) + block_length] = 0.0;
-*/
+	
 	// Calculate beta going backward in the trellis
 	for (k = block_length; k >= 2; k--)
 	{
@@ -1037,7 +1115,7 @@ void log_decoder(float *recv_syst,
 	        quotient = sum / num_threads;
 		        remain = sum % num_threads;
 //#pragma omp parallel default(shared) num_threads(num_threads)
-#pragma omp parallel for private(id,k,kk,nom,den,s_prim_,s0,s1,exp_temp1,exp_temp0,rp)
+#pragma omp parallel for private(jj,id,k,kk,nom,den,s_prim_,s0,s1,exp_temp1,exp_temp0,rp)
 	for(id=0;id<num_threads;id++)
 	{
 		// Calculate extrinsic output for each bit
@@ -1058,7 +1136,7 @@ void log_decoder(float *recv_syst,
 		for (jj=0;jj<num_j;jj++)
 		{
 			k=i_begin+jj+1;
-//			*/
+//
 //	for (k = 1; k <= block_length; k++)
 //	{
 			kk = k - 1;

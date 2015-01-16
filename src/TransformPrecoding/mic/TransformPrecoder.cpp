@@ -10,12 +10,12 @@
 
 double ddtime()
 {
-	    double tseconds = 0.0;
-	        struct timeval mytime;
-		    gettimeofday(&mytime,(struct timezone*)0);
-		        tseconds = (double)(mytime.tv_sec +
-					                        mytime.tv_usec*1.0e-6);
-			    return( tseconds );
+	double tseconds = 0.0;
+	struct timeval mytime;
+	gettimeofday(&mytime,(struct timezone*)0);
+	tseconds = (double)(mytime.tv_sec +
+			mytime.tv_usec*1.0e-6);
+	return( tseconds );
 }
 //#define __MIC__ 1
 #ifdef DEBUG_FFT
@@ -125,11 +125,7 @@ void TransformDecoding(LTE_PHY_PARAMS *lte_phy_params, float *pDataMatrix, float
 				
 				fftwf_execute_dft(ifftplan, reinterpret_cast<fftwf_complex*>(&in[0]), reinterpret_cast<fftwf_complex*>(&out[0]));
 #else
-				double tbegin,ttime;
-				tbegin = ddtime();
 				dft(MDFT, pDataMatrix + idx * 2, pDecSeq + idx * 2, -1);
-				ttime = ddtime() - tbegin;
-				printf("dft time is %f \n",ttime);
 #endif
 
 			for(int m = 0; m < MDFT; m++)

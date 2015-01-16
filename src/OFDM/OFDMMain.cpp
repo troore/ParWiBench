@@ -6,7 +6,7 @@
 #include "GeneralFunc.h"
 #include "meas.h"
 #include "check.h"
-
+#include "micpower.h"
 #include "OFDM.h"
 #include "lte_phy.h"
 
@@ -22,11 +22,11 @@ void test_mod(LTE_PHY_PARAMS *lte_phy_params)
 //	ReadInputFromFiles(lte_phy_params->ofmod_in_real, lte_phy_params->ofmod_in_imag, lte_phy_params->ofmod_in_buf_sz, "../testsuite/ModulationInputReal", "../testsuite/ModulationInputImag");
 //	GeneRandomInput(lte_phy_params->ofmod_in, lte_phy_params->ofmod_in_buf_sz, "../testsuite/RandomModulationInputReal", "../testsuite/RandomModulationInputImag");
 	GeneRandomInput(lte_phy_params->ofmod_in_real, lte_phy_params->ofmod_in_imag, lte_phy_params->ofmod_in_buf_sz, "../testsuite/RandomModulationInputReal", "../testsuite/RandomModulationInputImag");
-
-//	ofmodulating(lte_phy_params, lte_phy_params->ofmod_in, lte_phy_params->ofmod_out);
-
+#ifdef __MIC__
+	ofmodulating(lte_phy_params, lte_phy_params->ofmod_in, lte_phy_params->ofmod_out);
+#else
 	ofmodulating(lte_phy_params, lte_phy_params->ofmod_in_real, lte_phy_params->ofmod_in_imag, lte_phy_params->ofmod_out_real, lte_phy_params->ofmod_out_imag);
-	
+#endif	
 //	WriteOutputToFiles(lte_phy_params->ofmod_out, lte_phy_params->ofmod_out_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
 	WriteOutputToFiles(lte_phy_params->ofmod_out_real, lte_phy_params->ofmod_out_imag, lte_phy_params->ofmod_out_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
 
@@ -41,10 +41,23 @@ void test_demod(LTE_PHY_PARAMS *lte_phy_params)
 //	ReadInputFromFiles(lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_in_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
 	ReadInputFromFiles(lte_phy_params->ofdemod_in_real, lte_phy_params->ofdemod_in_imag, lte_phy_params->ofdemod_in_buf_sz, "../testsuite/testModulationOutputReal", "../testsuite/testModulationOutputImag");
 //	ReadInputFromFiles(lte_phy_params->ofdemod_in_real, lte_phy_params->ofdemod_in_imag, lte_phy_params->ofdemod_in_buf_sz, "../testsuite/DemodulationInputReal", "../testsuite/DemodulationInputImag");
-
-//	ofdemodulating(lte_phy_params, lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_out);
+#ifdef __MIC__
+	ofdemodulating(lte_phy_params, lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_out);
+	double energy,ttime,tbegin;
+	micpower_start();
+	tbegin = dtime();
+	for(int i = 0;i < 10000; i++)
+		ofdemodulating(lte_phy_params, lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_out);
+#else
+	//	ofdemodulating(lte_phy_params, lte_phy_params->ofdemod_in, lte_phy_params->ofdemod_out);
 	ofdemodulating(lte_phy_params, lte_phy_params->ofdemod_in_real, lte_phy_params->ofdemod_in_imag, lte_phy_params->ofdemod_out_real, lte_phy_params->ofdemod_out_imag);
-
+#endif
+#ifdef __MIC__
+	ttime = dtime() - tbegin;
+	energy = micpower_finalize();
+	printf("Energy used in %lf\n", energy);
+	printf("whole time is %fms\n", ttime);
+#endif
 //	WriteOutputToFiles(lte_phy_params->ofdemod_out, lte_phy_params->ofdemod_out_buf_sz, "../testsuite/testDemodulationOutputReal", "../testsuite/testDemodulationOutputImag");
 	WriteOutputToFiles(lte_phy_params->ofdemod_out_real, lte_phy_params->ofdemod_out_imag, lte_phy_params->ofdemod_out_buf_sz, "../testsuite/testDemodulationOutputReal", "../testsuite/testDemodulationOutputImag");
 	
