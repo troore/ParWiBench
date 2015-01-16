@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-
+#include "timer/meas.h"
 //volatile bool flag = false;
 
 /*
@@ -58,6 +58,7 @@ static int read_sysfs_file(long long* counts)
 
 volatile bool keepAlive = true;
 double passEnergy = 0.0;
+int _50ms_counts=0;
 
 void* recordEnergy(void *arg)
 {
@@ -76,6 +77,7 @@ void* recordEnergy(void *arg)
 		//	printf("%d\n", keepAlive);
 		retval = read_sysfs_file(counts);
 		energy += counts[0];
+		_50ms_counts++;
 		nanosleep(&ts, NULL);
 	}
 //	keepAlive = true;
@@ -95,9 +97,9 @@ double micpower_finalize()
 {
 	keepAlive = false;
 	pthread_join(micPthread, NULL);
-
+	printf("counts = %d\n",_50ms_counts);
 	// (uw * ms) / 10e-9 = J
-	return (passEnergy * 50.0) / (1000 * 1000 * 1000);
+	return (passEnergy * 70.0) / (1000 * 1000 * 1000);
 }
 
 /*

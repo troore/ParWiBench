@@ -152,10 +152,8 @@ void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq
 	{
 		zmmf_t tmp_f,tmp_f2,tmp_result;
 		zmmi_t tmp_i;
-		tmp_i.elems[0:LEN16] = scramb_seq_int[i:LEN16] * -2 + 1 ;
-		tmp_f.reg = _mm512_castsi512_ps(tmp_i.reg);
+		tmp_f.elems[0:LEN16] = (float)scramb_seq_int[i:LEN16] * -2.0 + 1.0 ;
 		tmp_f2.elems[0:LEN16] = pInpSeq[i:16];
-		//tmp_result.reg = _mm512_fmadd_ps(tmp_f.reg, tmp_f2.reg, tmp_zero.reg);
 		tmp_result.reg = _mm512_mul_ps(tmp_f.reg, tmp_f2.reg);
 		pOutSeq[i:LEN16] = tmp_result.elems[0:16];
 	}

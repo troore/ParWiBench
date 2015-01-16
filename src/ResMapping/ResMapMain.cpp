@@ -1,11 +1,15 @@
 
 #include <iostream>
+#include <stdlib.h>
+#include <string.h>
 
 #include "gauss.h"
 #include "GeneralFunc.h"
-#include "timer/meas.h"
-#include "check/check.h"
-
+#include "meas.h"
+#include "check.h"
+#ifdef __MIC__
+#include "micpower.h"
+#endif
 #include "ResMapper.h"
 
 
@@ -19,14 +23,14 @@ void test_SCMapper(LTE_PHY_PARAMS *lte_phy_params)
 {
 	std::cout << "Resource mapping starts" << std::endl;
 
-	double tstart, tstop, ttime;
+//	double tstart, tstop, ttime;
 
 //	ReadInputFromFiles(lte_phy_params->resm_in, lte_phy_params->resm_in_buf_sz, "../testsuite/SubCarrierMapInputReal", "../testsuite/SubCarrierMapInputImag");
 //	ReadInputFromFiles(lte_phy_params->resm_in_real, lte_phy_params->resm_in_imag, lte_phy_params->resm_in_buf_sz, "../testsuite/SubCarrierMapInputReal", "../testsuite/SubCarrierMapInputImag");
 //	GeneRandomInput(lte_phy_params->resm_in_real, lte_phy_params->resm_in_imag, lte_phy_params->resm_in_buf_sz, "../testsuite/SubCarrierMapInputReal", "../testsuite/SubCarrierMapInputImag");
 	GeneRandomInput(lte_phy_params->resm_in, lte_phy_params->resm_in_buf_sz, "../testsuite/SubCarrierMapInputReal", "../testsuite/SubCarrierMapInputImag");
 
-	tstart = dtime();
+//	tstart = dtime();
 
 	/*
 	for (int i = 0; i < 10000; i++)
@@ -35,13 +39,21 @@ void test_SCMapper(LTE_PHY_PARAMS *lte_phy_params)
 	
 //	SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in_real, lte_phy_params->resm_in_imag, lte_phy_params->resm_out_real, lte_phy_params->resm_out_imag);
 	SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in, lte_phy_params->resm_out);
-	
-	tstop = dtime();
+	double energy,ttime,tbegin;
+	micpower_start();
+	tbegin = dtime();
+	for(int i=0;i<10000;i++)
+		SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in, lte_phy_params->resm_out);
+	ttime = dtime() - tbegin;
+	energy = micpower_finalize();
+	printf("Energy used in %lf\n", energy);
+	printf("whole time is %fms\n", ttime);
+/*	tstop = dtime();
 
 	ttime = (tstop - tstart);
 	
 	std::cout << ttime << "ms\n";
-
+*/
 	WriteOutputToFiles(lte_phy_params->resm_out, lte_phy_params->resm_out_buf_sz, "../testsuite/testSubCarrierMapOutputReal", "../testsuite/testSubCarrierMapOutputImag");
 //	WriteOutputToFiles(lte_phy_params->resm_out_real, lte_phy_params->resm_out_imag, lte_phy_params->resm_out_buf_sz, "../testsuite/testSubCarrierMapOutputReal", "../testsuite/testSubCarrierMapOutputImag");
 	
@@ -62,16 +74,16 @@ void test_SCDemapper(LTE_PHY_PARAMS *lte_phy_params)
 //	ReadInputFromFiles(lte_phy_params->resdm_in, lte_phy_params->resdm_in_buf_sz, "../testsuite/SubCarrierDemapInputReal", "../testsuite/SubCarrierDemapInputImag");
 	GeneRandomInput(lte_phy_params->resdm_in, lte_phy_params->resdm_in_buf_sz, "../testsuite/SubCarrierDemapInputReal", "../testsuite/SubCarrierDemapInputImag");
 	
-	tstart = dtime();
+//	tstart = dtime();
 
 	SubCarrierDemapping(lte_phy_params, lte_phy_params->resdm_in, lte_phy_params->resdm_out);
 
-	tstop = dtime();
+/*	tstop = dtime();
 
 	ttime = (tstop - tstart);
 	
 	std::cout << ttime << "ms\n";
-
+*/
 	WriteOutputToFiles(lte_phy_params->resdm_out, lte_phy_params->resdm_out_buf_sz, "../testsuite/testSubCarrierDemapOutputReal", "../testsuite/testSubCarrierDemapOutputImag");
 
 	std::cout << "Resource demapping ends" << std::endl;
@@ -120,17 +132,17 @@ int main(int argc, char *argv[])
 
 	test_SCDemapper(&lte_phy_params);
 
-	/*
-	strcpy(tx_in_fname, "../testsuite/transformprecoderinputreal");
-	strcpy(rx_out_fname, "../testsuite/testtransformdecoderoutputreal");
+	
+	strcpy(tx_in_fname, "../testsuite/SubCarrierMapInputReal");
+	strcpy(rx_out_fname, "../testsuite/testSubCarrierDemapOutputReal");
 	err_n = check_float(tx_in_fname, rx_out_fname);
 	printf("%d\n", err_n);
 	
-	strcpy(tx_in_fname, "../testsuite/TransformPrecoderInputImag");
-	strcpy(rx_out_fname, "../testsuite/testTransformDecoderOutputImag");
+	strcpy(tx_in_fname, "../testsuite/SubCarrierMapInputImag");
+	strcpy(rx_out_fname, "../testsuite/testSubCarrierDemapOutputImag");
 	err_n = check_float(tx_in_fname, rx_out_fname);
 	printf("%d\n", err_n);
-	*/
+	
 
 #endif
 	

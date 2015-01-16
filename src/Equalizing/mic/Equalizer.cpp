@@ -1,8 +1,9 @@
 
 #include "Equalizer.h"
-
+#include "dmrs.h"
+#include <immintrin.h>
 #include <stdio.h>
-
+#define LEN16 16
 static void MatrixProd(int d1, int d2, int d3, float M1[], float M2[], float oM[])
 {
 	int r, c, i;

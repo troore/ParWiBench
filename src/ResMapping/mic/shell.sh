@@ -1,0 +1,10 @@
+./X_ResMapper.out 0
+./ResMapper.out 0
+./X_ResMapper.out 1
+./ResMapper.out 1
+./X_ResMapper.out 2
+./ResMapper.out 2
+./X_ResMapper.out 3
+./ResMapper.out 3
+./X_ResMapper.out 4
+./ResMapper.out 4
