@@ -420,7 +420,7 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, i
 	_err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &p_idx_table_buffer);
 	_err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &pLLR_buffer);
 	_err |= clSetKernelArg(kernel, 7, sizeof(float), &No);
-	int n_iters = 10000;
+	int n_iters = 0;
 	_err |= clSetKernelArg(kernel, 8, sizeof(float), &n_iters);
 	if(_err < 0) { perror("Couldn't create a kernel argument");  exit(1);   }
 	
@@ -428,11 +428,17 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, i
 	local_size = 32;
 
 	double elapsed_time = 0.0;
+
+//	_err = clEnqueueWriteBuffer(queue, pDecSeq_buffer, CL_TRUE, 0, in_buf_sz * 2 * sizeof(float), pDecSeq, 0, NULL, NULL);
+//	_err |= clEnqueueWriteBuffer(queue, p_mod_table_buffer, CL_TRUE, 0, mod_table_len * 2 * sizeof(float), p_mod_table, 0, NULL, NULL);
+//	_err |= clEnqueueWriteBuffer(queue, p_idx_table_buffer, CL_TRUE, 0, mod_table_len * bits_per_samp * sizeof(int), p_idx_table, 0, NULL, NULL);
 	
 	for (int i = 0; i < 1; i++) {
+		
 	_err = clEnqueueWriteBuffer(queue, pDecSeq_buffer, CL_TRUE, 0, in_buf_sz * 2 * sizeof(float), pDecSeq, 0, NULL, NULL);
 	_err |= clEnqueueWriteBuffer(queue, p_mod_table_buffer, CL_TRUE, 0, mod_table_len * 2 * sizeof(float), p_mod_table, 0, NULL, NULL);
 	_err |= clEnqueueWriteBuffer(queue, p_idx_table_buffer, CL_TRUE, 0, mod_table_len * bits_per_samp * sizeof(int), p_idx_table, 0, NULL, NULL);
+
 	
 //	static double elapsed_time = 0.0;
 	cl_event prof_event;
@@ -453,6 +459,7 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, i
 
 	_err = clEnqueueReadBuffer(queue, pLLR_buffer, CL_TRUE, 0, out_buf_sz * sizeof(float), pLLR, 0, NULL, NULL);
 	}
+//	_err = clEnqueueReadBuffer(queue, pLLR_buffer, CL_TRUE, 0, out_buf_sz * sizeof(float), pLLR, 0, NULL, NULL);
 
 	printf("Elapsed time of kernel is: %lfms\n", elapsed_time);
 

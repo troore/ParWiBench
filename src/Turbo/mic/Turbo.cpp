@@ -5,7 +5,7 @@
 #include <omp.h>
 #include <immintrin.h>
 #include "Turbo.h"
-#include "meas.h"
+
 #define LOG_INFINITY 1e30
 #define LEN16 16
 /**************Global variables*****************/

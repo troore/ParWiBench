@@ -4,9 +4,7 @@
 #include <omp.h>
 
 #include <immintrin.h>
-#include "Scrambler.h"
-#include "meas.h"
-#include "micpower.h"
+#include "lte_phy.h"
 
 #define MIC_DEV 1
 #define LEN8 8
@@ -65,10 +63,6 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 
 	GenScrambInt(scramb_seq_int, n_inp);
 
-	micpower_start();
-	
-	double tstart, tstop, ttime;
-	tstart = dtime();
 	////////////////////////Scrambling////////////////////////////
 
 //#pragma offload_transfer target(mic:MIC_DEV) \
@@ -107,12 +101,6 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 		pOutSeq[i] = (pInpSeq[i] + scramb_seq_int[i]) % 2;
 	}*/
 	////////////////////////END Scrambling////////////////////////////
-	tstop = dtime();
-	ttime = tstop - tstart;
-
-	double energy = micpower_finalize();
-	printf("Energy used is %fJ\n", energy);
-	printf("Elapsed time of Scrambling is %lfms\n", ttime);
 }
 
 void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq)

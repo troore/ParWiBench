@@ -203,7 +203,7 @@ void set_mod_params(/*float (*mod_table)[2]*/ p_a *pp_table, int *bits_per_samp,
 	}
 }
 
-void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex<float> *pModedSeq, int mod_type)
+void Modulating_cplx(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex<float> *pModedSeq, int mod_type)
 {
 	float I, Q;
 	float (*p_table)[2];

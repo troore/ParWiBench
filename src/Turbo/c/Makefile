@@ -1,7 +1,6 @@
 include ../../../common/makefile.config
 
-SRC = $(LIB_DIR)/check/check.cpp
-SRC += ../TurboMain.cpp Turbo.cpp
+SRC = $(SRC_DIR)/main_test.cpp Turbo.cpp test.cpp
 SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp
 
 ifeq ($(PARD),1)

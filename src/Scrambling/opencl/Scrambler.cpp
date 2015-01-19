@@ -88,17 +88,21 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 	_err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &scramb_buffer);
 	_err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &output_buffer);
 	_err |= clSetKernelArg(kernel, 3, sizeof(int), &n);
-	int n_iters = 100000;
+	int n_iters = 1;
 	_err |= clSetKernelArg(kernel, 4, sizeof(int), &n_iters);
-	
-	_err = clEnqueueWriteBuffer(queue, input_buffer, CL_TRUE, 0, n * sizeof(int), pInpSeq, 0, NULL, NULL);
-	_err = clEnqueueWriteBuffer(queue, scramb_buffer, CL_TRUE, 0, n * sizeof(int), scramb_seq_int, 0, NULL, NULL);
+
 
 	global_size = n;
 	local_size = 32;
 
 	double elapsed_time = 0.0;
+
+	for (int k = 0; k < 100000; k++) {
 	cl_event prof_event;
+
+		
+	_err = clEnqueueWriteBuffer(queue, input_buffer, CL_TRUE, 0, n * sizeof(int), pInpSeq, 0, NULL, NULL);
+	_err = clEnqueueWriteBuffer(queue, scramb_buffer, CL_TRUE, 0, n * sizeof(int), scramb_seq_int, 0, NULL, NULL);
 
 	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, /*NULL*/&local_size, 0, NULL, /*NULL*/&prof_event);
 
@@ -116,12 +120,14 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 
 //	printf("%d\n", ev_start_time);
 //	printf("%d\n", ev_end_time);
+	
+	_err = clEnqueueReadBuffer(queue, output_buffer, CL_TRUE, 0, n * sizeof(int), pOutSeq, 0, NULL, NULL);
 
 	elapsed_time = elapsed_time + (double)(ev_end_time - ev_start_time) / 1000000.0;
+	}
 
 	printf("Elapsed time of kernel is: %lfms\n", elapsed_time);
 
-	_err = clEnqueueReadBuffer(queue, output_buffer, CL_TRUE, 0, n * sizeof(int), pOutSeq, 0, NULL, NULL);
 	//	_err = clEnqueueReadBuffer(queue, output_buffer, CL_TRUE, 0, n * sizeof(int), pOutSeq, 0, NULL, &prof_event);
 	//	_err = clWaitForEvents(1, &prof_event);
 

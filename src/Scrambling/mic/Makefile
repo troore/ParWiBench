@@ -1,11 +1,11 @@
 include ../../../common/makefile.config
 
-SRC = ../ScrambMain.cpp  Scrambler.cpp
+SRC = $(SRC_DIR)/main_test.cpp  Scrambler.cpp test.cpp
 SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/power/micpower/micpower.cpp
 
 SRC += $(SRC_DIR)/lte_phy.cpp $(LIB_DIR)/check/check.cpp
 
-INC_FLAGS += -I$(LIB_DIR) -I$(SRC_DIR) -I$(LIB_DIR)/check -I../ -I./ -I$(LIB_DIR)/timer -I$(LIB_DIR)/power/micpower
+INC_FLAGS += -I./  -I../ -I$(LIB_DIR) -I$(SRC_DIR) -I$(LIB_DIR)/power/micpower
 
 LINKFLAGS += -lpthread
 

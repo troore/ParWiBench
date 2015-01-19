@@ -1,11 +1,11 @@
 include ../../../common/makefile.config
 
-SRC = ../TransformPreMain.cpp TransformPrecoder.cpp 
+SRC = $(SRC_DIR)/main_test.cpp TransformPrecoder.cpp test.cpp
 SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/dft/mic/dft.cpp $(LIB_DIR)/timer/meas.cpp
 
 SRC += $(SRC_DIR)/lte_phy.cpp $(LIB_DIR)/power/micpower/micpower.cpp $(LIB_DIR)/check/check.cpp
 
-INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)/dft -I$(LIB_DIR)/dft/mic -I$(LIB_DIR)/power/micpower -I$(LIB_DIR)/check -I$(LIB_DIR)/timer
+INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)/dft -I$(LIB_DIR)/dft/mic -I$(LIB_DIR)/power/micpower -I$(LIB_DIR)
 
 TARGETS = TPTD.out
 

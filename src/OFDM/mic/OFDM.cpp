@@ -1,5 +1,6 @@
-#include "OFDM.h"
-#include "meas.h"
+
+#include "lte_phy.h"
+#include "fft.h"
 
 void ofmodulating(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOutData)
 {
@@ -65,11 +66,11 @@ void ofdemodulating(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOut
 //	float *p_samp_out_buf = (float *)malloc(2 * NIFFT * sizeof(float));
 
 
-/*	for (nrx=0;nrx<NumRxAntenna;nrx++)
-	{
-		for (nsym=0;nsym<NumULSymbSF;nsym++)
-		{
-*/
+//	for (nrx=0;nrx<NumRxAntenna;nrx++)
+//	{
+//		for (nsym=0;nsym<NumULSymbSF;nsym++)
+//		{
+
 	int num_threads=236,sum=0,quotient=0,remain=0;
 	int ii,j,k;
 	sum = NumRxAntenna*NumULSymbSF;
@@ -99,7 +100,7 @@ void ofdemodulating(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOut
 			nrx = (i_begin + j) / NumULSymbSF;
 			nsym = (i_begin + j) % NumULSymbSF;
 			int symb_idx = nrx * NumULSymbSF + nsym;
-			float norm = (float)sqrt((float)NIFFT)/*(float)1*/;
+			float norm = (float)sqrt((float)NIFFT);
 			for (ii = 0; ii < NIFFT; ii++)
 			{
 				p_samp_in_buf[ii] = pInpData[symb_idx * (CPLen + NIFFT) + CPLen + ii];
@@ -123,59 +124,3 @@ void ofdemodulating(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOut
 //	free(p_samp_out_buf);
 }
 
-/*
-void ofdemodulating(LTE_PHY_PARAMS *lte_phy_params, float *pInpDataReal, float *pInpDataImag,
-					float *pOutDataReal, float *pOutDataImag)
-{
-	int NumRxAntenna = lte_phy_params->N_rx_ant;
-	int NIFFT = lte_phy_params->N_fft_sz;
-	int NumULSymbSF = LTE_PHY_N_SYMB_PER_SUBFR;
-	int CPLen = lte_phy_params->N_samps_cp_l_0;
-
-	int nrx, nsym, i;
-
-//	for (nrx=0;nrx<NumRxAntenna;nrx++)
-//	{
-//		for (nsym=0;nsym<NumULSymbSF;nsym++)
-//		{
-
-	int num_threads=236,sum=0,quotient=0,remain=0;
-	int ii,j,k;
-	sum = NumRxAntenna*NumULSymbSF;
-	quotient = sum / num_threads;
-	remain = sum % num_threads;
-	
-#pragma omp parallel for private(j,k)
-	for(i=0;i<num_threads;i++)
-	{
-		int i_begin,num_j;
-		if(i>=remain)
-		{
-			i_begin = remain  + i * quotient;
-			num_j = quotient;
-		}
-		else 
-		{ 
-			i_begin = i * (quotient + 1);
-			num_j = quotient + 1;
-		} 
-		for(j=0;j<num_j;j++)
-		{
-			nrx = (i_begin + j) / NumULSymbSF;
-			nsym = (i_begin + j) % NumULSymbSF;
-			int symb_idx = nrx * NumULSymbSF + nsym;
-			float norm = (float)sqrt((float)NIFFT)/*(float)1*/
-/*			
-			fft_nrvs(NIFFT, pInpDataReal + symb_idx * (CPLen + NIFFT) + CPLen, pInpDataImag + symb_idx * (CPLen + NIFFT) + CPLen,
-					 pOutDataReal + symb_idx * NIFFT, pOutDataReal + symb_idx * NIFFT,
-					 -1);
-
-			for(ii = 0; ii < NIFFT; ii++)
-			{
-				pOutDataReal[symb_idx * NIFFT + ii] /= norm;
-				pOutDataImag[symb_idx * NIFFT + ii] /= norm;
-			}
-		}
-	}
-}
-*/
