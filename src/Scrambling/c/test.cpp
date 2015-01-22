@@ -9,6 +9,11 @@
 #include "timer/meas.h"
 #include "check/check.h"
 
+extern "C" {
+#include "papi-rapl/rapl_power.h"
+}
+
+
 void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 {
 	std::cout << "Tx scrambling starts" << std::endl;
@@ -16,7 +21,17 @@ void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 //	ReadInputFromFiles(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "../testsuite/ScrambleInput");
 	GeneRandomInput(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "../testsuite/RandomScrambleInput");
 
-	Scrambling(lte_phy_params, lte_phy_params->scramb_in, lte_phy_params->scramb_out);
+//	double tstart, tend, ttime;
+
+//	tstart = dtime();
+	rapl_power_start();
+	for (int i = 0; i < 1000; i++) {
+		Scrambling(lte_phy_params, lte_phy_params->scramb_in, lte_phy_params->scramb_out);
+	}
+	rapl_power_stop();
+//	tend = dtime();
+//	ttime = tend - tstart;
+//	printf("%fms\n", ttime);
 	
 	WriteOutputToFiles(lte_phy_params->scramb_out, lte_phy_params->scramb_out_buf_sz, "../testsuite/testScrambleOutput");
 

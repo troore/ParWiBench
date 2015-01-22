@@ -21,3 +21,10 @@ Move several tables in Turbo into lte_phy.h, as these tables are used to determi
 [Info]
 
 Please cautiously choose the Read/Write/GeneRandom functions in GeneralFunc.cpp/GeneralFunc.h when using different complex format, especially when switch between paired and separated formats. Specified functioins for these two formats are still not implemented individually, so users must comment one when using another.
+
+
+2015-01-16 Hibbert <lixibai2@126.com>
+
+[Bug Fixed]
+
+RateM: Offset is added directly on the input arguments (pointers), rather than make it a argument and get start addresses of block in the subblockinterleaver function.

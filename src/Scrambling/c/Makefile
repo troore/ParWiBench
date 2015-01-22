@@ -1,26 +1,44 @@
 include ../../../common/makefile.config
 
 SRC = $(SRC_DIR)/main_test.cpp  Scrambler.cpp test.cpp
-SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp $(LIB_DIR)/power/papi-rapl/rapl_power.c
 
 SRC += $(SRC_DIR)/lte_phy.cpp
 
-INC_FLAGS += -I. -I.. -I$(LIB_DIR) -I$(SRC_DIR) -I$(LIB_DIR)/timer -I$(LIB_DIR)/check
+#$(warning $(SRC))
 
-TARGETS = ScrDescr.out
+SRC_OMP = $(subst Scrambler, Scrambler_omp, $(SRC))
+#SRC_OMP = $(subst ee,EE,feet)
+#$(warning $(SRC_OMP))
+
+INC_FLAGS += -I. -I.. -I$(LIB_DIR) -I$(SRC_DIR)
+
+TARGETS = ScrDescr.out ScrDescr_omp.out
 
 OBJS := $(patsubst %.cpp, %.o, $(SRC))
+OBJS_OMP := $(patsubst %.cpp, %.o, $(SRC_OMP))
 
 ifeq ($(TX),1)
 	CXXFLAGS += -DScramb
 endif
 
+all: $(TARGETS)
+
 ScrDescr.out: $(OBJS)
 	$(CXX) $^ $(LINKFLAGS) -o $@
+
+ScrDescr_omp.out: $(OBJS_OMP)
+	$(CXX) $^ $(LIB_DIR)/power/papi-rapl/libpapi.a $(LIB_DIR)/power/papi-rapl/libtestlib.a $(LINKFLAGS) -fopenmp -o $@
+
+Scrambler_omp.o: Scrambler_omp.cpp
+	$(CXX) -c $< -o $@ $(CXXFLAGS) -fopenmp
 
 %.o: %.cpp
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
+%.o: %.c
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
+
 clean:
-	rm -rf $(TARGETS) $(OBJS)
+	rm -rf $(TARGETS) $(OBJS) $(OBJS_OMP)
 
