@@ -17,7 +17,8 @@ void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *p
 	int out_buf_sz = lte_phy_params->resm_out_buf_sz;
 
 //	float DMRS[2 * (2 * LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX)];
-	float *pDMRS = (float *)malloc(2 * (NDMRSslot * NumLayer * MDFT) * sizeof(float));
+//	float *pDMRS = (float *)malloc(2 * (NDMRSslot * NumLayer * MDFT) * sizeof(float));
+	float *pDMRS;
 
 	int *map_table = (int *)malloc(NumULSymbSF * sizeof(int));
 
@@ -36,7 +37,8 @@ void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *p
 		}
 	}
 
-	geneDMRS(pDMRS, NumLayer, MDFT);
+//	geneDMRS(pDMRS, NumLayer, MDFT);
+	pDMRS = lte_phy_params->DMRS;
 
 	for (int nlayer = 0; nlayer < NumLayer; nlayer++)
 	{
@@ -83,7 +85,7 @@ void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *p
 		}
 	}
 
-	free(pDMRS);
+//	free(pDMRS);
 	free(map_table);
 }
 

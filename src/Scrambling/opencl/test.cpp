@@ -16,6 +16,7 @@ void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 //	ReadInputFromFiles(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "../testsuite/ScrambleInput");
 	GeneRandomInput(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "../testsuite/RandomScrambleInput");
 
+	GenScrambInt(lte_phy_params->scramb_seq_int, lte_phy_params->scramb_in_buf_sz);
 	Scrambling(lte_phy_params, lte_phy_params->scramb_in, lte_phy_params->scramb_out);
 	
 	WriteOutputToFiles(lte_phy_params->scramb_out, lte_phy_params->scramb_out_buf_sz, "../testsuite/testScrambleOutput");
@@ -42,6 +43,8 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 		else
 			rx_scramb_in[i] = 1.0;
 	}
+
+	GenScrambInt(lte_phy_params->scramb_seq_int, lte_phy_params->descramb_in_buf_sz);
 	Descrambling(lte_phy_params, rx_scramb_in, rx_scramb_out);
 
 	for (i = 0; i < lte_phy_params->descramb_out_buf_sz; i++)
@@ -79,3 +82,13 @@ void test(LTE_PHY_PARAMS *lte_phy_params)
 	check();
 #endif
 }
+
+double gflop_counter(LTE_PHY_PARAMS *lte_phy_params)
+{
+	double cnter = 0.0;
+
+	cnter = ((double)lte_phy_params->scramb_in_buf_sz) * 3.0;
+
+	return 1.0e-9 * cnter;
+}
+

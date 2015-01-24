@@ -38,19 +38,23 @@ void GenScrambInt(int *pScrambInt, int n)
 void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 {
 	int n_inp;
-	int scramb_seq_int[N_SCRAMB_IN_MAX];
+//	int scramb_seq_int[N_SCRAMB_IN_MAX];
+	int *scramb_seq_int;
 
 	int i;
 
 	n_inp = lte_phy_params->scramb_in_buf_sz;
 
-	GenScrambInt(scramb_seq_int, n_inp);
+//	GenScrambInt(scramb_seq_int, n_inp);
+	scramb_seq_int = lte_phy_params->scramb_seq_int;
 
-//	omp_set_num_threads(4);
+//	omp_set_num_threads(2);
+//	printf("Number of Threads: %d\n", omp_get_num_threads());
 
 	////////////////////////Scrambling////////////////////////////
 #pragma omp parallel
 	{
+		//	printf("Number of Threads: %d\n", omp_get_num_threads());
 		//	printf("tid=%d\n", omp_get_thread_num());
 		#pragma omp for
 		for (i = 0; i < n_inp; i++)
@@ -65,14 +69,16 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq)
 {
 	int n_inp;
-	float scramb_seq_float[N_SCRAMB_IN_MAX];
-	int scramb_seq_int[N_SCRAMB_IN_MAX];
+//	float scramb_seq_float[N_SCRAMB_IN_MAX];
+//	int scramb_seq_int[N_SCRAMB_IN_MAX];
+	int *scramb_seq_int;
 
 	int i;
 
 	n_inp = lte_phy_params->scramb_in_buf_sz;
 	// Generate integer scrambling sequence
-	GenScrambInt(scramb_seq_int, n_inp);
+//	GenScrambInt(scramb_seq_int, n_inp);
+	scramb_seq_int = lte_phy_params->scramb_seq_int;
 
 	/*
 	for (i = 0; i < n_inp; i++)
@@ -90,10 +96,13 @@ void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq
 		pOutSeq[i] = pInpSeq[i] * scramb_seq_float[i];
 	*/
 
-
-	for (i = 0; i < n_inp; i++)
+#pragma omp parallel
 	{
-		pOutSeq[i] = (pInpSeq[i] * (scramb_seq_int[i] * (-2.0) + 1.0));
+#pragma omp for 
+		for (i = 0; i < n_inp; i++)
+		{
+			pOutSeq[i] = (pInpSeq[i] * (scramb_seq_int[i] * (-2.0) + 1.0));
+		}
 	}
 }
 

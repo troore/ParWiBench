@@ -277,12 +277,11 @@ void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, float *pModedSeq,
 	_err |= clSetKernelArg(kernel, 3, sizeof(int), &out_buf_sz);
 	_err |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &p_mod_table_buffer);
 	_err |= clSetKernelArg(kernel, 5, sizeof(int), &mod_table_len);
-	int n_iters = 100000;
-	_err |= clSetKernelArg(kernel, 6, sizeof(int), &n_iters);
 	if(_err < 0) { perror("Couldn't create a kernel argument");  exit(1);   }
-	
-	global_size = out_buf_sz;
-	local_size = 32;
+
+//	printf("%d\n", out_buf_sz);
+	global_size = 2048;
+	local_size = 128;
 
 	_err = clEnqueueWriteBuffer(queue, pBitsSeq_buffer, CL_TRUE, 0, in_buf_sz * sizeof(int), pBitsSeq, 0, NULL, NULL);
 	_err |= clEnqueueWriteBuffer(queue, p_mod_table_buffer, CL_TRUE, 0, mod_table_len * 2 * sizeof(float), p_mod_table, 0, NULL, NULL);
@@ -420,12 +419,14 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, i
 	_err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &p_idx_table_buffer);
 	_err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &pLLR_buffer);
 	_err |= clSetKernelArg(kernel, 7, sizeof(float), &No);
-	int n_iters = 0;
+	int n_iters = 10000;
 	_err |= clSetKernelArg(kernel, 8, sizeof(float), &n_iters);
 	if(_err < 0) { perror("Couldn't create a kernel argument");  exit(1);   }
-	
-	global_size = in_buf_sz;
-	local_size = 32;
+
+//	printf("%d\n", in_buf_sz);
+//	global_size = in_buf_sz;
+	global_size = 4096;
+	local_size = 128;
 
 	double elapsed_time = 0.0;
 
@@ -439,7 +440,6 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, i
 	_err |= clEnqueueWriteBuffer(queue, p_mod_table_buffer, CL_TRUE, 0, mod_table_len * 2 * sizeof(float), p_mod_table, 0, NULL, NULL);
 	_err |= clEnqueueWriteBuffer(queue, p_idx_table_buffer, CL_TRUE, 0, mod_table_len * bits_per_samp * sizeof(int), p_idx_table, 0, NULL, NULL);
 
-	
 //	static double elapsed_time = 0.0;
 	cl_event prof_event;
 	

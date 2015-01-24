@@ -74,7 +74,7 @@ void test(LTE_PHY_PARAMS *lte_phy_params)
 
 //	test_demod(lte_phy_params, lte_phy_params->mod_type);
 	test_demod(lte_phy_params, 2);
-//	check();
+	check();
 
 #endif
 }

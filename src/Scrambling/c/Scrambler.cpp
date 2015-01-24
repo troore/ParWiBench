@@ -2,6 +2,9 @@
 //#include "Scrambler.h"
 #include "lte_phy.h"
 
+#include <stdio.h>
+#include "timer/meas.h"
+
 void GenScrambInt(int *pScrambInt, int n)
 {
 	int i;
@@ -22,7 +25,7 @@ void GenScrambInt(int *pScrambInt, int n)
 	
 	for (i = 0; i < n + N_c - 31; i++)
 	{
-		px1[i + 31] =(px1[i + 3] + px1[i]) % 2;
+		px1[i + 31] = (px1[i + 3] + px1[i]) % 2;
 		px2[i + 31] = (px2[i + 3] + px2[i + 2] + px2[i + 1] + px2[i]) % 2;
 	}
 	for (i = 0; i < n; i++)
@@ -36,13 +39,15 @@ void GenScrambInt(int *pScrambInt, int n)
 void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 {
 	int n_inp;
-	int scramb_seq_int[N_SCRAMB_IN_MAX];
+//	int scramb_seq_int[N_SCRAMB_IN_MAX];
+	int *scramb_seq_int;
 
 	int i;
 
 	n_inp = lte_phy_params->scramb_in_buf_sz;
 
-	GenScrambInt(scramb_seq_int, n_inp);
+//	GenScrambInt(scramb_seq_int, n_inp);
+	scramb_seq_int = lte_phy_params->scramb_seq_int;
 
 	////////////////////////Scrambling////////////////////////////
 	for (i = 0; i < n_inp; i++)
@@ -56,14 +61,16 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq)
 {
 	int n_inp;
-	float scramb_seq_float[N_SCRAMB_IN_MAX];
-	int scramb_seq_int[N_SCRAMB_IN_MAX];
+//	float scramb_seq_float[N_SCRAMB_IN_MAX];
+//	int scramb_seq_int[N_SCRAMB_IN_MAX];
+	int *scramb_seq_int;
 
 	int i;
 
 	n_inp = lte_phy_params->scramb_in_buf_sz;
 	// Generate integer scrambling sequence
-	GenScrambInt(scramb_seq_int, n_inp);
+//	GenScrambInt(scramb_seq_int, n_inp);
+	scramb_seq_int = lte_phy_params->scramb_seq_int;
 
 	/*
 	for (i = 0; i < n_inp; i++)

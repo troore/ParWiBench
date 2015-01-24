@@ -4,11 +4,13 @@
 #include "opencl/clutil.h"
 #include "timer/meas.h"
 
+#include "test.h"
+
 #define PROGRAM_FILE "scrambler.ocl"
 #define SCR_KERNEL_FUNC "scrambler"
 #define DESCR_KERNEL_FUNC "descrambler"
 
-inline static void GenScrambInt(int *pScrambInt, int n)
+void GenScrambInt(int *pScrambInt, int n)
 {
 	int i;
 	int N_c = 1600;
@@ -54,18 +56,14 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 	size_t global_size, local_size;
 
 	int n;
-	int scramb_seq_int[N_SCRAMB_IN_MAX];
+//	int scramb_seq_int[N_SCRAMB_IN_MAX];
+	int *scramb_seq_int;
 
 	
-//	double tstart, tstop, ttime;
-//	tstart = dtime();
-	// Generate integer scrambling sequence
-	GenScrambInt(scramb_seq_int, n);
-//	tstop = dtime();
-
-//	ttime = tstop - tstart;
-
-//	printf("Elapsed time of GenScrambInt is %lfms\n", ttime);
+//	GenScrambInt(scramb_seq_int, n);
+	
+	n = lte_phy_params->scramb_in_buf_sz;
+	scramb_seq_int = lte_phy_params->scramb_seq_int;
 
 //	int i;
 
@@ -75,8 +73,6 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 	program = build_program(&context, &device, PROGRAM_FILE);
 	kernel = clCreateKernel(program, SCR_KERNEL_FUNC, &_err);
 	queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &_err);
-
-	n = lte_phy_params->scramb_in_buf_sz;
 
 	/* Create buffers*/
 	input_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, n * sizeof(int), NULL, &_err);
@@ -92,14 +88,14 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 	_err |= clSetKernelArg(kernel, 4, sizeof(int), &n_iters);
 
 
-	global_size = n;
+//	global_size = n;
+	global_size = 1024;
 	local_size = 32;
 
 	double elapsed_time = 0.0;
 
-	for (int k = 0; k < 100000; k++) {
+	for (int k = 0; k < 1; k++) {
 	cl_event prof_event;
-
 		
 	_err = clEnqueueWriteBuffer(queue, input_buffer, CL_TRUE, 0, n * sizeof(int), pInpSeq, 0, NULL, NULL);
 	_err = clEnqueueWriteBuffer(queue, scramb_buffer, CL_TRUE, 0, n * sizeof(int), scramb_seq_int, 0, NULL, NULL);
@@ -154,7 +150,8 @@ void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq
 
 
 	int n;
-	int scramb_seq_int[N_SCRAMB_IN_MAX];
+//	int scramb_seq_int[N_SCRAMB_IN_MAX];
+	int *scramb_seq_int;
 
 	int i;
 
@@ -163,7 +160,7 @@ void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, &_err);
 	program = build_program(&context, &device, PROGRAM_FILE);
 	kernel = clCreateKernel(program, DESCR_KERNEL_FUNC, &_err);
-	queue = clCreateCommandQueue(context, device, 0, &_err);
+	queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &_err);
 
 	n = lte_phy_params->scramb_in_buf_sz;
 
@@ -179,24 +176,48 @@ void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq
 	_err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &scramb_buffer);
 	_err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &output_buffer);
 	_err |= clSetKernelArg(kernel, 3, sizeof(int), &n);
+	int n_iters = 100000;
+	_err |= clSetKernelArg(kernel, 4, sizeof(int), &n_iters);
 
 	// Generate integer scrambling sequence
-	GenScrambInt(scramb_seq_int, n);
+//	GenScrambInt(scramb_seq_int, n);
+	scramb_seq_int = lte_phy_params->scramb_seq_int;
 
-	/*
-	 * kernel
-	for (i = 0; i < n_inp; i++)
-	{
-		pOutSeq[i] = (pInpSeq[i] * (scramb_seq_int[i] * (-2.0) + 1.0));
-	}
-	*/
+//	printf("%d\n", n);
+//	printf("%d\n", CL_DEVICE_MAX_WORK_ITEM_SIZES); // 4101
+	global_size = 8192;
+	local_size = 128;
+
+	double elapsed_time = 0.0;
+	
+	for (int k = 0; k < 1; k++) {
+		cl_event prof_event;
 	_err = clEnqueueWriteBuffer(queue, input_buffer, CL_TRUE, 0, n * sizeof(float), pInpSeq, 0, NULL, NULL);
 	_err = clEnqueueWriteBuffer(queue, scramb_buffer, CL_TRUE, 0, n * sizeof(int), scramb_seq_int, 0, NULL, NULL);
 
-	global_size = n;
-	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
+	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, &local_size/*NULL*/, 0, NULL, /*NULL*/&prof_event);
+
+	cl_ulong ev_start_time = (cl_ulong)0;
+	cl_ulong ev_end_time = (cl_ulong)0;
+	clFinish(queue);
+
+	_err = clWaitForEvents(1, &prof_event);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ev_start_time, NULL);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ev_end_time, NULL);
 
 	_err = clEnqueueReadBuffer(queue, output_buffer, CL_TRUE, 0, n * sizeof(float), pOutSeq, 0, NULL, NULL);
+
+	elapsed_time = elapsed_time + (double)(ev_end_time - ev_start_time) / 1000000.0;
+	}
+
+	double n_gflops, gflops;
+	
+	n_gflops = n_iters * gflop_counter(lte_phy_params);
+	gflops = (n_gflops * 10e3) / elapsed_time;
+	
+	printf("Elapsed time of kernel is: %lfms\n", elapsed_time);
+	printf("Number of gflops = %lf\n", n_gflops);
+	printf("GFlops = %lf\n", gflops);
 
 //	cl_params_release();
 	clReleaseMemObject(input_buffer);

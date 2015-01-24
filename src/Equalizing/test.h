@@ -7,5 +7,5 @@
 void test(LTE_PHY_PARAMS *lte_phy_params);
 void test_equalizer(LTE_PHY_PARAMS *lte_phy_params);
 void check();
-
+double gflop_counter(LTE_PHY_PARAMS *lte_phy_params);
 #endif

@@ -6,6 +6,7 @@
 #include "timer/meas.h"
 #include "check/check.h"
 #include "ResMapper.h"
+#include "refs/dmrs.h"
 
 void test_SCMapper(LTE_PHY_PARAMS *lte_phy_params)
 {
@@ -18,6 +19,7 @@ void test_SCMapper(LTE_PHY_PARAMS *lte_phy_params)
 
 //	SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in_real, lte_phy_params->resm_in_imag, lte_phy_params->resm_out_real, lte_phy_params->resm_out_imag);
 
+	geneDMRS(lte_phy_params->DMRS, lte_phy_params->N_tx_ant, lte_phy_params->N_dft_sz);
 	SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in, lte_phy_params->resm_out);
 
 	WriteOutputToFiles(lte_phy_params->resm_out, lte_phy_params->resm_out_buf_sz, "../testsuite/testSubCarrierMapOutputReal", "../testsuite/testSubCarrierMapOutputImag");

@@ -245,6 +245,14 @@ int main(int argc, char *argv[])
 
 	fprintf(f, "%.4f\t#active time [s]\n", activetime);
 	fprintf(f, "%.4f\t#active energy [J]\n", activeenergy);
+	if ((activetime - 5e-7) > 0.0) 
+	{
+		fprintf(f, "%.4f\t#power [W]\n", activeenergy / activetime);
+	}
+	else
+	{
+		fprintf(f, "No Energy, No Power.\n");
+	}
 
 	fprintf(f, "\ntime [s]\tpower [W]\ttrue power [W]\n");
 	for (i = 1; i < samples; i++) {

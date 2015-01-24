@@ -1,16 +1,16 @@
 
 __kernel void scrambler(__global int *pInpSeq, __global int *pScrambSeq, __global int *pOutSeq, int n, int n_iters)
 {
-	int work_items_num = get_global_size(0);
-	int task_num = (n + work_items_num - 1) / work_items_num;
+	int work_num_items = get_global_size(0);
+	int num_tasks = (n + work_num_items - 1) / work_num_items;
 	int g_id = get_global_id(0);
 	int i, k;
 
 	for (k = 0; k < n_iters; k++)
 	{
-		for (i = 0; i < task_num; i++)
+		for (i = 0; i < num_tasks; i++)
 		{
-			int task_id = i * work_items_num + g_id;
+			int task_id = i * work_num_items + g_id;
 
 			if (task_id < n)
 				pOutSeq[task_id] = (pInpSeq[task_id] + pScrambSeq[task_id]) % 2;
@@ -18,22 +18,24 @@ __kernel void scrambler(__global int *pInpSeq, __global int *pScrambSeq, __globa
 	}
 }
 
-__kernel void descrambler(__global float *pInpSeq, __global int *pScrambSeq, __global float *pOutSeq, int n)
+__kernel void descrambler(__global float *pInpSeq, __global int *pScrambSeq, __global float *pOutSeq, int n, int n_iters)
 {
-	int work_items_num = get_global_size(0);
-	int task_num = (n + work_items_num - 1) / work_items_num;
+	int work_num_items = get_global_size(0);
+	int num_tasks = (n + work_num_items - 1) / work_num_items;
 	int g_id = get_global_id(0);
 	int i;
 
 //	printf("%d\n", work_items_num);
 
-	for (i = 0; i < task_num; i++)
+	for (int k = 0; k < n_iters; k++) {
+	for (i = 0; i < num_tasks; i++)
 	{
-		int task_id = i * work_items_num + g_id;
+		int task_id = i * work_num_items + g_id;
 
 		if (task_id < n)
 		{
 			pOutSeq[task_id] = (pInpSeq[task_id] * (pScrambSeq[task_id] * (-2.0) + 1.0));
 		}
+	}
 	}
 }

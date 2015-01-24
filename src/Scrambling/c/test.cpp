@@ -8,10 +8,13 @@
 #include "Scrambler.h"
 #include "timer/meas.h"
 #include "check/check.h"
+#include "test.h"
 
+#ifdef _RAPL
 extern "C" {
 #include "papi-rapl/rapl_power.h"
 }
+#endif
 
 
 void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
@@ -21,14 +24,16 @@ void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 //	ReadInputFromFiles(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "../testsuite/ScrambleInput");
 	GeneRandomInput(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "../testsuite/RandomScrambleInput");
 
-//	double tstart, tend, ttime;
+	GenScrambInt(lte_phy_params->scramb_seq_int, lte_phy_params->scramb_in_buf_sz);
+	
+	double tstart, tend, ttime;
 
 //	tstart = dtime();
-	rapl_power_start();
-	for (int i = 0; i < 1000; i++) {
-		Scrambling(lte_phy_params, lte_phy_params->scramb_in, lte_phy_params->scramb_out);
-	}
-	rapl_power_stop();
+
+//	for (int i = 0; i < 1; i++) {
+	Scrambling(lte_phy_params, lte_phy_params->scramb_in, lte_phy_params->scramb_out);
+//	}
+
 //	tend = dtime();
 //	ttime = tend - tstart;
 //	printf("%fms\n", ttime);
@@ -49,6 +54,8 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 
 	ReadInputFromFiles(lte_phy_params->descramb_in, lte_phy_params->descramb_in_buf_sz, "../testsuite/testScrambleOutput");
 //	ReadInputFromFiles(rx_scramb_in, in_buf_sz, "testScrambleOutput");
+
+	GenScrambInt(lte_phy_params->scramb_seq_int, lte_phy_params->descramb_in_buf_sz);
 	
 	for (i = 0; i < lte_phy_params->descramb_in_buf_sz; i++)
 	{
@@ -57,7 +64,33 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 		else
 			rx_scramb_in[i] = 1.0;
 	}
-	Descrambling(lte_phy_params, rx_scramb_in, rx_scramb_out);
+
+#ifdef _RAPL
+	rapl_power_start();
+#else
+	
+	double tstart, tend, ttime;
+	double n_gflops, gflops;
+
+	tstart = dtime();
+#endif
+
+	int n_iters = 1000;
+	for (i = 0; i < n_iters; i++) {
+		Descrambling(lte_phy_params, rx_scramb_in, rx_scramb_out);
+	}
+	
+#ifndef _RAPL
+	tend = dtime();
+	ttime = tend - tstart;
+	n_gflops = n_iters * gflop_counter(lte_phy_params);
+	gflops = (n_gflops * 10e3) / ttime;
+	printf("%fms\n", ttime);
+	printf("Number of gflops = %lf\n", n_gflops);
+	printf("GFlops = %lf\n", gflops);
+#else
+	rapl_power_stop();
+#endif
 
 	for (i = 0; i < lte_phy_params->descramb_out_buf_sz; i++)
 	{
@@ -93,4 +126,13 @@ void test(LTE_PHY_PARAMS *lte_phy_params)
 	test_descrambling(lte_phy_params);
 	check();
 //#endif
+}
+
+double gflop_counter(LTE_PHY_PARAMS *lte_phy_params)
+{
+	double cnter = 0.0;
+
+	cnter = ((double)lte_phy_params->scramb_in_buf_sz) * 3.0;
+
+	return 1.0e-9 * cnter;
 }

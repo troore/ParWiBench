@@ -189,6 +189,7 @@ typedef struct
 	int scramb_out[N_SCRAMB_OUT_MAX];
 	float descramb_in[N_SCRAMB_IN_MAX];
 	float descramb_out[N_SCRAMB_OUT_MAX];
+	int scramb_seq_int[N_SCRAMB_IN_MAX];
 	int scramb_in_buf_sz;
 	int scramb_out_buf_sz;
 	int descramb_in_buf_sz;
@@ -288,6 +289,9 @@ typedef struct
 	float eq_in_imag[N_EQ_IN_MAX];
 	float eq_out_real[N_EQ_OUT_MAX];
 	float eq_out_imag[N_EQ_OUT_MAX];
+	float DMRS[2 * LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX * 2];
+	float DMRSReal[LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX * 2];
+	float DMRSImag[LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX * 2];
 	int eq_in_buf_sz;
 	int eq_out_buf_sz;
 

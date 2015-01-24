@@ -23,10 +23,11 @@ void FDLSEqualization(float *pInpDataReal, float *pInpDataImag,
 					  int NumULSymbSF,
 					  float *pOutDataReal, float *pOutDataImag);
 
-void LSFreqDomain(float *pInpData, float *pOutData, int MDFT, int NumLayer, int NumRxAyntenna, int NumULSymbSF);
+void LSFreqDomain(float *pInpData, float *pOutData, int MDFT, int NumLayer, int NumRxAyntenna, int NumULSymbSF, float *pDMRS);
 void LSFreqDomain(float *pInpDataReal, float *pInpDataImag,
 				  float *pOutDataReal, float *pOutDataImag,
-				  int MDFT, int NumLayer, int NumRxAntenna, int NumULSymbSF);
+				  int MDFT, int NumLayer, int NumRxAntenna, int NumULSymbSF,
+				  float *pDMRSReal, float *pDMRSImag);
 
 void Equalizing(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOutData);
 void Equalizing(LTE_PHY_PARAMS *lte_phy_params,
