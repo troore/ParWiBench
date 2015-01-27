@@ -1,16 +1,14 @@
-
+#include <omp.h>
 #include "Modulation.h"
-#define LEN16 16
-#include <immintrin.h>
+#include "util.h"
 
 static const float INF = 1.0e9;
 
-float BPSK_table[2][2];
-float QPSK_table[4][2];
+float BPSK_table[2][2]; float QPSK_table[4][2];
 float QAM16_table[16][2];
 float QAM64_table[64][2];
 
-void init_mod_tables()
+static void init_mod_tables()
 {
 	int i, j;
 	
@@ -154,7 +152,7 @@ void init_mod_tables()
  * n: width of bit sequence
  * bvec: vector to contain the sequence
  */
-void dec2bits(int i, int n, int *bvec)
+static void dec2bits(int i, int n, int *bvec)
 {
 	int j;
 	
@@ -165,7 +163,7 @@ void dec2bits(int i, int n, int *bvec)
 	}
 }
 
-void set_mod_params(/*float (*mod_table)[2]*/ p_a *pp_table, int *bits_per_samp, int *mod_table_len, int mod_type)
+static void set_mod_params(/*float (*mod_table)[2]*/ p_a *pp_table, int *bits_per_samp, int *mod_table_len, int mod_type)
 {
 	init_mod_tables();
 
@@ -193,7 +191,7 @@ void set_mod_params(/*float (*mod_table)[2]*/ p_a *pp_table, int *bits_per_samp,
 		break;
 	case LTE_QAM64:
 		*pp_table = &QAM64_table[0];
-		*bits_per_samp = QAM16_BITS_PER_SAMP;
+		*bits_per_samp = QAM64_BITS_PER_SAMP;
 		*mod_table_len = QAM64_TABLE_LEN;
 		break;
 	default:
@@ -203,7 +201,7 @@ void set_mod_params(/*float (*mod_table)[2]*/ p_a *pp_table, int *bits_per_samp,
 	}
 }
 
-void Modulating_cplx(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex<float> *pModedSeq, int mod_type)
+void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex<float> *pModedSeq, int mod_type)
 {
 	float I, Q;
 	float (*p_table)[2];
@@ -230,7 +228,37 @@ void Modulating_cplx(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex
 	}
 }
 
-float vecmin(float* pV, int len)
+void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, float *pModedSeq, int mod_type)
+{
+	float I, Q;
+	float (*p_table)[2];
+	int bits_per_samp;
+	int mod_table_len;
+	int n_samp, b, idx;
+	int in_buf_sz;
+	int out_buf_sz;
+
+	in_buf_sz = lte_phy_params->mod_in_buf_sz;
+	out_buf_sz = lte_phy_params->mod_out_buf_sz;
+
+	set_mod_params(&p_table, &bits_per_samp, &mod_table_len, mod_type);
+
+	for (n_samp = 0; n_samp < (in_buf_sz / bits_per_samp); n_samp++)
+	{
+		idx = 0;
+		for (b = 0; b < bits_per_samp; b++)
+		{
+			idx += pBitsSeq[n_samp * bits_per_samp + b] * /* pow(2.0, (float)(bits_per_samp - 1 - b)) */ (1 << (bits_per_samp - 1 - b));
+		}
+		I = p_table[idx][0];
+		Q = p_table[idx][1];
+		
+		pModedSeq[n_samp] = I;
+		pModedSeq[n_samp + out_buf_sz] = Q;
+	}
+}
+
+static float vecmin(float* pV, int len)
 {
 	float minValue = INF;
 	int i;
@@ -251,7 +279,7 @@ float vecmin(float* pV, int len)
 /*
  * Euclidean distance of two complex values: a+bi and c+di
  */
-float eudist(float a, float b, float c, float d)
+static float eudist(float a, float b, float c, float d)
 {
 	return sqrt((a - c) * (a - c) + (b - d) * (b - d));
 }
@@ -313,14 +341,7 @@ void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, 
 	/* End demodulation*/
 }
 
-#ifdef __MIC__
-typedef __attribute__((aligned(64))) union zmmf {
-	__m512 reg;
-	float elems[LEN16];
-} zmmf_t;
-#endif
-
-void _Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, int mod_type, float awgnSigma)
+void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, float *pLLR, int mod_type, float awgnSigma)
 {
 
 	float No = 2.0 * (pow(awgnSigma, 2.0));
@@ -329,11 +350,13 @@ void _Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, 
 	int mod_table_len;
 
 	int idx_table[MAX_MOD_TABLE_LEN][MAX_MOD_BITS_PER_SAMP];
-	float metric[MAX_MOD_TABLE_LEN],metric_[MAX_MOD_TABLE_LEN][16];
-	float metric_set[2][(MAX_MOD_TABLE_LEN / 2)],metric_set_[2][(MAX_MOD_TABLE_LEN / 2)][16];
+	float metric[MAX_MOD_TABLE_LEN];
+	float metric_set[2][(MAX_MOD_TABLE_LEN / 2)];
 
 	int in_buf_sz;
-	int i, j, k, jj;
+
+	int i, j, k;
+
 	in_buf_sz = lte_phy_params->demod_in_buf_sz;
 
 	set_mod_params(&p_table, &bits_per_samp, &mod_table_len, mod_type);
@@ -358,140 +381,128 @@ void _Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, 
 			b--;
 		}
 	}
-	for (i = 0; i < in_buf_sz-LEN16; i+=LEN16)
+	
+	for (i = 0; i < in_buf_sz; i++)
 	{
-		zmmf_t a0,a1,b0,b1,tmp1,tmp2,tmp3,result;
 		for(j = 0; j < mod_table_len; j++)
 		{
-			a0.elems[0:16] = pDecSeq[i:16];
-			a1.elems[0:16] = pDecSeq[i+N_MOD_OUT_MAX:16];
-			for(int ii=0;ii<16;ii++)
-			{
-				printf("%f ", pDecSeq[i+ii]);
-				b0.elems[ii] = p_table[j][0];
-				b1.elems[ii] = p_table[j][1];
-			}
-			tmp1.reg = _mm512_sub_ps(a0.reg,b0.reg);
-			tmp2.reg = _mm512_sub_ps(a1.reg,b1.reg);
-			tmp3.reg = _mm512_mul_ps(tmp1.reg,tmp1.reg);
-			result.reg = _mm512_fmadd_ps(tmp2.reg,tmp2.reg,tmp3.reg);
-			metric_[j][0:16] = result.elems[0:16];
-/*			for(int ii=0;ii<16;ii++)
-			{
-            			metric_[ii][j] = pow(abs((std::complex<float>(pDecSeq_0[ii], pDecSeq_1[ii]) - (std::complex<float>(p_table[j][0], p_table[j][1])))), 2.0);
-				if(abs(metric_[ii][j]-(pDecSeq_0[ii]-p_table[j][0])*(pDecSeq_0[ii]-p_table[j][0]) - (pDecSeq_1[ii]-p_table[j][1])*(pDecSeq_1[ii]-p_table[j][1]))>0.0001) printf("right!\n");
-				if(abs(result.elems[ii]-metric_[ii][j])>0.0001) printf("wrong!\n");
-			}
-*/		}
+			metric[j] = pow(abs((pDecSeq[i] - (std::complex<float>(p_table[j][0], p_table[j][1])))), 2.0);
+		}
 
 		for (j = 0; j < bits_per_samp; j++)
 		{
-			float min0[16], min1[16];
+			float min0, min1;
 			int idx[2]={0,0};
-           // idx0[0:16] = zero_i[0:16];
-           // idx1[0:16] = zero_i[0:16];
+		       
+
 			for (k = 0; k < mod_table_len; k++)
 			{
-			//	if(idx_table[k][j] == 0)
-				{
-                    metric_set_[idx_table[k][j]][idx[idx_table[k][j]]][0:16] = metric_[k][0:16];
-                    idx[idx_table[k][j]]++;
-				}
-	/*			else
-				{
-                    metric_set_[0:16][1][idx1] = metric_[0:16][k];
-                    idx1++;
-				}
-	*/		}
-//printf("2 ");
-			zmmf_t min_0,min_1;
-			min_0.elems[0:16] = metric_set_[0][0][0:16];
-			min_1.elems[0:16] = metric_set_[1][0][0:16];
-			for(jj=1;jj<mod_table_len / 2;jj++)
-			{
-			    zmmf_t tmpp0,tmpp1,tmpp2,tmpp3;
-			    tmpp0.elems[0:16] = metric_set_[0][jj][0:16];
-			    tmpp1.elems[0:16] = metric_set_[1][jj][0:16];
-		            tmpp2.reg = _mm512_gmin_ps(tmpp0.reg, min_0.reg);
-		            tmpp3.reg = _mm512_gmin_ps(tmpp1.reg, min_1.reg);
-			    min_0.reg = tmpp2.reg;
-			    min_1.reg = tmpp3.reg;
+				
+					metric_set[idx_table[k][j]][idx[idx_table[k][j]]] = metric[k];
+					idx[idx_table[k][j]]++;
 			}
-/*			if(i==0) 
+
+			min0 = vecmin(metric_set[0], mod_table_len / 2);
+			min1  = vecmin(metric_set[1], mod_table_len / 2);
+
+			if (No == (float)0)
 			{
-				float min__=INF,min1__=INF;
-				for(jj=0;jj<mod_table_len/2;jj++)
-				{
-					printf("%f %f\n",metric_set_[0][jj][0],metric_set_[1][jj][0]);
-					if(metric_set_[0][jj][0]<min__)
-						min__ = metric_set_[0][jj][0];
-					if(metric_set_[1][jj][0]<min1__)
-		                                min1__ = metric_set_[1][jj][0];
-				}
-				printf("\n%f xx %f\n",min__,min1__);
-				printf("%f yy %f\n",min_0.elems[0],min_1.elems[0]);
-			}
-	min0[0:16] = vecmin(metric_set_[0][0:16], mod_table_len / 2);
-	min1[0:16]  = vecmin(metric_set_[1][0:16], mod_table_len / 2);
-	for(j=0;j<16;j++)
-		if(min0[j]!=min_0.elems[j]) 1;//printf("0 wrong\n");
-		else if(min1[j]!=min_1.elems[j]) 1;//printf("1 wrong\n");
-		else printf("right %d\n",j);
-*/			if (No == (float)0)
-			{
-//				printf("a\n");
-				for(int ii=0;ii<16;ii++)
-  			              pLLR[(i+ii) * bits_per_samp + j] = (min_0.elems[ii] - min_1.elems[ii]);
+				pLLR[i * bits_per_samp + j] = (min0 - min1);
 			}
 			else
 			{
-//				printf("b\n");
-				for(int ii=0;ii<16;ii++)
-        			        pLLR[(i+ii) * bits_per_samp + j] = (min_0.elems[ii] - min_1.elems[ii]) / No;
+				pLLR[i * bits_per_samp + j] = (min0 - min1) / No;
 			}
-//		printf("3 ");
 		}
 	}
-//printf("ok");    
-    for (; i < in_buf_sz; i++)
-    {
-        for(j = 0; j < mod_table_len; j++)
-        {
-            metric[j] = pow(abs((std::complex<float>(pDecSeq[i], pDecSeq[i+N_MOD_OUT_MAX]) - (std::complex<float>(p_table[j][0], p_table[j][1])))), 2.0);
-        }
-        
-        for (j = 0; j < bits_per_samp; j++)
-        {
-            float min0, min1;
-            int idx0 = 0, idx1 = 0;
-            
-            for (k = 0; k < mod_table_len; k++)
-            {
-                if(idx_table[k][j] == 0)
-                {
-                    metric_set[0][idx0] = metric[k];
-                    idx0++;
-                }
-                else
-                {
-                    metric_set[1][idx1] = metric[k];
-                    idx1++;
-                }
-            }
-            
-            min0 = vecmin(metric_set[0], mod_table_len / 2);
-            min1  = vecmin(metric_set[1], mod_table_len / 2);
-            
-            if (No == (float)0)
-            {
-                pLLR[i * bits_per_samp + j] = (min0 - min1);
-            }
-            else
-            {
-                pLLR[i * bits_per_samp + j] = (min0 - min1) / No;
-            	//if(i==0) printf("%f rr %f\n",min0,min1);
-	    }
-        }
-    }
+}
+
+
+void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, int mod_type, float awgnSigma)
+{
+
+	float No = 2.0 * (pow(awgnSigma, 2.0));
+	float (*p_table)[2];
+	int bits_per_samp;
+	int mod_table_len;
+
+	int idx_table[MAX_MOD_TABLE_LEN][MAX_MOD_BITS_PER_SAMP];
+	float metric[MAX_MOD_TABLE_LEN];
+	float metric_set[2][(MAX_MOD_TABLE_LEN / 2)];
+
+	int in_buf_sz;
+//	int out_buf_sz;
+
+	int i, j, k;
+
+	in_buf_sz = lte_phy_params->demod_in_buf_sz;
+//	out_buf_sz = lte_phy_params->demod_out_buf_sz;
+
+	set_mod_params(&p_table, &bits_per_samp, &mod_table_len, mod_type);
+	
+	for (i = 0; i < mod_table_len; i++)
+	{
+		for (j = 0; j < bits_per_samp; j++)
+		{
+			idx_table[i][j] = 0;
+		}
+	}
+	for (i = 0; i < mod_table_len; i++)
+	{ 
+ 
+		int idx_val = i;
+		int b = bits_per_samp - 1;
+		
+		while (idx_val)
+		{
+			idx_table[i][b] = idx_val % 2;
+			idx_val /= 2;
+			b--;
+		}
+	}
+
+	omp_set_num_threads(num_threads);
+#pragma omp parallel
+	{
+		//	printf("tid=%d\n", omp_get_thread_num());
+#pragma omp for private(i, j, k, metric, metric_set)
+		for (i = 0; i < in_buf_sz; i++)
+		{
+//			#pragma omp barrier
+			for(j = 0; j < mod_table_len; j++)
+			{
+				float tmp[2];
+				//	metric[j] = pow(abs((pDecSeq[i] - (std::complex<float>(p_table[j][0], p_table[j][1])))), 2.0);
+				tmp[0] = pDecSeq[i] - p_table[j][0];
+				tmp[1] = pDecSeq[i + in_buf_sz] - p_table[j][1];
+				metric[j] = tmp[0] * tmp[0] + tmp[1] * tmp[1];
+			}
+
+			for (j = 0; j < bits_per_samp; j++)
+			{
+				float min0, min1;
+				int idx[2]={0,0};
+
+				for (k = 0; k < mod_table_len; k++)
+				{
+				
+					metric_set[idx_table[k][j]][idx[idx_table[k][j]]] = metric[k];
+					idx[idx_table[k][j]]++;
+				}
+
+				min0 = vecmin(metric_set[0], mod_table_len / 2);
+				min1 = vecmin(metric_set[1], mod_table_len / 2);
+
+				if (No == (float)0)
+				{
+					pLLR[i * bits_per_samp + j] = (min0 - min1);
+				}
+				else
+				{
+					pLLR[i * bits_per_samp + j] = (min0 - min1) / No;
+				}
+			}
+		}
+	}
 }
 

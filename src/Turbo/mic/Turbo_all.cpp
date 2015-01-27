@@ -91,12 +91,12 @@ int TURBO_INT_F2_TABLE[TURBO_INT_K_TABLE_SIZE] = { 10, 12, 42, 16, 18, 20, 22, 2
 												   182,184,186, 94,190,480};
 */
 
-float max_log(float a, float b)
+__forceinline float max_log(float a, float b)
 {
 	return (a > b) ? a : b;
 }
 
-void set_generator_polynomials(int *gens, int n_gens, int constraint_length)
+__forceinline void set_generator_polynomials(int *gens, int n_gens, int constraint_length)
 {
 	int i, j;
 	int K = constraint_length;
@@ -141,7 +141,7 @@ void set_generator_polynomials(int *gens, int n_gens, int constraint_length)
 
 //void internal_interleaver(int in[BLOCK_SIZE], int out[BLOCK_SIZE], int m)
 template <typename T>
-void internal_interleaver(T *in, T *out, int m)
+__forceinline void internal_interleaver(T *in, T *out, int m)
 {
     int i;
     int f1 = 0;
@@ -183,7 +183,7 @@ void internal_interleaver(T *in, T *out, int m)
 }
 
 
-void internal_interleaver_(float *in, float *out, int m)
+__forceinline void internal_interleaver_(float *in, float *out, int m)
 {
 	int ii,i;
 	int f1 = 0;
@@ -245,7 +245,7 @@ void internal_interleaver_(float *in, float *out, int m)
 
 //void internal_deinterleaver(int in[BLOCK_SIZE], int out[BLOCK_SIZE], int m)
  template <typename T>
- void internal_deinterleaver(T *in, T *out, int m)
+__forceinline void internal_deinterleaver(T *in, T *out, int m)
 {
     int i;
     int f1 = 0;
@@ -279,7 +279,7 @@ void internal_interleaver_(float *in, float *out, int m)
 }
 
 
-void internal_deinterleaver(float *in, float *out, int m)
+__forceinline void internal_deinterleaver(float *in, float *out, int m)
 {
 	int ii,i;
 	int f1 = 0;
@@ -333,7 +333,7 @@ void internal_deinterleaver(float *in, float *out, int m)
 }
 
 
-void constituent_encoder(int *input, int input_len, int *tail, int *parity)
+__forceinline void constituent_encoder(int *input, int input_len, int *tail, int *parity)
 {
 	int i, j;
 	int encoder_state = 0, target_state;
@@ -485,7 +485,7 @@ void turbo_encoding(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 	}
 }
 
-void encode_block(int *input_bits,
+__forceinline void encode_block(int *input_bits,
 		int *interleaved_input_bits,
 		int *parity1, 
 		int *tail1,
@@ -511,7 +511,7 @@ void encode_block(int *input_bits,
 }
 
 
-int calc_state_transition(int instate, int input, int *parity)
+__forceinline int calc_state_transition(int instate, int input, int *parity)
 {
 	int in = 0;
 	int temp = (g_gen_pols[0] & instate), parity_temp, parity_bit;
@@ -539,7 +539,7 @@ int calc_state_transition(int instate, int input, int *parity)
 	return (in << (CST_LEN - 2) | (instate >> 1)) & ((1 << (CST_LEN - 1)) - 1);
 }
 
-int reverse_int(int length, int in)
+__forceinline int reverse_int(int length, int in)
 {
 	int out = 0;
 	int i, j;
@@ -637,7 +637,7 @@ void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, int *pOutBi
 }
 
 
-void decode_block(float *recv_syst1, 
+__forceinline void decode_block(float *recv_syst1, 
 		float *recv_syst2,
 		float *recv_parity1,
 		float *recv_parity2,
@@ -890,7 +890,7 @@ void log_decoder(float *recv_syst,
 }*/
 
 
-void log_decoder(float *recv_syst,
+__forceinline void log_decoder(float *recv_syst,
 		float *recv_parity,
 		float *apriori,
 		float *extrinsic,
@@ -910,7 +910,6 @@ void log_decoder(float *recv_syst,
 //	memset(beta,0,sizeof(beta));
 //	memset(denom,0,sizeof(denom));
 	Lc = 1.0;
-	com_log = max_log;
 	int m,jj,id,num_threads=236,sum=0,quotient=0,remain=0;
 	sum = block_length + 1;
 	quotient = sum / num_threads;
@@ -1042,7 +1041,7 @@ void log_decoder(float *recv_syst,
 		for(s = 0; s < N_STATES; s++)
 		{
 			alpha[s + k * N_STATES] = aa.elems[s];//com_log(tt_.elems[s*2+0], tt_.elems[s*2+1]);
-			denom[k] = com_log(alpha[s + k * N_STATES], denom[k]);
+			denom[k] = max_log(alpha[s + k * N_STATES], denom[k]);
 		}
 	// Normalization of alpha
 		for (l = 0; l < N_STATES; l++)
@@ -1168,8 +1167,8 @@ void log_decoder(float *recv_syst,
 						exp_temp1 -= rp;
 					}
 				}
-				nom = com_log(nom, alpha[s_prim_ + kk * N_STATES] + 0.5 * exp_temp0 + beta[s0 + k * N_STATES]);
-				den = com_log(den, alpha[s_prim_ + kk * N_STATES] + 0.5 * exp_temp1 + beta[s1 + k * N_STATES]);
+				nom = max_log(nom, alpha[s_prim_ + kk * N_STATES] + 0.5 * exp_temp0 + beta[s0 + k * N_STATES]);
+				den = max_log(den, alpha[s_prim_ + kk * N_STATES] + 0.5 * exp_temp1 + beta[s1 + k * N_STATES]);
 			}
 			extrinsic[kk] = nom - den;
 			//	std::cout << nom << "\t" << den << std::endl;

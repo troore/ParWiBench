@@ -55,13 +55,13 @@ void GenScrambInt(int *pScrambInt, int n)
 void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 {
 	int n_inp;
-	int scramb_seq_int[N_SCRAMB_IN_MAX];
+	int *scramb_seq_int;
 	int offset,n_threads=236;
 	int i,j;
 	//printf("%d ",n_inp);
 	n_inp = lte_phy_params->scramb_in_buf_sz;
-
-	GenScrambInt(scramb_seq_int, n_inp);
+	scramb_seq_int=lte_phy_params->scramb_seq_int;
+	//GenScrambInt(scramb_seq_int, n_inp);
 
 	////////////////////////Scrambling////////////////////////////
 
@@ -106,37 +106,12 @@ void Scrambling(LTE_PHY_PARAMS *lte_phy_params, int *pInpSeq, int *pOutSeq)
 void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq)
 {
 	int n_inp;
-	float scramb_seq_float[N_SCRAMB_IN_MAX];
-	int scramb_seq_int[N_SCRAMB_IN_MAX];
-
+//	float scramb_seq_float[N_SCRAMB_IN_MAX];
+	int *scramb_seq_int;
 	int i,j;
-	//int offset,n_threads=236;
-	//printf("%d ",n_inp);
 	n_inp = lte_phy_params->scramb_in_buf_sz;
-	// Generate integer scrambling sequence
-	GenScrambInt(scramb_seq_int, n_inp);
-	//cputimer timer;
-	//double tstart = ddtime();
-	//        omp_set_num_threads(236);
-	//        n_threads = omp_get_num_threads();
-		    //    offset = n_inp / n_threads + 1;
-//#ifdef __MIC__
-//#pragma omp parallel for private(j)
-//#pragma omp parallel default(shared) num_threads(n_threads)     
-/*	        for (i = 0; i < n_threads; i++)	
-		{
-			int j_end;
-			if(i!=n_threads-1) j_end=offset*(i+1);
-			else j_end=n_inp;
-			for(j=offset*i;j<j_end;j++)
-				pOutSeq[j] = (pInpSeq[j] * (scramb_seq_int[j] * (-2.0) + 1.0));
-		}
-*/
-//	zmmf_t tmp_zero;
-//	for (i=0;i<16;i++)
-//		tmp_zero.elems[i] = 0;
-//	printf("right\n");
-	for (i = 0; i < n_inp; i+=16)
+	scramb_seq_int=lte_phy_params->scramb_seq_int;
+	for (i = 0; i < n_inp-16; i+=16)
 	{
 		zmmf_t tmp_f,tmp_f2,tmp_result;
 		zmmi_t tmp_i;
@@ -146,7 +121,6 @@ void Descrambling(LTE_PHY_PARAMS *lte_phy_params, float *pInpSeq, float *pOutSeq
 		pOutSeq[i:LEN16] = tmp_result.elems[0:16];
 	}
 
-	i-=16;
 	for(;i<n_inp;i++)
 	{
 		pOutSeq[i] = (pInpSeq[i] * (scramb_seq_int[i] * (-2.0) + 1.0));

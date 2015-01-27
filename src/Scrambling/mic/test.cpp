@@ -16,10 +16,13 @@ void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 	std::cout << "Tx scrambling starts" << std::endl;
 
 //	ReadInputFromFiles(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "../testsuite/ScrambleInput");
+//	GeneRandomInput(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "/home/xblee/ParWiBench/src/Scrambling/testsuite/RandomScrambleInput");
 	GeneRandomInput(lte_phy_params->scramb_in, lte_phy_params->scramb_in_buf_sz, "../testsuite/RandomScrambleInput");
 
+	GenScrambInt(lte_phy_params->scramb_seq_int, lte_phy_params->scramb_in_buf_sz);
 	Scrambling(lte_phy_params, lte_phy_params->scramb_in, lte_phy_params->scramb_out);
 
+//	WriteOutputToFiles(lte_phy_params->scramb_out, lte_phy_params->scramb_out_buf_sz, "/home/xblee/ParWiBench/src/Scrambling/testsuite/testScrambleOutput");
 	WriteOutputToFiles(lte_phy_params->scramb_out, lte_phy_params->scramb_out_buf_sz, "../testsuite/testScrambleOutput");
 
 	std::cout << "Tx scrambling ends" << std::endl;
@@ -34,6 +37,7 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 	float *rx_scramb_out = (float *)malloc(lte_phy_params->descramb_out_buf_sz * sizeof(float));
 	int i;
 
+//	ReadInputFromFiles(lte_phy_params->descramb_in, lte_phy_params->descramb_in_buf_sz, "/home/xblee/ParWiBench/src/Scrambling/testsuite/testScrambleOutput");
 	ReadInputFromFiles(lte_phy_params->descramb_in, lte_phy_params->descramb_in_buf_sz, "../testsuite/testScrambleOutput");
 //	ReadInputFromFiles(rx_scramb_in, in_buf_sz, "testScrambleOutput");
 	
@@ -44,6 +48,7 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 		else
 			rx_scramb_in[i] = 1.0;
 	 }
+	GenScrambInt(lte_phy_params->scramb_seq_int, lte_phy_params->scramb_in_buf_sz);
 	Descrambling(lte_phy_params, rx_scramb_in, rx_scramb_out);
 	double energy,ttime,tbegin;
 	micpower_start();
@@ -63,6 +68,7 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 			lte_phy_params->descramb_out[i] = 0.0;
 	}
 	
+//	WriteOutputToFiles(lte_phy_params->descramb_out, lte_phy_params->descramb_out_buf_sz, "/home/xblee/ParWiBench/src/Scrambling/testsuite/testDescrambleOutput");
 	WriteOutputToFiles(lte_phy_params->descramb_out, lte_phy_params->descramb_out_buf_sz, "../testsuite/testDescrambleOutput");
 	
 	cout << "Rx descrambling ends" << endl;
@@ -70,10 +76,12 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 
 void check()
 {	
-	char tx_in_fname[50];
-	char rx_out_fname[50];
+	char tx_in_fname[100];
+	char rx_out_fname[100];
 	int err_n;
 	
+//	strcpy(tx_in_fname, "/home/xblee/ParWiBench/src/Scrambling/testsuite/RandomScrambleInput");
+//	strcpy(rx_out_fname, "/home/xblee/ParWiBench/src/Scrambling/testsuite/testDescrambleOutput");
 	strcpy(tx_in_fname, "../testsuite/RandomScrambleInput");
 	strcpy(rx_out_fname, "../testsuite/testDescrambleOutput");
 	err_n = check_float(tx_in_fname, rx_out_fname);

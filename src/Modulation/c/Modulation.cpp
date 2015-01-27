@@ -199,7 +199,7 @@ static void set_mod_params(/*float (*mod_table)[2]*/ p_a *pp_table, int *bits_pe
 	}
 }
 
-void Modulating_cplx(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex<float> *pModedSeq, int mod_type)
+void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex<float> *pModedSeq, int mod_type)
 {
 	float I, Q;
 	float (*p_table)[2];
@@ -223,6 +223,36 @@ void Modulating_cplx(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, std::complex
 		Q = p_table[idx][1];
 		
 		pModedSeq[n_samp] = std::complex<float>(I, Q);
+	}
+}
+
+void Modulating(LTE_PHY_PARAMS *lte_phy_params, int *pBitsSeq, float *pModedSeq, int mod_type)
+{
+	float I, Q;
+	float (*p_table)[2];
+	int bits_per_samp;
+	int mod_table_len;
+	int n_samp, b, idx;
+	int in_buf_sz;
+	int out_buf_sz;
+
+	in_buf_sz = lte_phy_params->mod_in_buf_sz;
+	out_buf_sz = lte_phy_params->mod_out_buf_sz;
+
+	set_mod_params(&p_table, &bits_per_samp, &mod_table_len, mod_type);
+
+	for (n_samp = 0; n_samp < (in_buf_sz / bits_per_samp); n_samp++)
+	{
+		idx = 0;
+		for (b = 0; b < bits_per_samp; b++)
+		{
+			idx += pBitsSeq[n_samp * bits_per_samp + b] * /* pow(2.0, (float)(bits_per_samp - 1 - b)) */ (1 << (bits_per_samp - 1 - b));
+		}
+		I = p_table[idx][0];
+		Q = p_table[idx][1];
+		
+		pModedSeq[n_samp] = I;
+		pModedSeq[n_samp + out_buf_sz] = Q;
 	}
 }
 
@@ -252,7 +282,7 @@ static float eudist(float a, float b, float c, float d)
 	return sqrt((a - c) * (a - c) + (b - d) * (b - d));
 }
 
-void Demodulating_cplx(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, int *pHD, int mod_type)
+void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, int *pHD, int mod_type)
 {
 	float dist, mindist;
 	int closest;
@@ -309,7 +339,7 @@ void Demodulating_cplx(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDec
 	/* End demodulation*/
 }
 
-void Demodulating_cplx(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, float *pLLR, int mod_type, float awgnSigma)
+void Demodulating(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDecSeq, float *pLLR, int mod_type, float awgnSigma)
 {
 
 	float No = 2.0 * (pow(awgnSigma, 2.0));
@@ -372,6 +402,88 @@ void Demodulating_cplx(LTE_PHY_PARAMS *lte_phy_params, std::complex<float> *pDec
 
 			min0 = vecmin(metric_set[0], mod_table_len / 2);
 			min1  = vecmin(metric_set[1], mod_table_len / 2);
+
+			if (No == (float)0)
+			{
+				pLLR[i * bits_per_samp + j] = (min0 - min1);
+			}
+			else
+			{
+				pLLR[i * bits_per_samp + j] = (min0 - min1) / No;
+			}
+		}
+	}
+}
+
+
+void Demodulating(LTE_PHY_PARAMS *lte_phy_params, float *pDecSeq, float *pLLR, int mod_type, float awgnSigma)
+{
+
+	float No = 2.0 * (pow(awgnSigma, 2.0));
+	float (*p_table)[2];
+	int bits_per_samp;
+	int mod_table_len;
+
+	int idx_table[MAX_MOD_TABLE_LEN][MAX_MOD_BITS_PER_SAMP];
+	float metric[MAX_MOD_TABLE_LEN];
+	float metric_set[2][(MAX_MOD_TABLE_LEN / 2)];
+
+	int in_buf_sz;
+//	int out_buf_sz;
+
+	int i, j, k;
+
+	in_buf_sz = lte_phy_params->demod_in_buf_sz;
+//	out_buf_sz = lte_phy_params->demod_out_buf_sz;
+
+	set_mod_params(&p_table, &bits_per_samp, &mod_table_len, mod_type);
+	
+	for (i = 0; i < mod_table_len; i++)
+	{
+		for (j = 0; j < bits_per_samp; j++)
+		{
+			idx_table[i][j] = 0;
+		}
+	}
+	for (i = 0; i < mod_table_len; i++)
+	{ 
+ 
+		int idx_val = i;
+		int b = bits_per_samp - 1;
+		
+		while (idx_val)
+		{
+			idx_table[i][b] = idx_val % 2;
+			idx_val /= 2;
+			b--;
+		}
+	}
+	
+	for (i = 0; i < in_buf_sz; i++)
+	{
+		for(j = 0; j < mod_table_len; j++)
+		{
+			float tmp[2];
+			//	metric[j] = pow(abs((pDecSeq[i] - (std::complex<float>(p_table[j][0], p_table[j][1])))), 2.0);
+			tmp[0] = pDecSeq[i] - p_table[j][0];
+			tmp[1] = pDecSeq[i + in_buf_sz] - p_table[j][1];
+			metric[j] = tmp[0] * tmp[0] + tmp[1] * tmp[1];
+		}
+
+		for (j = 0; j < bits_per_samp; j++)
+		{
+			float min0, min1;
+			int idx[2]={0,0};
+
+			for (k = 0; k < mod_table_len; k++)
+			{
+				
+				metric_set[idx_table[k][j]][idx[idx_table[k][j]]] = metric[k];
+				idx[idx_table[k][j]]++;
+			}
+
+			min0 = vecmin(metric_set[0], mod_table_len / 2);
+			min1 = vecmin(metric_set[1], mod_table_len / 2);
 
 			if (No == (float)0)
 			{

@@ -59,7 +59,7 @@ static int read_sysfs_file(long long* counts)
 volatile bool keepAlive = true;
 double passEnergy = 0.0;
 int _50ms_counts=0;
-
+double Energy_thread_time;
 void* recordEnergy(void *arg)
 {
 	int retval = 0;
@@ -72,6 +72,8 @@ void* recordEnergy(void *arg)
 	ts.tv_nsec = 50000000L; // 50 milliseconds
 //	ts.tv_nsec = 50L; // 0.05 usec
 	double energy = 0.0;
+	double tbegin,ttime;
+	tbegin=dtime();
 	while (keepAlive)
 	{
 		//	printf("%d\n", keepAlive);
@@ -80,6 +82,8 @@ void* recordEnergy(void *arg)
 		_50ms_counts++;
 		nanosleep(&ts, NULL);
 	}
+	ttime=dtime();
+	Energy_thread_time=ttime-tbegin;
 //	keepAlive = true;
 	passEnergy = energy;
 //	energy = 0.0;
@@ -98,6 +102,7 @@ double micpower_finalize()
 	keepAlive = false;
 	pthread_join(micPthread, NULL);
 	printf("counts = %d\n",_50ms_counts);
+	printf("Energy_thread_time = %lf\n", Energy_thread_time);
 	// (uw * ms) / 10e-9 = J
 	return (passEnergy * 70.0) / (1000 * 1000 * 1000);
 }

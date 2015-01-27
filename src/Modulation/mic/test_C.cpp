@@ -31,16 +31,15 @@ void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 
 	float awgn_sigma = 0.193649; //this value is for the standard input  see "AWGNSigma"
 
-	ReadInputFromFiles(lte_phy_params->demod_in, lte_phy_params->demod_in_buf_sz, "/home/xblee/ParWiBench/src/Modulation/testsuite/testModulationRandomOutputReal", "/home/xblee/ParWiBench/src/Modulation/testsuite/testModulationRandomOutputImag");
+	ReadInputFromFiles(lte_phy_params->demod_in_cplx, lte_phy_params->demod_in_buf_sz, "/home/xblee/ParWiBench/src/Modulation/testsuite/testModulationRandomOutputReal", "/home/xblee/ParWiBench/src/Modulation/testsuite/testModulationRandomOutputImag");
 
-	_Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
+	Demodulating_cplx(lte_phy_params, lte_phy_params->demod_in_cplx, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
 	double ttime,tbegin,energy;
 	micpower_start();
 	tbegin = dtime();
 
 	for(int i = 0;i < 10000; i++)	
-		_Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
-
+		Demodulating_cplx(lte_phy_params, lte_phy_params->demod_in_cplx, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
 	ttime = dtime();
 	energy = micpower_finalize();
 	printf("Energy used in %lf\n", energy);

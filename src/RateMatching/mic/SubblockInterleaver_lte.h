@@ -51,9 +51,9 @@ static int InterColumnPattern[32] = {0,16,8,24,4,20,12,28,
 
 template <typename T>
 #ifdef DEBUG_INTL
-void SubblockInterleaving(int SeqLen, T **pInpMtr, T **pOutMtr)
+inline void SubblockInterleaving(int SeqLen, T **pInpMtr, T **pOutMtr)
 #else
-void SubblockInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
+inline void SubblockInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 #endif
 {
 	int D;
@@ -342,9 +342,9 @@ void SubblockInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 
 template<typename T>
 #ifdef DEBUG_INTL
-void SubblockDeInterleaving(int SeqLen, T **pInpMtr, T **pOutMtr)
+inline void SubblockDeInterleaving(int SeqLen, T **pInpMtr, T **pOutMtr)
 #else
-void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
+inline void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
 #endif
 {
 	int D;

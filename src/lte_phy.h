@@ -198,14 +198,12 @@ typedef struct
 	// Modulation
 #define N_MOD_IN_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX * (LTE_PHY_N_SYMB_PER_SUBFR - 2) * MAX_MOD_BITS_PER_SAMP)
 #define N_MOD_OUT_MAX (LTE_PHY_N_ANT_MAX * LTE_PHY_DFT_SIZE_MAX * (LTE_PHY_N_SYMB_PER_SUBFR - 2))
-
-
 	int mod_in[N_MOD_IN_MAX];
-	std::complex<float> mod_out_cplx[N_MOD_OUT_MAX];
+//	std::complex<float> mod_out[N_MOD_OUT_MAX];
 	float mod_out[N_MOD_OUT_MAX * 2];
 	float mod_out_real[N_MOD_OUT_MAX];
 	float mod_out_imag[N_MOD_OUT_MAX];
-	std::complex<float> demod_in_cplx[N_MOD_OUT_MAX];
+//	std::complex<float> demod_in[N_MOD_OUT_MAX];
 	float demod_in[N_MOD_OUT_MAX * 2];
 	float demod_in_real[N_MOD_IN_MAX];
 	float demod_in_imag[N_MOD_IN_MAX];
@@ -332,7 +330,7 @@ extern int TURBO_INT_F2_TABLE[TURBO_INT_K_TABLE_SIZE];
 // Function declarations
 void lte_phy_init(LTE_PHY_PARAMS *lte_phy_params, int fs_id, int mod_type, int n_tx_ant, int n_rx_ant);
 
-void lte_phy_init(LTE_PHY_PARAMS *lte_phy_params, int fs_id);
+//void lte_phy_init(LTE_PHY_PARAMS *lte_phy_params, int fs_id);
 
 void lte_phy_usage_info(char *exec);
 

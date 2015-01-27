@@ -3,10 +3,11 @@
 #include <limits>
 #include <stdio.h>
 #include <omp.h>
+#include <immintrin.h>
 #include "Turbo.h"
-#include "meas.h"
-#define LOG_INFINITY 1e30
 
+#define LOG_INFINITY 1e30
+#define LEN16 16
 /**************Global variables*****************/
 
 int InpBlockShift;
@@ -26,8 +27,12 @@ int g_output_parity[N_STATES * (N_GENS - 1) * 2];
 int g_rev_output_parity[N_STATES * (N_GENS - 1) * 2];
 
 float Lc;
-float (*com_log)(float a, float b);
-
+//float (*com_log)(float a, float b);
+void log_decoder_(float *recv_syst,
+		float *recv_parity,
+		float *apriori,
+		float *extrinsic,
+		int interleaver_size); 
 //! Constant definition to speed up trunc_log() and trunc_exp()
 //const double log_double_max = log(std::numeric_limits<double>::max());
 //! Constant definition to speed up trunc_log(), trunc_exp() and log_add()
@@ -36,7 +41,7 @@ float (*com_log)(float a, float b);
 /*****************End of globals*****************/
 
 // Turbo Internal Interleaver from 3GPP TS 36.212 v10.0.0 table 5.1.3-3
-
+/*
 int TURBO_INT_K_TABLE[TURBO_INT_K_TABLE_SIZE] = {  40,  48,  56,  64,  72,  80,  88,  96, 104, 112,
 														120, 128, 136, 144, 152, 160, 168, 176, 184, 192,
 														200, 208, 216, 224, 232, 240, 248, 256, 264, 272,
@@ -88,14 +93,14 @@ int TURBO_INT_F2_TABLE[TURBO_INT_K_TABLE_SIZE] = { 10, 12, 42, 16, 18, 20, 22, 2
 												   130,264,134,408,138,280,142,480,146,444,120,152,462,
 												   234,158, 80, 96,902,166,336,170, 86,174,176,178,120,
 												   182,184,186, 94,190,480};
+*/
 
-
-float max_log(float a, float b)
+__forceinline float max_log(float a, float b)
 {
 	return (a > b) ? a : b;
 }
 
-void set_generator_polynomials(int *gens, int n_gens, int constraint_length)
+inline void set_generator_polynomials(int *gens, int n_gens, int constraint_length)
 {
 	int i, j;
 	int K = constraint_length;
@@ -140,13 +145,14 @@ void set_generator_polynomials(int *gens, int n_gens, int constraint_length)
 
 //void internal_interleaver(int in[BLOCK_SIZE], int out[BLOCK_SIZE], int m)
 template <typename T>
-void internal_interleaver(T *in, T *out, int m)
+__forceinline void internal_interleaver(T *in, T *out, int m)
 {
     int i;
     int f1 = 0;
     int f2 = 0;
     int idx;
-
+//    double ttime,tbegin;
+//    tbegin = dtime();
     // Determine f1 and f2
     for(i = 0; i < TURBO_INT_K_TABLE_SIZE; i++)
     {
@@ -157,7 +163,8 @@ void internal_interleaver(T *in, T *out, int m)
             break;
         }
     }
-
+//    ttime = dtime();
+//    printf("inter 1 time is %f\n",ttime - tbegin);
     for(i = 0; i < m; i++)
     {
 		if ((0 == f1) && (0 == f2))
@@ -175,10 +182,53 @@ void internal_interleaver(T *in, T *out, int m)
 		}
         out[i] = in[idx];
     }
+//    tbegin = dtime();
+//    printf("inter 2 time is %f\n",tbegin - ttime);
 }
 
-template <typename T>
- void internal_deinterleaver(T *in, T *out, int m)
+
+__forceinline void internal_interleaver_(float *in, float *out, int m)
+{
+	int ii,i;
+	int f1 = 0;
+	int f2 = 0;
+	int idx;
+//	double ttime,tbegin;
+//	tbegin = dtime();
+	// Determine f1 and f2
+	for(i = 0; i < TURBO_INT_K_TABLE_SIZE; i++)
+	{
+		if(m == TURBO_INT_K_TABLE[i])
+		{
+			f1 = TURBO_INT_F1_TABLE[i];
+			f2 = TURBO_INT_F2_TABLE[i];
+			break;
+		}
+	}
+	//	ttime = dtime();
+	//	printf("m = %d, inter 1 time is %f\n",m, ttime - tbegin);
+	for(i = 0; i < m; i++)
+	{
+		if ((0 == f1) && (0 == f2))
+		{
+			idx = i;
+		}
+		else
+		{
+			idx = (((f1 % m) * (i % m)) % m + ((((f2 % m) * (i % m)) % m) * (i % m)) % m) % m; 
+		}
+		out[i] = in[idx];
+	}
+
+	//	tbegin = dtime();
+	//	printf("inter 2 time is %f\n",tbegin - ttime);
+}
+
+
+
+//void internal_deinterleaver(int in[BLOCK_SIZE], int out[BLOCK_SIZE], int m)
+ template <typename T>
+__forceinline void internal_deinterleaver(T *in, T *out, int m)
 {
     int i;
     int f1 = 0;
@@ -211,7 +261,41 @@ template <typename T>
     }
 }
 
-void constituent_encoder(int *input, int input_len, int *tail, int *parity)
+
+__forceinline void internal_deinterleaver(float *in, float *out, int m)
+{
+	int ii,i;
+	int f1 = 0;
+	int f2 = 0;
+	int idx;
+
+	// Determine f1 and f2
+	for (i = 0; i < TURBO_INT_K_TABLE_SIZE; i++)
+	{
+		if (m == TURBO_INT_K_TABLE[i])
+		{
+			f1 = TURBO_INT_F1_TABLE[i];
+			f2 = TURBO_INT_F2_TABLE[i];
+			break;
+		}
+	}
+	for (i = 0; i < m; i++)
+	{
+		if ((0 == f1) && (0 == f2))
+		{
+			idx = i;
+		}
+		else
+		{
+			idx = (((f1 % m) * (i % m)) % m + ((((f2 % m) * (i % m)) % m) * (i % m)) % m) % m; 
+		}
+		out[idx] = in[i];
+
+	}
+}
+
+
+__forceinline void constituent_encoder(int *input, int input_len, int *tail, int *parity)
 {
 	int i, j;
 	int encoder_state = 0, target_state;
@@ -278,7 +362,6 @@ void turbo_encoding(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 
 	inp_blk_offset = 0;
 	out_bit_offset = 0;
-
 	// encode all code blocks
 	for (i = 0; i < n_blocks; i++)
 	{
@@ -364,7 +447,7 @@ void turbo_encoding(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 	}
 }
 
-void encode_block(int *input_bits,
+inline void encode_block(int *input_bits,
 		int *interleaved_input_bits,
 		int *parity1, 
 		int *tail1,
@@ -390,7 +473,7 @@ void encode_block(int *input_bits,
 }
 
 
-int calc_state_transition(int instate, int input, int *parity)
+__forceinline int calc_state_transition(int instate, int input, int *parity)
 {
 	int in = 0;
 	int temp = (g_gen_pols[0] & instate), parity_temp, parity_bit;
@@ -418,7 +501,7 @@ int calc_state_transition(int instate, int input, int *parity)
 	return (in << (CST_LEN - 2) | (instate >> 1)) & ((1 << (CST_LEN - 1)) - 1);
 }
 
-int reverse_int(int length, int in)
+inline int reverse_int(int length, int in)
 {
 	int out = 0;
 	int i, j;
@@ -453,9 +536,7 @@ void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, int *pOutBi
 	float recv_parity2[(N_UNCODED + N_TAIL) * (N_GENS - 1)];
 
 	int i, j, k;
-//	double turbo_begin;
-//	turbo_begin = dtime();
-//	printf("turbo_begin = %f\n",turbo_begin);
+
 	set_generator_polynomials(g_gens, N_GENS, CST_LEN);
 	
 	out_data_length = lte_phy_params->td_out_buf_sz;
@@ -477,12 +558,11 @@ void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, int *pOutBi
 
 	out_bit_offset = 0;
 	out_block_offset = 0;
-
+	int ppOutBits[BLOCK_SIZE];
 	for (i = 0; i < n_blocks; i++)
 	{
 		cur_blk_len = (i != (n_blocks - 1)) ? BLOCK_SIZE : last_block_length;
 		// data part
-	//	printf("cur_blk_len = %d, N_TAIL = %d, N_GENS = %d\n",cur_blk_len,N_TAIL,N_GENS);
 		for (j = 0; j < cur_blk_len; j++)
 		{
 			recv_syst1[j] = pInpData[out_bit_offset++];
@@ -513,19 +593,13 @@ void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, int *pOutBi
 				recv_parity2[(cur_blk_len + j) * (N_GENS - 1) + k] = pInpData[out_bit_offset++];
 			}
 		}
-	//	double block_begin;
-	//	block_begin=dtime();
-	//	printf("block_begin = %f\n",block_begin);
 		decode_block(recv_syst1, recv_syst2, recv_parity1, recv_parity2, pOutBits + out_block_offset, cur_blk_len, n_iters);
-	//	double block_ends;
-	//	block_ends=dtime();
-	//	printf("block_ends = %f\n",block_ends);
 		out_block_offset += cur_blk_len;
 	}
 }
 
 
-void decode_block(float *recv_syst1, 
+__forceinline void decode_block(float *recv_syst1, 
 		float *recv_syst2,
 		float *recv_parity1,
 		float *recv_parity2,
@@ -548,13 +622,9 @@ void decode_block(float *recv_syst1,
 	float int_recv_syst[BLOCK_SIZE + N_TAIL];
 
 	memset(Le21, 0, n_tailed * sizeof(float));
-	
-	internal_interleaver(recv_syst1, int_recv_syst1, interleaver_size);
+
+	internal_interleaver_(recv_syst1, int_recv_syst1, interleaver_size);
 	internal_deinterleaver(recv_syst2, deint_recv_syst2, interleaver_size);
-	
-//	double after_interleaver;
-//	after_interleaver = dtime();
-//	printf("after_interleaver = %f\n",after_interleaver);
 
 	// Combine the results from recv_syst1 and recv_syst2 (in case some bits are transmitted several times)
 	for (i = 0; i < interleaver_size; i++)
@@ -570,39 +640,31 @@ void decode_block(float *recv_syst1,
 		recv_syst[i] = recv_syst1[i];
 		int_recv_syst[i] = recv_syst2[i];
 	}
-	
-//	double after_size;
-//	after_size = dtime();
-//	printf("after_size = %f\n",after_size);
-//	printf("n_iters = %d\n",n_iters);
+//	double log_begin,log_time;
+//	log_begin = dtime();
 	// do the iterative decoding
 	for (i = 0; i < /*MAX_ITERATIONS*/ n_iters; i++)
 	{
 	//	map_decoder(recv_syst1, recv_parity1, Le21, Le12, interleaver_size);
-		log_decoder(recv_syst, recv_parity1, Le21, Le12, interleaver_size);
+		
+		log_decoder_(recv_syst, recv_parity1, Le21, Le12, interleaver_size);
+//		log_time = dtime();
+//		        printf("log time 1 is %f\n", log_time - log_begin);
 		/*
 		for (int j = 0; j < interleaver_size; j++)
 			std::cout << Le21[j] << "\t" << Le12[j] << std::endl;
 		*/
-//		double first_;
-//		first_ = dtime();
-//		printf("first_ = %f\n",first_);	
-		internal_interleaver(Le12, Le12_int, interleaver_size);
-		//double first_;
-//		first_ = dtime();
-//		printf("second_ = %f\n",first_);
+			
+		internal_interleaver_(Le12, Le12_int, interleaver_size);
+//		log_begin = dtime();
+//		                        printf("inter time 1 is %f\n", 0 - log_time + log_begin);
 		/*
 		for (int j = 0; j < interleaver_size; j++)
 			std::cout << Le12[j] << "\t" << Le12_int[j] << std::endl;
 			*/
 		memset(Le12_int + interleaver_size, 0, N_TAIL * sizeof(float));
 	//	map_decoder(recv_syst2, recv_parity2, Le12_int, Le21_int, interleaver_size);
-//		first_ = dtime();
-//		printf("after_memset = %f\n",first_);
-		log_decoder(int_recv_syst, recv_parity2, Le12_int, Le21_int, interleaver_size);
-		//double first_;
-//		first_ = dtime();
-//		printf("third_ = %f\n",first_);
+		log_decoder_(int_recv_syst, recv_parity2, Le12_int, Le21_int, interleaver_size);
 		/*
 		for (int j = 0; j < interleaver_size; j++)
 		{
@@ -613,10 +675,8 @@ void decode_block(float *recv_syst1,
 		internal_deinterleaver(Le21_int, Le21, interleaver_size);
 		memset(Le21 + interleaver_size, 0, N_TAIL);
 	}
-	
-//	double middle_for;
-//	middle_for = dtime();
-//	printf("middle_for = %f\n",middle_for);
+//	log_time = dtime();
+//	printf("log time is %f\n", log_time - log_begin);
 
 	for (i = 0; i < interleaver_size; i++)
 	{
@@ -627,7 +687,172 @@ void decode_block(float *recv_syst1,
 	}
 }
 
+#ifdef __MIC__
+typedef __attribute__((aligned(64))) union zmmf {
+	__m512 reg;
+	float elems[LEN16];
+} zmmf_t;
+typedef __attribute__((aligned(64))) union zmmi {
+	__m512i reg;
+	int elems[LEN16];
+} zmmi_t;
+#endif
+/*
 void log_decoder(float *recv_syst,
+                 float *recv_parity,
+                 float *apriori,
+                 float *extrinsic,
+                 int interleaver_size)
+{
+    
+    float nom, den, temp0, temp1, exp_temp0, exp_temp1, rp;
+    int i, j, s0, s1, k, kk, l, s, s_prim, s_prim0, s_prim1;
+    int block_length = (interleaver_size + N_TAIL);
+    
+    float alpha[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
+    float beta[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
+    float gamma[N_STATES * 2 * (BLOCK_SIZE + N_TAIL + 1)];
+    float denom[BLOCK_SIZE + N_TAIL + 1];
+    
+    Lc = 1.0;
+    com_log = max_log;
+    
+    for (k = 0; k <= block_length; k++)
+    {
+        denom[k] = -LOG_INFINITY;
+    }
+    
+    // Calculate gamma
+    for (k = 1; k <= block_length; k++)
+    {
+        kk = k - 1;
+        
+        for (s_prim = 0; s_prim < N_STATES; s_prim++)
+        {
+            exp_temp0 = 0.0;
+            exp_temp1 = 0.0;
+            
+            for (j = 0; j < (N_GENS - 1); j++)
+            {
+                rp = recv_parity[kk * (N_GENS - 1) + j];
+                if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+                {
+                    exp_temp0 += rp;
+                }
+                else
+                {
+                    exp_temp0 -= rp;
+                }
+                if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+                {
+                    exp_temp1 += rp;
+                }
+                else
+                {
+                    exp_temp1 -= rp;
+                }
+            }
+            
+            gamma[(2 * s_prim + 0) * (block_length + 1) + k] =  0.5 * ((apriori[kk] + recv_syst[kk]) + exp_temp0);
+            //	std::cout << gamma[(2 * s_prim + 0) * (block_length + 1) + k] << "\t";
+            gamma[(2 * s_prim + 1) * (block_length + 1) + k] = -0.5 * ((apriori[kk] + recv_syst[kk]) - exp_temp1);
+            //	std::cout << gamma[(2 * s_prim + 1) * (block_length + 1) + k] << std::endl;
+        }
+    }
+    
+    // Initiate alpha
+    for (int i = 1; i < N_STATES; i++)
+    {
+        alpha[i * (block_length + 1) + 0] = -LOG_INFINITY;
+    }
+    alpha[0 * (block_length + 1) + 0] = 0.0;
+    
+    // Calculate alpha, going forward through the trellis
+    for (k = 1; k <= block_length; k++)
+    {
+        for (s = 0; s < N_STATES; s++)
+        {
+            s_prim0 = g_rev_state_trans[s * 2 + 0];
+            s_prim1 = g_rev_state_trans[s * 2 + 1];
+            temp0 = alpha[s_prim0 * (block_length + 1) + k - 1] + gamma[(2 * s_prim0 + 0) * (block_length + 1) + k];
+            temp1 = alpha[s_prim1 * (block_length + 1) + k - 1] + gamma[(2 * s_prim1 + 1) * (block_length + 1) + k];
+            alpha[s * (block_length + 1) + k] = com_log(temp0, temp1);
+            denom[k] = com_log(alpha[s * (block_length + 1) + k], denom[k]);
+        }
+        
+        // Normalization of alpha
+        for (l = 0; l < N_STATES; l++)
+        {
+            alpha[l * (block_length + 1) + k] -= denom[k];
+        }
+    }
+    
+    // Initiate beta
+    for (i = 1; i < N_STATES; i++)
+    {
+        beta[i * (block_length + 1) + block_length] = -LOG_INFINITY;
+    }
+    beta[0 * (block_length + 1) + block_length] = 0.0;
+    
+    // Calculate beta going backward in the trellis
+    for (k = block_length; k >= 2; k--)
+    {
+        for (s_prim = 0; s_prim < N_STATES; s_prim++)
+        {
+            s0 = g_state_trans[s_prim * 2 + 0];
+            s1 = g_state_trans[s_prim * 2 + 1];
+            beta[s_prim * (block_length + 1) + k - 1] = com_log(beta[s0 * (block_length + 1) + k] + gamma[(2 * s_prim + 0) * (block_length + 1) + k], beta[s1 * (block_length + 1) + k] + gamma[(2 * s_prim + 1) * (block_length + 1) + k]);
+        }
+        // Normalization of beta
+        for (l = 0; l < N_STATES; l++)
+        {
+            beta[l * (block_length + 1) + k - 1] -= denom[k];
+        }
+    }
+    
+    // Calculate extrinsic output for each bit
+    for (k = 1; k <= block_length; k++)
+    {
+        kk = k - 1;
+        nom = -LOG_INFINITY;
+        den = -LOG_INFINITY;
+        for (s_prim = 0; s_prim < N_STATES; s_prim++)
+        {
+            s0 = g_state_trans[s_prim * 2 + 0];
+            s1 = g_state_trans[s_prim * 2 + 1];
+            exp_temp0 = 0.0;
+            exp_temp1 = 0.0;
+            for (j = 0; j < (N_GENS - 1); j++)
+            {
+                rp = recv_parity[kk * (N_GENS - 1) + j];
+                if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+                {
+                    exp_temp0 += rp;
+                }
+                else
+                {
+                    exp_temp0 -= rp; 
+                }
+                if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+                { 
+                    exp_temp1 += rp;
+                }
+                else
+                {
+                    exp_temp1 -= rp;
+                }
+            }
+            nom = com_log(nom, alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp0 + beta[s0 * (block_length + 1) + k]);
+            den = com_log(den, alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp1 + beta[s1 * (block_length + 1) + k]);
+        }
+        extrinsic[kk] = nom - den;
+        //	std::cout << nom << "\t" << den << std::endl;
+        //	std::cout << extrinsic[kk] << std::endl;
+    }
+}*/
+
+
+__forceinline void log_decoder_(float *recv_syst,
 		float *recv_parity,
 		float *apriori,
 		float *extrinsic,
@@ -635,186 +860,199 @@ void log_decoder(float *recv_syst,
 {
 
 	float nom, den, temp0, temp1, exp_temp0, exp_temp1, rp;
-	int i, j, jj, s0, s1, k, kk, l, s, s_prim, s_prim0, s_prim1;
+	int i, j, s0, s1, k, kk, l, s, s_prim_, s_prim0, s_prim1;
 	int block_length = (interleaver_size + N_TAIL);
 	
 	float alpha[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
 	float beta[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
 	float gamma[N_STATES * 2 * (BLOCK_SIZE + N_TAIL + 1)];
 	float denom[BLOCK_SIZE + N_TAIL + 1];
-	
+//	memset(alpha,0,sizeof(alpha));
+//	memset(gamma,0,sizeof(gamma));
+//	memset(beta,0,sizeof(beta));
+//	memset(denom,0,sizeof(denom));
 	Lc = 1.0;
-	com_log = max_log;
-
-/*	for (k = 0; k <= block_length; k++)
+//	com_log = max_log;
+	for (k = 1; k <= block_length; k++)	
 	{
-		denom[k] = -LOG_INFINITY;
-	}
-*/	denom[block_length] = -LOG_INFINITY;
-//	printf("block_length = %d\n",block_length);
-//	double middle_for;
-//	middle_for = dtime();
-//	printf("log_begin = %f\n",middle_for);
-	int nlayer,nsym,num_threads=236,sum=0,quotient=0,remain=0;
-	//int i,j,k;
-	sum = block_length;
-	quotient = sum / num_threads;
-	remain = sum % num_threads;
-//#pragma omp parallel for private(jj,j,s_prim)
-//	for(i=0;i<num_threads;i++)
-#pragma omp parallel default(shared) num_threads(num_threads)
-	{
-		i = omp_get_thread_num();
-		int i_begin,num_j;
-		if(i>=remain)
-		{
-			i_begin = remain  + i * quotient;
-			num_j = quotient;
-		}
-		else
-		{
-			i_begin = i * (quotient + 1);
-			num_j = quotient + 1;
-		}
-		for (jj = 0; jj < num_j; jj++)
-		{
-			k=i_begin+jj;
-			denom[k] = -LOG_INFINITY;
-		}
-#pragma omp barrier
-		//printf("helle from %d\n",i);
-		for(jj=0;jj<num_j;jj++)
-		{
-			// Calculate gamma
-			k = i_begin + jj + 1;
-			//	for (k = 1; k <= block_length; k++)
-			//	{
-			kk = k - 1;
+		kk = k - 1;
 
-			for (s_prim = 0; s_prim < N_STATES; s_prim++)
+		for (s_prim_ = 0; s_prim_ < N_STATES; s_prim_++)
+		{
+			exp_temp0 = 0.0;
+			exp_temp1 = 0.0;
+
+			for (j = 0; j < (N_GENS - 1); j++)
 			{
-				exp_temp0 = 0.0;
-				exp_temp1 = 0.0;
-
-				for (j = 0; j < (N_GENS - 1); j++)
+				rp = recv_parity[kk * (N_GENS - 1) + j];
+				if (0 == g_output_parity[s_prim_ * (N_GENS - 1) * 2 + j * 2 + 0])
 				{
-					rp = recv_parity[kk * (N_GENS - 1) + j];
-					if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
-					{
-						exp_temp0 += rp;
-					}
-					else
-					{ 
-						exp_temp0 -= rp;
-					}
-					if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
-					{
-						exp_temp1 += rp;
-					}
-					else
-					{
-						exp_temp1 -= rp; 
-					}
+					exp_temp0 += rp;
 				}
-
-				gamma[(2 * s_prim + 0) * (block_length + 1) + k] =  0.5 * ((apriori[kk] + recv_syst[kk]) + exp_temp0);
-				//	std::cout << gamma[(2 * s_prim + 0) * (block_length + 1) + k] << "\t";
-				gamma[(2 * s_prim + 1) * (block_length + 1) + k] = -0.5 * ((apriori[kk] + recv_syst[kk]) - exp_temp1);
-				//	std::cout << gamma[(2 * s_prim + 1) * (block_length + 1) + k] << std::endl;
+				else
+				{
+					exp_temp0 -= rp;
+				}
+				if (0 == g_output_parity[s_prim_ * (N_GENS - 1) * 2 + j * 2 + 1])
+				{
+					exp_temp1 += rp;
+				}
+				else
+				{
+					exp_temp1 -= rp;
+				}
 			}
+
+			gamma[(2 * s_prim_ + 0) + 2 * k * N_STATES] =  0.5 * ((apriori[kk] + recv_syst[kk]) + exp_temp0);
+			//      std::cout << gamma[(2 * s_prim + 0) * (block_length + 1) + k] << "\t";
+			gamma[(2 * s_prim_ + 1) + 2 * k * N_STATES] = -0.5 * ((apriori[kk] + recv_syst[kk]) - exp_temp1);
+			//      std::cout << gamma[(2 * s_prim + 1) * (block_length + 1) + k] << std::endl;
 		}
-#pragma omp barrier
-
-
-		//middle_for = dtime();
-		//printf("log_begin_middle = %f\n",middle_for);
-		// Initiate alpha
-		if(i==0)
-		{
-			for (int ii = 1; ii < N_STATES; ii++)
-			{
-				alpha[ii * (block_length + 1) + 0] = -LOG_INFINITY;
-			}
-			alpha[0 * (block_length + 1) + 0] = 0.0;
-		}
-		// Calculate alpha, going forward through the trellis
-#pragma omp barrier
-
-		for (jj = 0; jj < num_j; jj++)
-		{
-			k=i_begin+jj+1;
-			for (s = 0; s < N_STATES; s++)
-			{
-				s_prim0 = g_rev_state_trans[s * 2 + 0];
-				s_prim1 = g_rev_state_trans[s * 2 + 1];
-				temp0 = alpha[s_prim0 * (block_length + 1) + k - 1] + gamma[(2 * s_prim0 + 0) * (block_length + 1) + k];
-				temp1 = alpha[s_prim1 * (block_length + 1) + k - 1] + gamma[(2 * s_prim1 + 1) * (block_length + 1) + k];
-				alpha[s * (block_length + 1) + k] = com_log(temp0, temp1);
-				denom[k] = com_log(alpha[s * (block_length + 1) + k], denom[k]);
-			}
-
-			// Normalization of alpha
-			for (l = 0; l < N_STATES; l++)
-			{
-				alpha[l * (block_length + 1) + k] -= denom[k];
-			}
-		}
-#pragma omp barrier
-
-		//middle_for = dtime();
-		//      printf("log_begin_what's_more = %f\n",middle_for);
-		// Initiate beta
-		if(i==0)
-		{
-			for (int ii = 1; ii < N_STATES; ii++)
-			{
-				beta[ii * (block_length + 1) + block_length] = -LOG_INFINITY;
-			}
-			beta[0 * (block_length + 1) + block_length] = 0.0;
-//		}
-		//printf("N_STATES = %d\n",N_STATES);
-		// Calculate beta going backward in the trellis
-//#pragma omp barrier
-//		for (jj = 0; jj < num_j; jj++)
-		for (k = block_length; k >= 2; k--)
-		{
-//			k=block_length-(i_begin+jj);
-			for (s_prim = 0; s_prim < N_STATES; s_prim++)
-			{
-				s0 = g_state_trans[s_prim * 2 + 0];
-				s1 = g_state_trans[s_prim * 2 + 1];
-				beta[s_prim * (block_length + 1) + k - 1] = com_log(beta[s0 * (block_length + 1) + k] + gamma[(2 * s_prim + 0) * (block_length + 1) + k], beta[s1 * (block_length + 1) + k] + gamma[(2 * s_prim + 1) * (block_length + 1) + k]);
-			}
-			// Normalization of beta
-			for (l = 0; l < N_STATES; l++)
-			{
-				beta[l * (block_length + 1) + k - 1] -= denom[k];
-			}
-		}
-		}
-		
-		//middle_for = dtime();
-	        //printf("log_begin_before_end = %f\n",middle_for);
-	// Calculate extrinsic output for each bit
-#pragma omp barrier
-if(i==0)		
+	}
+	for (int i = 1; i < N_STATES; i++)
+	{
+		alpha[i + 0 * N_STATES] = -LOG_INFINITY;
+	}
+	alpha[0 + 0 * N_STATES] = 0.0;
+	for (int i = 1; i < N_STATES; i++)
+	{
+		beta[i + block_length * N_STATES] = -LOG_INFINITY;
+	}
+	beta[0 + block_length * N_STATES] = 0.0;
+	// Calculate alpha, going forward through the trellis
+	zmmi_t block_vector,zero_one_vector,two_vector,N_STATES_vector,num_vector;
+	for(int tmpx=0;tmpx<16;tmpx++)
+	{
+		N_STATES_vector.elems[tmpx] = N_STATES;
+		block_vector.elems[tmpx] = block_length + 1;
+		zero_one_vector.elems[tmpx] = tmpx%2;
+		two_vector.elems[tmpx] = 2;
+		num_vector.elems[tmpx] = tmpx;
+	}
 	for (k = 1; k <= block_length; k++)
-//		for(jj=0;jj<num_j;jj++)
+	{
+		zmmi_t s_prim,tmp1,tmp2,tmp3,k_vector,k_1_vector;
+		zmmf_t aa,gg,tt_,tt_0,tt_1;
+		float tt1,tt2;
+		float *ar,*ga;
+		s_prim.elems[0:16] = g_rev_state_trans[0:16];
+		for(int tmpx = 0;tmpx<16;tmpx++)
 		{
-//			k=i_begin+jj+1;
+			k_vector.elems[tmpx] = 2 * k;
+			k_1_vector.elems[tmpx] = (k - 1);
+		}
+		tmp1.reg = _mm512_fmadd_epi32(k_1_vector.reg,N_STATES_vector.reg,s_prim.reg);
+		//get alpha[s_prim + (k-1) * N_STATES]
+		tmp3.reg = _mm512_fmadd_epi32(two_vector.reg,s_prim.reg,zero_one_vector.reg);
+		//get gamma[2*s_prim + 0/1 + 2 * k * N_STATES]
+		tmp2.reg = _mm512_fmadd_epi32(N_STATES_vector.reg,k_vector.reg,tmp3.reg);
+		ar = &alpha[0];
+		ga = &gamma[0];
+		aa.reg = _mm512_i32gather_ps(tmp1.reg,ar,4);
+		gg.reg = _mm512_i32gather_ps(tmp2.reg,ga,4);
+		tt_.reg = _mm512_add_ps(aa.reg,gg.reg);
+		tt_0.elems[0] = tt_.elems[0];
+		tt_1.elems[0] = tt_.elems[1];
+		tt_0.elems[1] = tt_.elems[2];
+		tt_1.elems[1] = tt_.elems[3];
+		tt_0.elems[2] = tt_.elems[4];
+		tt_1.elems[2] = tt_.elems[5];
+		tt_0.elems[3] = tt_.elems[6];
+		tt_1.elems[3] = tt_.elems[7]; 
+		tt_0.elems[4] = tt_.elems[8];
+		tt_1.elems[4] = tt_.elems[9];
+		tt_0.elems[5] = tt_.elems[10];
+		tt_1.elems[5] = tt_.elems[11];
+		tt_0.elems[6] = tt_.elems[12];
+		tt_1.elems[6] = tt_.elems[13];
+		tt_0.elems[7] = tt_.elems[14];
+		tt_1.elems[7] = tt_.elems[15];
+		aa.reg = _mm512_gmax_ps(tt_0.reg,tt_1.reg);
+		for(s = 0; s < N_STATES; s++)
+		{
+			alpha[s + k * N_STATES] = aa.elems[s];//com_log(tt_.elems[s*2+0], tt_.elems[s*2+1]);
+			denom[k] =max_log(alpha[s + k * N_STATES], denom[k]);
+		}
+	// Normalization of alpha
+		for (l = 0; l < N_STATES; l++)
+		{
+			alpha[l + k * N_STATES] -= denom[k];
+		}
+	}
+//	ttime = dtime();
+//	printf("alpha time is %f\n",ttime - tbegin);
+	// Initiate beta
+	
+	// Calculate beta going backward in the trellis
+	for (k = block_length; k >= 2; k--)
+	{
+		zmmi_t s_prim,tmp1,tmp2,tmp3,k_vector,k_1_vector;
+		zmmf_t aa,gg,tt_,tt_0,tt_1;
+		float tt1,tt2;
+		float *ar,*ga;
+		s_prim.elems[0:16] = g_state_trans[0:16];
+		for(int tmpx = 0;tmpx<16;tmpx++)
+		{
+			k_vector.elems[tmpx] = 2 * k;
+			k_1_vector.elems[tmpx] = k;
+		}
+		tmp1.reg = _mm512_fmadd_epi32(k_1_vector.reg,N_STATES_vector.reg,s_prim.reg);
+		//get alpha[s_prim + (k-1) * N_STATES]
+		//tmp3.reg = _mm512_fmadd_epi32(two_vector.reg,num_vector.reg,zero_one_vector.reg);
+		//get gamma[2*s_prim + 0/1 + 2 * k * N_STATES]
+		tmp2.reg = _mm512_fmadd_epi32(N_STATES_vector.reg,k_vector.reg,num_vector.reg);
+		ar = &beta[0];
+		ga = &gamma[0];
+		aa.reg = _mm512_i32gather_ps(tmp1.reg,ar,4);
+		gg.reg = _mm512_i32gather_ps(tmp2.reg,ga,4);
+		tt_.reg = _mm512_add_ps(aa.reg,gg.reg);
+		tt_0.elems[0] = tt_.elems[0];
+		tt_1.elems[0] = tt_.elems[1];
+		tt_0.elems[1] = tt_.elems[2];
+		tt_1.elems[1] = tt_.elems[3];
+		tt_0.elems[2] = tt_.elems[4];
+		tt_1.elems[2] = tt_.elems[5];
+		tt_0.elems[3] = tt_.elems[6];
+		tt_1.elems[3] = tt_.elems[7];
+		tt_0.elems[4] = tt_.elems[8];
+		tt_1.elems[4] = tt_.elems[9];
+		tt_0.elems[5] = tt_.elems[10];
+		tt_1.elems[5] = tt_.elems[11];
+		tt_0.elems[6] = tt_.elems[12];
+		tt_1.elems[6] = tt_.elems[13];
+		tt_0.elems[7] = tt_.elems[14];
+		tt_1.elems[7] = tt_.elems[15];
+		aa.reg = _mm512_gmax_ps(tt_0.reg,tt_1.reg);
+		for (s_prim_ = 0; s_prim_ < N_STATES; s_prim_++)
+		{
+			//s0 = g_state_trans[s_prim_ * 2 + 0];
+			//s1 = g_state_trans[s_prim_ * 2 + 1];
+			//if(tmp2.elems[s_prim_*2]!=(2 * s_prim_ + 0) + 2 * k * N_STATES) printf("wrong\n");
+			//if(gg.elems[s_prim_*2]!=gamma[(2 * s_prim_ + 0) + 2 * k * N_STATES]) printf("wrong\n");
+			//if((tt_0.elems[s_prim_] != beta[s0 + k * N_STATES] + gamma[(2 * s_prim_ + 0) + 2 * k * N_STATES])||(tt_1.elems[s_prim_] != beta[s1 + k * N_STATES] + gamma[(2 * s_prim_ + 1) + 2 * k * N_STATES])) printf("wrong");
+			beta[s_prim_ + (k - 1) * N_STATES] = aa.elems[s_prim_];//com_log(beta[s0 + k * N_STATES] + gamma[(2 * s_prim_ + 0) + 2 * k * N_STATES], beta[s1 + k * N_STATES] + gamma[(2 * s_prim_ + 1) + 2 * k * N_STATES]);
+		}
+		// Normalization of beta
+		for (l = 0; l < N_STATES; l++)
+		{
+			beta[l + (k - 1) * N_STATES] -= denom[k];
+		}
+	}
+	for (k = 1; k <= block_length; k++)	 
+	{
 		kk = k - 1;
 		nom = -LOG_INFINITY;
 		den = -LOG_INFINITY;
-		for (s_prim = 0; s_prim < N_STATES; s_prim++)
+		for (s_prim_ = 0; s_prim_ < N_STATES; s_prim_++)
 		{
-			s0 = g_state_trans[s_prim * 2 + 0];
-			s1 = g_state_trans[s_prim * 2 + 1];
+			s0 = g_state_trans[s_prim_ * 2 + 0];
+			s1 = g_state_trans[s_prim_ * 2 + 1];
 			exp_temp0 = 0.0;
 			exp_temp1 = 0.0;
 			for (j = 0; j < (N_GENS - 1); j++)
 			{
 				rp = recv_parity[kk * (N_GENS - 1) + j];
-				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+				if (0 == g_output_parity[s_prim_ * (N_GENS - 1) * 2 + j * 2 + 0])
 				{
 					exp_temp0 += rp;
 				}
@@ -822,7 +1060,7 @@ if(i==0)
 				{
 					exp_temp0 -= rp; 
 				}
-				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+				if (0 == g_output_parity[s_prim_ * (N_GENS - 1) * 2 + j * 2 + 1])
 				{ 
 					exp_temp1 += rp;
 				}
@@ -831,14 +1069,9 @@ if(i==0)
 					exp_temp1 -= rp;
 				}
 			}
-			nom = com_log(nom, alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp0 + beta[s0 * (block_length + 1) + k]);
-			den = com_log(den, alpha[s_prim * (block_length + 1) + kk] + 0.5 * exp_temp1 + beta[s1 * (block_length + 1) + k]);
+			nom = max_log(nom, alpha[s_prim_ + kk * N_STATES] + 0.5 * exp_temp0 + beta[s0 + k * N_STATES]);
+			den = max_log(den, alpha[s_prim_ + kk * N_STATES] + 0.5 * exp_temp1 + beta[s1 + k * N_STATES]);
 		}
 		extrinsic[kk] = nom - den;
-	//	std::cout << nom << "\t" << den << std::endl;
-	//	std::cout << extrinsic[kk] << std::endl;
 	}
-	}
-//	middle_for = dtime();
-//	        printf("log_begin_end = %f\n",middle_for);
 }

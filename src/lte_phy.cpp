@@ -154,6 +154,7 @@ void lte_phy_iolen(LTE_PHY_PARAMS *lte_phy_params)
 	lte_phy_params->ofdemod_out_buf_sz = lte_phy_params->ofmod_in_buf_sz;
 }
 
+/*
 void lte_phy_init(LTE_PHY_PARAMS *lte_phy_params, int fs_id, int mod_type, int n_tx_ant, int n_rx_ant)
 {
 	switch(fs_id)
@@ -248,16 +249,16 @@ void lte_phy_init(LTE_PHY_PARAMS *lte_phy_params, int fs_id, int mod_type, int n
 	lte_phy_params->sc_loc = 1;
 
 	lte_phy_iolen(lte_phy_params);
-
 }
+*/
 
-void lte_phy_init(LTE_PHY_PARAMS *lte_phy_params, int fs_id)
+void lte_phy_init(LTE_PHY_PARAMS *lte_phy_params, int sf_id, int mod_type, int n_tx_ant, int n_rx_ant)
 {
 	int num_blks;
 	int subfr_len_limit;
 	int i;
 	
-	switch(fs_id)
+	switch(sf_id)
 	{
 	case LTE_PHY_FS_1_92MHZ:
 		lte_phy_params->fs = 1920000;
@@ -304,13 +305,31 @@ void lte_phy_init(LTE_PHY_PARAMS *lte_phy_params, int fs_id)
 		break;
 	}
 
-	lte_phy_params->mod_type = 2;
-	lte_phy_params->N_bits_per_samp = QAM16_BITS_PER_SAMP;
+	lte_phy_params->mod_type = mod_type;
+
+	switch(mod_type)
+	{
+	case LTE_BPSK:
+		lte_phy_params->N_bits_per_samp = BPSK_BITS_PER_SAMP;
+		break;
+	case LTE_QPSK:
+		lte_phy_params->N_bits_per_samp = QPSK_BITS_PER_SAMP;
+		break;
+	case LTE_QAM16:
+		lte_phy_params->N_bits_per_samp = QAM16_BITS_PER_SAMP;
+		break;
+	case LTE_QAM64:
+		lte_phy_params->N_bits_per_samp = QAM64_BITS_PER_SAMP;
+		break;
+	default:
+		break;
+	}
+//	lte_phy_params->N_bits_per_samp = QAM16_BITS_PER_SAMP;
 
 	lte_phy_params->N_symb_per_subfr = LTE_PHY_N_SYMB_PER_SUBFR;
 
-	lte_phy_params->N_tx_ant = 2;
-	lte_phy_params->N_rx_ant = 2;
+	lte_phy_params->N_tx_ant = n_tx_ant;
+	lte_phy_params->N_rx_ant = n_rx_ant;
 
 	lte_phy_params->dmrs_symb_pos[0] = 3;
 	lte_phy_params->dmrs_symb_pos[1] = 10;
