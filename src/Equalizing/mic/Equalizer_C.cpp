@@ -4,9 +4,9 @@
 #include <string.h>
 
 #include "lte_phy.h"
-//#include "refs/dmrs.h"
+#include "refs/dmrs.h"
 
-static void MatrixProd(int d1, int d2, int d3, float M1[], float M2[], float oM[])
+inline static void MatrixProd(int d1, int d2, int d3, float M1[], float M2[], float oM[])
 {
 	int r, c, i;
 	int m1_len = d1 * d2;
@@ -32,7 +32,7 @@ static void MatrixProd(int d1, int d2, int d3, float M1[], float M2[], float oM[
 	}
 }
 
-static void MatrixProd(int d1, int d2, int d3,
+inline static void MatrixProd(int d1, int d2, int d3,
 					   float M1Real[], float M1Imag[],
 					   float M2Real[], float M2Imag[],
 					   float oMReal[], float oMImag[])
@@ -58,7 +58,7 @@ static void MatrixProd(int d1, int d2, int d3,
 	}
 }
 
-static void MatrixInv(int sz, float pM[], float pInvM[])
+inline static void MatrixInv(int sz, float pM[], float pInvM[])
 {
 	int m_len = sz * sz;
 	int x_len = sz * (2 * sz);
@@ -168,7 +168,7 @@ static void MatrixInv(int sz, float pM[], float pInvM[])
 	free(pCurRow);
 }
 
-static void MatrixInv(int sz,
+inline static void MatrixInv(int sz,
 					  float pMReal[], float pMImag[],
 					  float pInvMReal[], float pInvMImag[])
 {
@@ -286,7 +286,7 @@ static void MatrixInv(int sz,
 	free(pCurRowImag);
 }
 
-void FDLSEstimation(float *pXt,
+inline void FDLSEstimation(float *pXt,
 				    float *pXtDagger,
  					float *pYt,
 					float *pHTranspose,
@@ -316,7 +316,7 @@ void FDLSEstimation(float *pXt,
 	*/
 }
 
-void FDLSEstimation(float *pXtReal, float *pXtImag,
+inline void FDLSEstimation(float *pXtReal, float *pXtImag,
 				    float *pXtDaggerReal, float *pXtDaggerImag,
  					float *pYtReal, float *pYtImag,
 					float *pHTransposeReal, float *pHTransposeImag,
@@ -340,16 +340,14 @@ void FDLSEstimation(float *pXtReal, float *pXtImag,
 
 	MatrixProd(NumLayer, NumLayer, NumRxAntenna, pInvXDXReal, pInvXDXImag, pXDYReal, pXDYImag, pHTransposeReal, pHTransposeImag);
 
-	/*
-	for (int i = 0; i < 4; i++)
+/*	for (int i = 0; i < 4; i++)
 	{
 		printf("%f\n", pHTransposeReal[i]);
 		printf("%f\n", pHTransposeImag[i]);
-	}
-	*/
+	}*/
 }
 
-void FDLSEqualization(float *pInpData, float *pHTranspose, int m, int NumLayer, int NumRxAntenna, int MDFTPerUser, int NumULSymbSF, float *pOutData)
+inline void FDLSEqualization(float *pInpData, float *pHTranspose, int m, int NumLayer, int NumRxAntenna, int MDFTPerUser, int NumULSymbSF, float *pOutData)
 {
 	int inp_len = NumLayer * NumULSymbSF * MDFTPerUser;
 	int out_len = NumLayer * (NumULSymbSF - 2) * MDFTPerUser;
@@ -413,7 +411,7 @@ void FDLSEqualization(float *pInpData, float *pHTranspose, int m, int NumLayer, 
 	}
 }
 
-void FDLSEqualization(float *pInpDataReal, float *pInpDataImag,
+inline void FDLSEqualization(float *pInpDataReal, float *pInpDataImag,
 					  float *pHTransposeReal, float *pHTransposeImag,
 					  int m,
 					  int NumLayer,
@@ -493,15 +491,15 @@ void FDLSEqualization(float *pInpDataReal, float *pInpDataImag,
 	}
 }
 
-void LSFreqDomain(float *pInpData, float *pOutData, int MDFT, int NumLayer, int NumRxAntenna, int NumULSymbSF, float *pDMRS)
+inline void LSFreqDomain(float *pInpData, float *pOutData, int MDFT, int NumLayer, int NumRxAntenna, int NumULSymbSF)
 {
 	int inp_len = NumLayer * NumULSymbSF * MDFT;
 	int out_len = NumLayer * (NumULSymbSF - 2) * MDFT;
 	int dmrs_len = NumLayer * MDFT * 2;
 	
-//	float *pDMRS = (float *)malloc(2 * dmrs_len * sizeof(float));
+	float *pDMRS = (float *)malloc(2 * dmrs_len * sizeof(float));
 	
-//	geneDMRS(pDMRS, NumLayer, MDFT);
+	geneDMRS(pDMRS, NumLayer, MDFT);
 
 	for (int m = 0; m < MDFT; m++)
 	{
@@ -542,25 +540,18 @@ void LSFreqDomain(float *pInpData, float *pOutData, int MDFT, int NumLayer, int 
 		FDLSEqualization(pInpData, pHTranspose, m, NumLayer, NumRxAntenna, MDFT, NumULSymbSF, pOutData);
 	}
 
-//	free(pDMRS);
+	free(pDMRS);
 }
 
-void LSFreqDomain(float *pInpDataReal, float *pInpDataImag,
+inline void LSFreqDomain(float *pInpDataReal, float *pInpDataImag,
 				  float *pOutDataReal, float *pOutDataImag,
-				  int MDFT, int NumLayer, int NumRxAntenna, int NumULSymbSF,
-				  float *pDMRSReal, float *pDMRSImag)
+				  int MDFT, int NumLayer, int NumRxAntenna, int NumULSymbSF, float *pDMRSReal, float *pDMRSImag)
 {
 //	int inp_len = NumLayer * NumULSymbSF * MDFT;
 //	int out_len = NumLayer * (NumULSymbSF - 2) * MDFT;
-//	int dmrs_len = NumLayer * MDFT * 2;
+	int dmrs_len = NumLayer * MDFT * 2;
 	
-//	float *pDMRSReal = (float *)malloc(dmrs_len * sizeof(float));
-//	float *pDMRSImag = (float *)malloc(dmrs_len * sizeof(float));
 	
-//	geneDMRS(pDMRSReal, pDMRSImag, NumLayer, MDFT);
-
-//	float *pDMRSReal = lte_phy_params->DMRSReal;
-//	float *pDMRSImag = lte_phy_params->DMRSImag;
 
 	for (int m = 0; m < MDFT; m++)
 	{
@@ -607,10 +598,8 @@ void LSFreqDomain(float *pInpDataReal, float *pInpDataImag,
 		FDLSEqualization(pInpDataReal, pInpDataImag, pHTransposeReal, pHTransposeImag, m, NumLayer, NumRxAntenna, MDFT, NumULSymbSF, pOutDataReal, pOutDataImag);
 	}
 
-//	free(pDMRSReal);
-//	free(pDMRSImag);
 }
-
+/*
 void Equalizing(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOutData)
 {
 	int MDFT = lte_phy_params->N_dft_sz;
@@ -618,8 +607,8 @@ void Equalizing(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOutData
 	int NumRxAntenna = lte_phy_params->N_rx_ant;
 	int NumULSymbSF = LTE_PHY_N_SYMB_PER_SUBFR;
 	
-	LSFreqDomain(pInpData, pOutData, MDFT, NumLayer, NumRxAntenna, NumULSymbSF, lte_phy_params->DMRS);
-}
+	LSFreqDomain(pInpData, pOutData, MDFT, NumLayer, NumRxAntenna, NumULSymbSF);
+}*/
 
 void Equalizing(LTE_PHY_PARAMS *lte_phy_params,
 				float *pInpDataReal, float *pInpDataImag,
@@ -631,6 +620,5 @@ void Equalizing(LTE_PHY_PARAMS *lte_phy_params,
 	int NumULSymbSF = LTE_PHY_N_SYMB_PER_SUBFR;
 	
 	LSFreqDomain(pInpDataReal, pInpDataImag, pOutDataReal, pOutDataImag,
-				 MDFT, NumLayer, NumRxAntenna, NumULSymbSF,
-				 lte_phy_params->DMRSReal, lte_phy_params->DMRSImag);
+				 MDFT, NumLayer, NumRxAntenna, NumULSymbSF,lte_phy_params->DMRSReal, lte_phy_params->DMRSImag);
 }

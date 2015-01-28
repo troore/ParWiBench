@@ -132,7 +132,7 @@ void SubCarrierDemapping(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float 
 				for (int n = 0; n < MDFT; n++)
 				{
 					pOutData[sym_out_idx * MDFT + n] = pInpData[sym_in_idx * NIFFT + (n + SCLoc)];
-					pOutData[sym_out_idx * MDFT + n + out_buf_sz] = pInpData[sym_in_idx * NIFFT + (n + SCLoc) + out_buf_sz];
+					pOutData[sym_out_idx * MDFT + n + out_buf_sz] = pInpData[sym_in_idx * NIFFT + (n + SCLoc) + in_buf_sz];
 				}
 			}
 			else
