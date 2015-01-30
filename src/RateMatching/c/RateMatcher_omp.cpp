@@ -1,7 +1,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <omp.h>
 #include "lte_phy.h"
+#include "util.h"
 
 static int InterColumnPattern[32] = {0,16,8,24,4,20,12,28,
 									 2,18,10,26,6,22,14,30,
@@ -33,22 +35,27 @@ static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 //	T pInterMatrix[((BLOCK_SIZE + 31) / 32) * 32];
 	T *pInterMatrix = (T *)malloc(K_pi * sizeof(T));
 
+	omp_set_num_threads(num_threads);
 	for (int StrIdx = 0; StrIdx < (Rate - 1); StrIdx++)
 	{
 		//////////////// write into matrix //////////////////
-		for (int r = 0; r < R_sb; r++)
+#pragma omp parallel
 		{
-			for (int c = 0; c < C_sb; c++)
+			#pragma omp for
+			for (int r = 0; r < R_sb; r++)
 			{
-				int k = r * C_sb + c;
+				for (int c = 0; c < C_sb; c++)
+				{
+					int k = r * C_sb + c;
 				
-				if (k < NumDummy)
-				{
-					pInterMatrix[r * C_sb + c] = DummyValue;
-				}
-				else
-				{
-					pInterMatrix[r * C_sb + c] = pInpMtr[StrIdx + (k - NumDummy) * Rate];
+					if (k < NumDummy)
+					{
+						pInterMatrix[r * C_sb + c] = DummyValue;
+					}
+					else
+					{
+						pInterMatrix[r * C_sb + c] = pInpMtr[StrIdx + (k - NumDummy) * Rate];
+					}
 				}
 			}
 		}
@@ -57,6 +64,8 @@ static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 		for (int c = 0; c < C_sb; c++)
 		{
 			int col = InterColumnPattern[c];
+
+			/*
 			for (int r = 0; r < R_sb; r++)
 			{
 				int k = col * R_sb + r;
@@ -67,6 +76,34 @@ static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 					pOutMtr[StrIdx + OutIdx * Rate] = v;
 					OutIdx++;
 				}  
+			}
+			*/
+
+			if (col < NumDummy)
+			{
+#pragma omp parallel shared (OutIdx)
+				{
+#pragma omp for 
+					for (int r = 1; r < R_sb; r++)
+					{
+						T v = pInterMatrix[r * C_sb + col];
+						pOutMtr[StrIdx + (OutIdx + (r - 1)) * Rate] = v;
+					}
+				}
+				OutIdx += (R_sb - 1);
+			}
+			else
+			{
+#pragma omp parallel shared (OutIdx)
+				{
+#pragma omp for 
+					for (int r = 0; r < R_sb; r++)
+					{
+						T v = pInterMatrix[r * C_sb + col];
+						pOutMtr[StrIdx + (OutIdx + r) * Rate] = v;
+					}
+				}
+				OutIdx += R_sb;
 			}
 		}  
 	}
@@ -141,7 +178,7 @@ static void SubblockDeInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 	
 	for (int StrIdx = 0; StrIdx < (Rate - 1); StrIdx++)
 	{
-		InIdx = 0;
+		InIdx=0;
 		for (int r = 0;r < R_sb; r++)
 		{
 			for (int c = 0; c < C_sb; c++)

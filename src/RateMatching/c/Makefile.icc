@@ -1,0 +1,54 @@
+include ../../../common/makefile.config
+
+SRC = $(SRC_DIR)/main_test.cpp  RateMatcher_ntp.cpp test.cpp ../util.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp
+
+SRC += $(SRC_DIR)/lte_phy.cpp
+
+#$(warning $(SRC))
+
+SRC_OMP = $(subst RateMatcher_ntp, RateMatcher_omp, $(SRC))
+
+INC_FLAGS += -I. -I.. -I$(LIB_DIR) -I$(SRC_DIR) -I$(LIB_DIR)/power
+
+TARGETS = RM.out RM_omp.out
+
+OBJS = $(patsubst %.cpp, %.o, $(SRC))
+#$(warning $(OBJS))
+OBJS_OMP = $(patsubst %.cpp, %.o, $(SRC_OMP))
+#$(warning $(OBJS_OMP))
+
+
+ifeq ($(TX),1)
+	ICPCFLAGS += -DTxRateM
+endif
+
+ifeq ($(VEC),1)
+	ICPCFLAGS += -vec -vec-report2
+#	ICPCFLAGS += -ftree-vectorize -msse2 -ffast-math -vec-report
+else
+	ICPCFLAGS += -no-vec
+endif
+
+ifeq ($(RAPL),1)
+	LINKFLAGS += -L$(LIB_DIR)/power/papi-rapl -lraplpower
+	ICPCFLAGS += -D_RAPL
+endif
+
+all: $(TARGETS)
+
+RM.out: $(OBJS)
+	$(ICPC) $^ $(LINKFLAGS) -o $@
+
+RM_omp.out: $(OBJS_OMP)
+	$(ICPC) $^ $(LINKFLAGS) -openmp -o $@
+
+RateMatcher_omp.o: RateMatcher_omp.cpp
+	$(ICPC) -c $< -o $@ $(ICPCFLAGS) -openmp
+
+%.o: %.cpp
+	$(ICPC) -c $< -o $@ $(ICPCFLAGS)
+
+clean:
+	rm -rf $(TARGETS) $(OBJS) $(OBJS_OMP)
+

@@ -7,7 +7,7 @@ SRC += $(SRC_DIR)/lte_phy.cpp
 
 SRC_OMP = $(subst Modulation, Modulation_omp, $(SRC))
 
-INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(SRC_DIR)/Modulation/testsuite -I$(LIB_DIR)
+INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)
 
 TARGETS = ModDemod.out ModDemod_omp.out
 

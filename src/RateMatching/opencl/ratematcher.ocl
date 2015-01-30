@@ -1,4 +1,6 @@
-__kernel void ratematcher(__global int *piSeq, __global int *pcSeq,
+
+/*
+__kernel void ratematcher_small_grid(__global int *piSeq, __global int *pcSeq,
 						int in_buf_sz, 
 						int rm_blk_sz,
 						int rm_last_blk_len,
@@ -6,7 +8,7 @@ __kernel void ratematcher(__global int *piSeq, __global int *pcSeq,
 						 __constant int *InverseColumnPattern,
 						int rm_data_length,
 						int n_blocks,
-						  __local int *pInterMatrix,
+						  __global int *pInterMatrix,
 						  int n_iters)
 {
 	int group_id = get_group_id(0);
@@ -55,7 +57,7 @@ __kernel void ratematcher(__global int *piSeq, __global int *pcSeq,
 
 			int out_idx = 0;
 			int ptn_id = InverseColumnPattern[c];
-			for (int i = 0; i <= /*c*/ptn_id; i++)
+			for (int i = 0; i <= ptn_id; i++)
 			{
 				if (InterColumnPattern[i] < NumDummy)
 					out_idx += (R_sb - 1);
@@ -63,14 +65,7 @@ __kernel void ratematcher(__global int *piSeq, __global int *pcSeq,
 					out_idx += R_sb;
 			}
 			out_idx -= R_sb - r;
-			/*
-			if (out_idx == 74)
-			{
-			//	printf("%d\n", NumDummy);
-				printf("%d %d %d\n", local_id, r, c);
-				printf("%d\n", pInterMatrix[local_id+NumDummy]);
-			}
-			*/
+
 			pcSeq[out_blk_offset + StrIdx + out_idx * Rate] = pInterMatrix[local_id+NumDummy];
 			barrier(CLK_LOCAL_MEM_FENCE);
 		}
@@ -114,6 +109,141 @@ __kernel void ratematcher(__global int *piSeq, __global int *pcSeq,
 	}
 	barrier(CLK_GLOBAL_MEM_FENCE);
 	}
+}
+*/
+
+__kernel void ratematcher_small_grid(__global int *piSeq, __global int *pcSeq,
+									 int in_buf_sz, 
+									 int rm_blk_sz,
+									 int rm_last_blk_len,
+									 __constant int *InterColumnPattern,
+									 __constant int *InverseColumnPattern,
+									 int rm_data_length,
+									 int n_blocks,
+									 __global int *pInterMatrix,
+									 int n_iters)
+{
+	int num_work_items = get_global_size(0);
+	int num_tasks = (rm_blk_sz + num_work_items - 1) / num_work_items;
+	int g_id = get_global_id(0);
+	int task_id;
+
+//	printf("%d\n", num_work_items);
+//	printf("%d\n", num_tasks);
+
+	for (int h = 0; h < n_iters; h++) {
+	int out_block_offset = 0;
+	for (int i = 0; i < n_blocks; i++)
+	{	
+		int cur_blk_len = (i != (n_blocks - 1)) ? rm_blk_sz : rm_last_blk_len;
+
+		int D = cur_blk_len;
+		int C_sb = 32;
+		int Rate = 3;	
+		int R_sb = (D + (C_sb - 1)) / C_sb;	
+		int K_pi = R_sb * C_sb;
+		int NumDummy = K_pi - D;
+		int DummyValue = 1000000;
+		//	int out_blk_offset = (group_id / groups_each_block) * Rate *rm_blk_sz;
+	
+		// 0 and 1
+		for (int StrIdx = 0; StrIdx < Rate - 1; StrIdx++)
+		{
+			for (int j = 0; j < num_tasks; j++)
+			{
+				int task_id = j * num_work_items + g_id;
+
+				if (task_id < rm_blk_sz)
+				{
+					if (0 == task_id)
+					{	
+						for (int k = 0; k < NumDummy; k++)
+							pInterMatrix[k] = DummyValue;
+					}
+					pInterMatrix[task_id + NumDummy] = piSeq[out_block_offset + StrIdx + task_id * Rate];
+					
+					//		barrier(CLK_LOCAL_MEM_FENCE);
+				
+					int r = (task_id + NumDummy) / C_sb;
+					int c = task_id + NumDummy - r * C_sb;
+
+					int out_idx = 0;
+					int ptn_id = InverseColumnPattern[c];
+					for (int k = 0; k <= /*c*/ptn_id; k++)
+					{
+						if (InterColumnPattern[k] < NumDummy)
+							out_idx += (R_sb - 1);
+						else
+							out_idx += R_sb;
+					}
+					out_idx -= (R_sb - r);
+
+					pcSeq[out_block_offset + StrIdx + out_idx * Rate] = pInterMatrix[task_id + NumDummy];
+				}
+			}
+			//	barrier(CLK_LOCAL_MEM_FENCE);
+		}
+
+		// 2
+		for (int j = 0; j < num_tasks; j++)
+		{
+			int task_id = j * num_work_items + g_id;
+
+			if (task_id < rm_blk_sz)
+			{
+				if (0 == task_id)
+				{
+					for (int k = 0; k < NumDummy; k++)
+						pInterMatrix[k] = DummyValue;
+				}
+				pInterMatrix[task_id + NumDummy] = piSeq[out_block_offset + 2 + task_id * Rate];
+				//	printf("%d\n", pInterMatrix[task_id + NumDummy]);
+				//	printf("out_block_offset = %d\n", out_block_offset);
+	
+//		barrier(CLK_LOCAL_MEM_FENCE);
+
+				int r = (task_id + NumDummy) / C_sb;
+				int c = task_id + NumDummy - r * C_sb;
+				int rr, cc;
+
+				// Excellent!
+				if(c == 0)
+				{
+					rr = r - 1;
+					cc = InverseColumnPattern[C_sb - 1];
+				}
+				else
+				{
+					rr = r;
+					cc = InverseColumnPattern[c - 1];
+				}
+	
+				int out_idx = 0;
+				for (int k = 0; k < cc; k++)
+				{
+					if (InterColumnPattern[k] < NumDummy - 1 || InterColumnPattern[k] == C_sb - 1)
+						out_idx += (R_sb - 1);
+					else
+						out_idx += R_sb;
+				}
+
+				// and Excellent!
+				if (InterColumnPattern[cc] < NumDummy - 1)
+					out_idx += (rr - 1);
+				else
+					out_idx += rr;
+		
+				pcSeq[out_block_offset + 2 + out_idx * Rate] = pInterMatrix[task_id + NumDummy];
+				//	printf("%d\n", pcSeq[out_block_offset + 2 + out_idx * Rate]);
+			}
+		}
+		out_block_offset += cur_blk_len * Rate;
+	}
+	}
+}
+
+__kernel void ratematcher_big_grid()
+{
 }
 
 __kernel void ratedematcher()

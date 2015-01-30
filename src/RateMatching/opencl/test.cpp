@@ -11,12 +11,6 @@
 #include "check/check.h"
 #include "util.h"
 
-#ifdef _RAPL
-extern "C" {
-#include "papi-rapl/rapl_power.h"
-}
-#endif
-
 void tx_rate_matching(LTE_PHY_PARAMS *lte_phy_params)
 {
 	std::cout << "Tx RateMatching starts" << std::endl;
@@ -24,32 +18,23 @@ void tx_rate_matching(LTE_PHY_PARAMS *lte_phy_params)
 //	ReadInputFromFiles(lte_phy_params->rm_in, lte_phy_params->rm_in_buf_sz, "../testsuite/TxRateMatchInput");
 	GeneRandomInput(lte_phy_params->rm_in, lte_phy_params->rm_in_buf_sz, "../testsuite/RandomTxRateMatchInput");
 
-#ifdef _RAPL
-	rapl_power_start();
-#else
-
 	double tstart, tend, ttime;
 	double n_gflops, gflops;
 
 	tstart = dtime();
-#endif
 
-	int n_iters = 1000;
+	int n_iters = 1;
 	for (int i = 0; i < n_iters; i++) {
 		TxRateMatching(lte_phy_params, lte_phy_params->rm_in, lte_phy_params->rm_out);
 	}
 
-#ifndef _RAPL
 	tend = dtime();
 	ttime = tend - tstart;
 	n_gflops = n_iters * gflop_counter(lte_phy_params);
 	gflops = (n_gflops * 10e3) / ttime;
-	printf("%fms\n", ttime);
-	printf("Number of gflops = %lf\n", n_gflops);
-	printf("GFlops = %f\n", gflops);
-#else
-	rapl_power_stop();
-#endif
+//	printf("%fms\n", ttime);
+//	printf("Number of gflops = %lf\n", n_gflops);
+//	printf("GFlops = %f\n", gflops);
 
 	WriteOutputToFiles(lte_phy_params->rm_out, lte_phy_params->rm_out_buf_sz, "../testsuite/testTxRateMatchOutput");
 	

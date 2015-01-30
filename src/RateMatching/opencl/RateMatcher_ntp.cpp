@@ -3,9 +3,11 @@
 
 #include "CL/opencl.h"
 #include "opencl/clutil.h"
+#include "util.h"
 
 #define PROGRAM_FILE "ratematcher.ocl"
-#define RM_KERNEL_FUNC "ratematcher"
+#define RM_SMALL_KERNEL_FUNC "ratematcher_small_grid"
+#define RM_BIG_KERNEL_FUNC "ratematcher_big_grid"
 #define RDM_KERNEL_FUNC "ratedematcher"
 
 static int InterColumnPattern[32] = {0,16,8,24,4,20,12,28,
@@ -13,6 +15,8 @@ static int InterColumnPattern[32] = {0,16,8,24,4,20,12,28,
 									 1,17,9,25,5,21,13,29,3,
 									 19,11,27,7,23,15,31};
 
+
+/*
 template <typename T>
 static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 {
@@ -116,7 +120,7 @@ static void SubblockInterleaving(int SeqLen, T *pInpMtr, T *pOutMtr)
 	free(Pi);
 	free(pInterSeq);
 }
-
+*/
 
 template<typename T>
 static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
@@ -254,6 +258,8 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 
 //	int pInMatrix[RATE * (BLOCK_SIZE + 4)];
 //	int pOutMatrix[RATE * (BLOCK_SIZE + 4)];
+	int *pInterMatrix;
+	int num_inter_matrices;
 
 	int i, j, r;
 
@@ -266,22 +272,19 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 	cl_program program;
 	cl_int _err;
 
-	cl_kernel kernel;
+	cl_kernel small_grid_kernel, big_grid_kernel;
 	cl_mem piSeq_buffer, pcSeq_buffer;
 	cl_mem InterColumnPattern_buffer, InverseColumnPattern_buffer;
+	cl_mem pInterMatrix_buffer;
 
 	size_t global_size, local_size;
-
-	for (i = 0; i < 32; i++)
-	{
-		InverseColumnPattern[InterColumnPattern[i]] = i;
-	}
-
+	
 	platform = device_query();
 	device = create_device(&platform);
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, &_err);
 	program = build_program(&context, &device, PROGRAM_FILE);
-	kernel = clCreateKernel(program, RM_KERNEL_FUNC, &_err);
+	small_grid_kernel = clCreateKernel(program, RM_SMALL_KERNEL_FUNC, &_err);
+	big_grid_kernel = clCreateKernel(program, RM_BIG_KERNEL_FUNC, &_err);
 	queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &_err);
 
 	in_buf_sz = lte_phy_params->rm_in_buf_sz;
@@ -292,7 +295,7 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 	rm_data_length = (in_buf_sz / RATE);
 
 	n_blocks = (rm_data_length + (rm_blk_sz - 1)) / rm_blk_sz;
-	printf("n_blocks:%d\n",n_blocks);
+//	printf("n_blocks:%d\n",n_blocks);
 	if (rm_data_length % rm_blk_sz)
 	{
 		rm_last_blk_len = (rm_data_length % rm_blk_sz);
@@ -301,42 +304,50 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 	{
 		rm_last_blk_len = rm_blk_sz;
 	}
+	
+	global_size = num_threads;
+//	printf("%d\n", global_size);
+	local_size = 128;
+//	printf("local_size:%d\n",local_size);
+//	int groups = (rm_blk_sz + (local_size -1))/local_size;
+	
+	//global_size = ((rm_data_length + (local_size-1))/local_size)*local_size;
+//	global_size = n_blocks * groups * local_size;
 
-	/*
-	out_block_offset = 0;
-	for (i = 0; i < n_blocks; i++)
+//	printf("global_size:%d\n",global_size);
+
+	if (global_size <= rm_blk_sz)
+		num_inter_matrices = 1;
+	else
+		num_inter_matrices = global_size / rm_blk_sz;
+
+	pInterMatrix = (int *)malloc(sizeof(int) * num_inter_matrices * (((rm_blk_sz + 31) / 32) * 32));
+	
+	for (i = 0; i < 32; i++)
 	{
-		cur_blk_len = (i != (n_blocks - 1)) ? rm_blk_sz : rm_last_blk_len;
-			
-		//	SubblockInterleaving(cur_blk_len, pInMatrix, pOutMatrix);
-		SubblockInterleaving(cur_blk_len, piSeq + out_block_offset, pcSeq + out_block_offset);
-
-		out_block_offset += RATE * cur_blk_len;
+		InverseColumnPattern[InterColumnPattern[i]] = i;
 	}
-	*/
-	/*
-	 * Use OpenCL kernel
-	 */
 
 	/* Create buffers*/
 	piSeq_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, in_buf_sz * sizeof(int), NULL, &_err);
 	pcSeq_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, in_buf_sz * sizeof(int), NULL, &_err);
 	InterColumnPattern_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, 32 * sizeof(int), NULL, &_err);
 	InverseColumnPattern_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, 32 * sizeof(int), NULL, &_err);
+	pInterMatrix_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(int) * num_inter_matrices * (((rm_blk_sz + 31) / 32) * 32), NULL, &_err);
 
 	/* Set kernel arguments */
-	_err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &piSeq_buffer);
-	_err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &pcSeq_buffer);
-	_err |= clSetKernelArg(kernel, 2, sizeof(int), &in_buf_sz);
-	_err |= clSetKernelArg(kernel, 3, sizeof(int), &rm_blk_sz);
-	_err |= clSetKernelArg(kernel, 4, sizeof(int), &rm_last_blk_len);
-	_err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &InterColumnPattern_buffer);
-	_err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &InverseColumnPattern_buffer);
-	_err |= clSetKernelArg(kernel, 7, sizeof(int), &rm_data_length);
-	_err |= clSetKernelArg(kernel, 8, sizeof(int), &n_blocks);
-	_err |= clSetKernelArg(kernel, 9, sizeof(int) * ((rm_blk_sz+31)/32) * 32, NULL);
+	_err = clSetKernelArg(small_grid_kernel, 0, sizeof(cl_mem), &piSeq_buffer);
+	_err |= clSetKernelArg(small_grid_kernel, 1, sizeof(cl_mem), &pcSeq_buffer);
+	_err |= clSetKernelArg(small_grid_kernel, 2, sizeof(int), &in_buf_sz);
+	_err |= clSetKernelArg(small_grid_kernel, 3, sizeof(int), &rm_blk_sz);
+	_err |= clSetKernelArg(small_grid_kernel, 4, sizeof(int), &rm_last_blk_len);
+	_err |= clSetKernelArg(small_grid_kernel, 5, sizeof(cl_mem), &InterColumnPattern_buffer);
+	_err |= clSetKernelArg(small_grid_kernel, 6, sizeof(cl_mem), &InverseColumnPattern_buffer);
+	_err |= clSetKernelArg(small_grid_kernel, 7, sizeof(int), &rm_data_length);
+	_err |= clSetKernelArg(small_grid_kernel, 8, sizeof(int), &n_blocks);
+	_err |= clSetKernelArg(small_grid_kernel, 9, sizeof(cl_mem), &pInterMatrix_buffer);
 	int n_iters = 10000;
-	_err |= clSetKernelArg(kernel, 10, sizeof(int), &n_iters);
+	_err |= clSetKernelArg(small_grid_kernel, 10, sizeof(int), &n_iters);
 	if(_err < 0) {printf("err set args:%d\n",_err);exit(1);}
 
 	/* Kernel */
@@ -345,19 +356,18 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 	_err = clEnqueueWriteBuffer(queue, InverseColumnPattern_buffer, CL_TRUE, 0, 32 * sizeof(int), InverseColumnPattern, 0, NULL, NULL);
 	if(_err < 0) {printf("err write buffer:%d\n",_err);exit(1);}
 
-	local_size = 64;
-	printf("local_size:%d\n",local_size);
-	int groups = (rm_blk_sz + (local_size -1))/local_size;
-	
-	//global_size = ((rm_data_length + (local_size-1))/local_size)*local_size;
-	global_size = n_blocks * groups * local_size;
-
-	printf("global_size:%d\n",global_size);
-
 	double elapsed_time = 0.0;
 	cl_event prof_event;
 
-	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, &local_size, 0, NULL, /*NULL*/&prof_event);
+	if (num_threads <= rm_data_length)
+	{
+		_err = clEnqueueNDRangeKernel(queue, small_grid_kernel, 1, NULL, &global_size, &local_size, 0, NULL, /*NULL*/&prof_event);
+	}
+	else
+	{
+		_err = clEnqueueNDRangeKernel(queue, big_grid_kernel, 1, NULL, &global_size, &local_size, 0, NULL, /*NULL*/&prof_event);
+	}
+
 	if(_err < 0) {printf("err in kernel:%d\n",_err);exit(1);}
 
 	cl_ulong ev_start_time = (cl_ulong)0;
@@ -384,10 +394,13 @@ void TxRateMatching(LTE_PHY_PARAMS *lte_phy_params, int *piSeq, int *pcSeq)
 	clReleaseMemObject(pcSeq_buffer);
 	clReleaseMemObject(InterColumnPattern_buffer);
 	clReleaseMemObject(InverseColumnPattern_buffer);
-	clReleaseKernel(kernel);
+	clReleaseKernel(small_grid_kernel);
+	clReleaseKernel(big_grid_kernel);
    	clReleaseCommandQueue(queue);
    	clReleaseProgram(program);
    	clReleaseContext(context);
+
+	free(pInterMatrix);
 }
 
 void RxRateMatching(LTE_PHY_PARAMS *lte_phy_params, float *pLLRin, float *pLLRout, int *pHD)
