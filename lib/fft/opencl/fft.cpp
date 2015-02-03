@@ -1,5 +1,5 @@
 
-#define PROGRAM_FILE "/home/xcwei/ParWiBench/lib/fft/opencl/fft.ocl"
+#define PROGRAM_FILE "/home/xuechao/ParWiBench/lib/fft/opencl/fft.ocl"
 #define KERNEL_FUNC "fft_radix2_kernel"
 
 #include <math.h>
@@ -12,26 +12,8 @@
 #include "CL/cl.h"
 
 #include "opencl/clutil.h"
+#include "util.h"
 //#include "fft/fft.h"
-#include "timer/meas.h"
-
-#define N (1 << 12)
-#define PI	3.14159265358979323846264338327950288
-
-float v[N][2], v1[N][2], vout[N][2], v1out[N][2];
-
-/* Print a vector of complexes as ordered pairs. */
-static void print_vector(
-		const char *title,
-		float (*x)[2],
-		int n)
-{
-	int i;
-	printf("%s (dim=%d):", title, n);
-	for(i=0; i<n; i++ ) printf(" %f,%f ", x[i][0],x[i][1]);
-	putchar('\n');
-}
-
 
 void fft(int n, float (*a)[2], float (*y)[2], int direction)
 {
@@ -51,7 +33,7 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	size_t global_size, local_size;
 
 	/* Data and buffer */
-	int num_points, points_per_group, p;
+	int p;
 	float *input, *output;
 
 	int i;
@@ -112,22 +94,25 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	};
 
 	/* Initialize kernel arguments */
-	num_points = n;
+
 	/*
 	points_per_group = local_mem_size / ( 2 * sizeof(float));
 	if (points_per_group > num_points)
 		points_per_group = num_points;
 	*/
 
-	global_size = num_points / 2;
-	local_size = 32;
+	global_size = num_threads;
+	local_size = 128;
+
+//	printf("%d\n", global_size);
 
 	/* Set kernel arguments */
 	_err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &input_buffer);
 	_err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &output_buffer);
-	_err |= clSetKernelArg(kernel, 3, sizeof(int), &direction);
+	_err |= clSetKernelArg(kernel, 2, sizeof(int), &n);
+	_err |= clSetKernelArg(kernel, 4, sizeof(int), &direction);
 	int n_iters = 10000;
-	_err |= clSetKernelArg(kernel, 4, sizeof(int), &n_iters);
+	_err |= clSetKernelArg(kernel, 5, sizeof(int), &n_iters);
 	if (_err < 0)
 	{
 		printf("Couldn't set a kernel argument");
@@ -137,13 +122,15 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	double elapsed_time = 0.0;
 	cl_event prof_event;
 	/* Enqueue fft kernel */
-	for (p = 1; p <= (num_points / 2); p <<= 1)
+	for (p = 1; p <= (n / 2); p <<= 1)
 	{
-		_err = clSetKernelArg(kernel, 2, sizeof(int), &p);
+		_err = clSetKernelArg(kernel, 3, sizeof(int), &p);
 		_err = clEnqueueWriteBuffer(queue, input_buffer, CL_TRUE, 0, 2 * n * sizeof(float), input, 0, NULL, NULL);
 		
 	//	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL); 
 		_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, /*NULL*/&local_size, 0, NULL, &prof_event);
+
+		//	printf("%d\n", _err);
 		
 		if (_err < 0)
 		{
@@ -160,7 +147,7 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 		elapsed_time = elapsed_time + (double)(ev_end_time - ev_start_time) / 1000000.0;
 
 		_err = clEnqueueReadBuffer(queue, output_buffer, CL_TRUE, 0, 2 * n * sizeof(float), output, 0, NULL, NULL);
-		for (i = 0; i < 2 * num_points; i++)
+		for (i = 0; i < 2 * n; i++)
 		{
 			input[i] = output[i];
 		}
@@ -193,6 +180,7 @@ void fft(int n, float (*a)[2], float (*y)[2], int direction)
 	free(output);
 }
 
+/*
 int main(int argc, char *argv[])
 {
 //	float v[N][2], v1[N][2], vout[N][2], v1out[N][2];
@@ -235,3 +223,4 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+*/

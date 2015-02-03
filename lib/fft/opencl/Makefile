@@ -1,5 +1,5 @@
 
-CXXFLAGS = -g -Wall -I../../ -I.
+CXXFLAGS = -g -Wall -I../../ -I. -I../
 LINKFLAGS = -lOpenCL
 
 ifeq ($(NV),1)
@@ -9,7 +9,7 @@ else
 	CXXFLAGS += -I/opt/AMDAPP/include
 endif
 
-fft: fft.cpp ../../opencl/clutil.cpp
+fft: fft.cpp ../../opencl/clutil.cpp test.cpp ../util.cpp ../../check/check.cpp ../../timer/meas.cpp
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LINKFLAGS)
 
 clean:

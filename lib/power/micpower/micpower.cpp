@@ -103,8 +103,10 @@ double micpower_finalize()
 	pthread_join(micPthread, NULL);
 	printf("counts = %d\n",_50ms_counts);
 	printf("Energy_thread_time = %lf\n", Energy_thread_time);
+//	printf("%lf\n", Energy_thread_time / _50ms_counts);
 	// (uw * ms) / 10e-9 = J
-	return (passEnergy * 70.0) / (1000 * 1000 * 1000);
+//	return (passEnergy * 70.0) / (1000 * 1000 * 1000);
+	return (passEnergy * (Energy_thread_time / _50ms_counts)) / (1000 * 1000 * 1000);
 }
 
 /*

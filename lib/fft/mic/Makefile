@@ -1,15 +1,27 @@
 include ../../../common/makefile.config
-all: fft fft_check
 
-INC_DIRS = ./ ../
+#SRC = test.cpp ../util.cpp
+SRC = test.cpp
+SRC += $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp
+OBJS = $(patsubst %.cpp, %.o, $(SRC))
 
-#CXXFLAGS += -DDEBUG
+all: fft
 
-fft: fft.cpp
-	$(ICC) $(MMIC) -o $@ -g $^ $(INC_DIRS:%=-I%) $(ICCFLAGS)
+INC_DIRS = ./ ../ $(LIB_DIR)
 
-fft_check: fft_check.c
-	$(ICC) $(MMIC) -o $@ -g $^ -lm $(INC_DIRS:%=-I%)
+ICPCFLAGS += $(INC_DIRS:%=-I%)
+
+LINKFLAGS += -L$(LIB_DIR)/fft/mic -lfft
+
+fft: $(OBJS) libfft.a
+	$(ICPC) $(MMIC) -o $@ $(OBJS) $(LINKFLAGS)
+
+libfft.a: fft.o ../util.o
+	ar rcs $@ $^
+
+%.o: %.cpp
+	$(ICPC) $(MMIC) -o $@ -c $< $(ICPCFLAGS)
+
 
 clean:
-	rm -rf *.o fft fft_check
+	rm -rf *.o $(OBJS) fft *.a *.so

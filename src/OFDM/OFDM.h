@@ -3,7 +3,7 @@
 #define __OFDM_H_
 
 #include "lte_phy.h"
-#include "fft.h"
+
 void ofmodulating(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOutData);
 void ofmodulating(LTE_PHY_PARAMS *lte_phy_params, float *pInpDataReal, float *pInpDataImag,
 				  float *pOutDataReal, float *pOutDataImag);

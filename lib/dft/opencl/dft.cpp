@@ -6,30 +6,13 @@
 #include "opencl/clutil.h"
 #include "timer/meas.h"
 
-#define PROGRAM_FILE "/home/xcwei/ParWiBench/lib/dft/opencl/dft.ocl"
-#define KERNEL_FUNC "dft_kernel"
+#define PROGRAM_FILE "/home/xuechao/ParWiBench/lib/dft/opencl/dft.ocl"
+#define DFT_UNCOALESED_KERNEL "dft_uncoalesed_kernel"
+#define DFT_COALESED_KERNEL "dft_coalesed_kernel"
 
+extern int num_threads;
 
-#define PI	3.14159265358979323846264338327950288
-
-#define N	(1 << 11)
-float v[N * 2], v1[N * 2], vout[N * 2], v1out[N * 2];
-
-
-/* Print a vector of complexes as ordered pairs. */
-/*
-static void
-print_vector(
-	const char *title,
-	float *x,
-	int n)
-{
-	int i;
-	printf("%s (dim=%d):", title, n);
-	for(i=0; i<n; i++ ) printf(" %f,%f ", x[i], x[i + n]);
-	putchar('\n');
-}
-*/
+//#define PI	3.14159265358979323846264338327950288
 
 /*
   Discrete Fourier Transform
@@ -43,7 +26,7 @@ void dft(int n, float *a, float *y, int direction)
 	cl_program program;
 	cl_int _err;
 
-	cl_kernel kernel;
+	cl_kernel uncoalesed_kernel, coalesed_kernel;
 
 	cl_ulong local_mem_size;
 	cl_mem a_buffer, y_buffer;
@@ -54,29 +37,41 @@ void dft(int n, float *a, float *y, int direction)
 	device = create_device(&platform);
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, &_err);
 	program = build_program(&context, &device, PROGRAM_FILE);
-	kernel = clCreateKernel(program, KERNEL_FUNC, &_err);
+	uncoalesed_kernel = clCreateKernel(program, DFT_UNCOALESED_KERNEL, &_err);
+	coalesed_kernel = clCreateKernel(program, DFT_COALESED_KERNEL, &_err);
 	queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &_err);
 
 	/* Create buffers*/
 	a_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, 2 * n * sizeof(float), NULL, &_err);
 	y_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, 2 * n * sizeof(float), NULL, &_err);
 
+	
+	global_size = num_threads;
+	local_size = 128;
+	
 	/* Set kernel arguments */
-	_err = clSetKernelArg(kernel, 0, sizeof(int), &n);
-	_err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &a_buffer);
-	_err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &y_buffer);
-	_err |= clSetKernelArg(kernel, 3, sizeof(int), &direction);
+	_err = clSetKernelArg(uncoalesed_kernel, 0, sizeof(int), &n);
+	_err |= clSetKernelArg(uncoalesed_kernel, 1, sizeof(cl_mem), &a_buffer);
+	_err |= clSetKernelArg(uncoalesed_kernel, 2, sizeof(cl_mem), &y_buffer);
+	_err |= clSetKernelArg(uncoalesed_kernel, 3, sizeof(int), &direction);
 	int n_iters = 1000;
-	_err |= clSetKernelArg(kernel, 4, sizeof(int), &n_iters);
+	_err |= clSetKernelArg(uncoalesed_kernel, 4, sizeof(int), &n_iters);
+	
+	_err = clSetKernelArg(coalesed_kernel, 0, sizeof(int), &n);
+	_err |= clSetKernelArg(coalesed_kernel, 1, sizeof(cl_mem), &a_buffer);
+	_err |= clSetKernelArg(coalesed_kernel, 2, sizeof(cl_mem), &y_buffer);
+	_err |= clSetKernelArg(coalesed_kernel, 3, sizeof(int), &direction);
+	_err |= clSetKernelArg(coalesed_kernel, 4, 2 * local_size * sizeof(float), NULL);
+//	int n_iters = 1;
+	_err |= clSetKernelArg(coalesed_kernel, 5, sizeof(int), &n_iters);
 
 	_err = clEnqueueWriteBuffer(queue, a_buffer, CL_TRUE, 0, 2 * n * sizeof(float), a, 0, NULL, NULL);
 
 	double elapsed_time = 0.0;
 	cl_event prof_event;
-
-	global_size = n;
-//	local_size = 32;
-	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, /*NULL*/&prof_event);
+	
+	_err = clEnqueueNDRangeKernel(queue, uncoalesed_kernel, 1, NULL, &global_size, &local_size, 0, NULL, /*NULL*/&prof_event);
+//	_err = clEnqueueNDRangeKernel(queue, coalesed_kernel, 1, NULL, &global_size, &local_size, 0, NULL, /*NULL*/&prof_event);
 
 	cl_ulong ev_start_time = (cl_ulong)0;
 	cl_ulong ev_end_time = (cl_ulong)0;
@@ -94,45 +89,5 @@ void dft(int n, float *a, float *y, int direction)
 
 	clReleaseMemObject(a_buffer);
 	clReleaseMemObject(y_buffer);
-}
-
-
-int main(int argc, char *argv[])
-{
-	int k;
-	int n = atoi(argv[1]);
-// Fill v[] with a function of known FFT:
-	for (k = 0; k < n; k++)
-	{
-		v[k] = 0.125 * cos(2 * PI * k / (float)n);
-		v[k + n] = 0.125 * sin(2 * PI * k / (float)n);
-// v1[k][0] = 0.3*cos(2*PI*k/(float)N);
-// v1[k][1] = -0.3*sin(2*PI*k/(float)N);
-// fscanf(fptr_real, "%f", &(v[k][0]));
-// fscanf(fptr_imag, "%f", &(v[k][1]));
-	}
-// v[0]=1;v[1]=0;
-// v[2]=2;v[3]=0;
-// v[4]=4;v[5]=0;
-// v[6]=3;v[7]=0;
-//	print_vector("Orig", v, N);
-
-//	double tstart, tstop, ttime;
-//	tstart = dtime();
-	dft(n, v, vout, -1);
-//	tstop = dtime();
-//	ttime = tstop - tstart;
-//	printf("Elapsed time of dft is %lfms\n", ttime);
-	
-//	for (k = 0; k < N; k++)
-//	{
-//		vout[k] /= N;
-//		vout[k + N] /= N;
-//	}
-//	print_vector("iFFT", vout, N);
-//	dft(N, vout, v, 1);
-//	print_vector(" FFT", v, N);
-	
-	return 0;
 }
 

@@ -478,6 +478,10 @@ itpp库中的Turbo解码模块认为其输入输出是“+1”或“-1”，因�
 
 目前的实现中，在Rate Dematching时，接收端将从OFDM传入的输入数据提取出的DMRS符号放到输出数据的最前面位置，然后接着再放Data部分。输出数据作为Equalizer的输入数据。
 
+\textbf{OpenMP实现}
+
+目前的OpenMP多线程版本主要在SubblockInterleaving内部的两个循环中，而且没有计算，全都是对两个矩阵的读写，而两个矩阵的大小大概是24KB，甚至都小于一个core上的L1 cache的大小（以cecag1上的Intel Xeon E5-2620为例，L1 cache的大小为35KB）。因此，如果这两个矩阵能够大部分在cache中，那么多线程不会带来好处，可以解释随着线程增多性能下降的现象。
+
 \subsection{Scrambling}
 
 在Tx，scrambling的计算公式为

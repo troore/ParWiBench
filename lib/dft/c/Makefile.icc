@@ -12,31 +12,45 @@ OBJS_OMP = $(patsubst %.cpp, %.o, $(SRC_OMP))
 
 INC_DIRS = ./ ../ $(LIB_DIR)
 
-CXXFLAGS += $(INC_DIRS:%=-I%)
+ICPCFLAGS += $(INC_DIRS:%=-I%)
 
 #LINKFLAGS += -L$(LIB_DIR)/dft/c -ldft
+
+ifeq ($(VEC),1)
+	ICPCFLAGS += -vec -vec-report2
+#	ICPCFLAGS += -ftree-vectorize -msse2 -ffast-math -vec-report
+else
+	ICPCFLAGS += -no-vec
+endif
+
+ifeq ($(RAPL),1)
+	INC_DIRS += $(LIB_DIR)/power
+	LINKFLAGS += -L$(LIB_DIR)/power/papi-rapl -lraplpower
+	ICPCFLAGS += -D_RAPL
+endif
+
 
 TARGETS = dft dft_omp
 
 all: $(TARGETS) 
 
 dft: $(OBJS) libdft.a
-	$(CXX) -o $@ $(OBJS) $(LINKFLAGS) -L$(LIB_DIR)/dft/c -ldft
+	$(ICPC) -o $@ $(OBJS) $(LINKFLAGS) -L$(LIB_DIR)/dft/c -ldft
 
 libdft.a: dft.o
 	ar rcs $@ $^
 
 dft_omp: $(OBJS_OMP) libdftomp.a
-	$(CXX) -o $@ $(OBJS_OMP) $(LINKFLAGS) -fopenmp -L$(LIB_DIR)/dft/c -ldftomp
+	$(ICPC) -o $@ $(OBJS_OMP) $(LINKFLAGS) -openmp -L$(LIB_DIR)/dft/c -ldftomp
 
 libdftomp.a: dft_omp.o
 	ar rcs $@ $^
 
 dft_omp.o: dft_omp.cpp
-	$(CXX) -o $@ -c $< $(CXXFLAGS) -fopenmp
+	$(ICPC) -o $@ -c $< $(ICPCFLAGS) -openmp
 
 %.o: %.cpp
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
+	$(ICPC) -o $@ -c $< $(ICPCFLAGS)
 
 
 clean:

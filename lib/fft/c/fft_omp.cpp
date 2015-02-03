@@ -4,12 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern int num_threads;
+//#include <omp.h>
 
-#define PI	3.14159265358979323846264338327950288
-
-#include "fft.h"
-#include "util.h"
+#include "fft/fftutil.h"
+#include "fft/fft.h"
 
 void fft_recur(int n, float (*a)[2], float (*y)[2], int direction)
 {

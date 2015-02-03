@@ -9,7 +9,7 @@ SRC += $(SRC_DIR)/lte_phy.cpp
 
 INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)
 # check
-INC_FLAGS += -I$(SRC_DIR)/OFDM -I$(SRC_DIR)/Equalizing -I$(LIB_DIR)/fft/c
+INC_FLAGS += -I$(SRC_DIR)/OFDM -I$(SRC_DIR)/Equalizing -I$(LIB_DIR)/fft
 
 
 #$(warning $(SRC))

@@ -1,28 +1,80 @@
 
 #define PI	3.14159265358979323846264338327950288
 
-__kernel void dft_kernel(int n, const __global float *a, __global float *y, int direction, int n_iters)
+__kernel void dft_uncoalesed_kernel(int n, const __global float *a, __global float *y, int direction, int n_iters)
 {
-    // Row index
-    uint k = get_global_id(0);
+	int num_work_items = get_global_size(0);
+	int num_tasks;
+    int gid = get_global_id(0);
+	int k;
 
 	float p[2];
 	float ang;
 
+	num_tasks = (n + num_work_items - 1) / num_work_items;
+	
 	for (int i = 0; i < n_iters; i++) {
-    if (k < n)
-	{
-		p[0] = 0.0;
-		p[1] = 0.0;
-		ang = ((float)direction) * 2.0 * PI * ((float)k) / ((float)n);
-		
-        for (int j = 0; j < n; j++)
+		for (int j = 0; j < num_tasks; j++)
 		{
-			p[0] += (a[j] * cos(j * ang) - a[j + n] * sin(j * ang));
-			p[1] += (a[j] * sin(j * ang) + a[j + n] * cos(j * ang));
+			k = j * num_work_items + gid;
+			if (k < n)
+			{
+				p[0] = 0.0;
+				p[1] = 0.0;
+				ang = ((float)direction) * 2.0 * PI * ((float)k) / ((float)n);
+		
+				for (int j = 0; j < n; j++)
+				{
+					p[0] += (a[j] * cos(j * ang) - a[j + n] * sin(j * ang));
+					p[1] += (a[j] * sin(j * ang) + a[j + n] * cos(j * ang));
+				}
+				y[k] = p[0];
+				y[k + n] = p[1];
+			}
 		}
-		y[k] = p[0];
-		y[k + n] = p[1];
-    }
+	}
+}
+
+__kernel void dft_coalesed_kernel(int n, const __global float *a, __global float *y, int direction,
+								  __local float *partial_dot_product, int n_iters)
+{
+	float ang;
+	float p[2], local_dot_product[2];
+
+	for (int h = 0; h < n_iters; h++)
+	{
+	for (int k = get_group_id(0); k < n; k += get_num_groups(0))
+	{
+		ang = ((float)direction) * 2.0 * PI * ((float)k) / ((float)n);
+		local_dot_product[0] = 0.0;
+		local_dot_product[1] = 0.0;
+		for (int j = get_local_id(0); j < n; j += get_local_size(0))
+		{
+			local_dot_product[0] += (a[j] * cos(j * ang) - a[j + n] * sin(j * ang));
+			local_dot_product[1] += (a[j] * sin(j * ang) + a[j + n] * cos(j * ang));
+		}
+		partial_dot_product[get_local_id(0)] = local_dot_product[0];
+		partial_dot_product[get_local_id(0) + get_local_size(0)] = local_dot_product[1];
+
+		barrier(CLK_LOCAL_MEM_FENCE);
+
+		if (0 == get_local_id(0))
+		{
+			p[0] = 0.0;
+			p[1] = 0.0;
+			for (int i = 0; i < get_local_size(0); i++)
+			{
+				p[0] += partial_dot_product[i];
+				p[1] += partial_dot_product[i + get_local_size(0)];
+			}
+			
+			y[k] = p[0];
+			y[k + n] = p[1];
+		}
+
+		// Synchronize to make sure the first local work-item in a group is done with
+		// reading partial_dot_product
+		barrier(CLK_LOCAL_MEM_FENCE);
+	}
 	}
 }

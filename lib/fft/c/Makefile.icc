@@ -10,30 +10,44 @@ SRC_OMP = $(subst fft, fft_omp, $(SRC))
 OBJS = $(patsubst %.cpp, %.o, $(SRC))
 OBJS_OMP = $(patsubst %.cpp, %.o, $(SRC_OMP))
 
-INC_DIRS = ./ ../ $(LIB_DIR)
+INC_DIRS = ./ ../ $(LIB_DIR) $(LIB_DIR)/power
 
-CXXFLAGS += $(INC_DIRS:%=-I%)
+ICPCFLAGS += $(INC_DIRS:%=-I%)
 
 LINKFLAGS += -L$(LIB_DIR)/fft/c -lfft
+
+ifeq ($(VEC),1)
+	ICPCFLAGS += -vec -vec-report2
+#	ICPCFLAGS += -ftree-vectorize -msse2 -ffast-math -vec-report
+else
+	ICPCFLAGS += -no-vec
+endif
+
+ifeq ($(RAPL),1)
+	LINKFLAGS += -L$(LIB_DIR)/power/papi-rapl -lraplpower
+	ICPCFLAGS += -D_RAPL
+endif
+
 
 TARGETS = fft fft_omp
 
 all: $(TARGETS) 
 
 fft: $(OBJS) libfft.a
-	$(CXX) -o $@ $(OBJS) $(LINKFLAGS)
+	$(ICPC) -o $@ $(OBJS) $(LINKFLAGS)
 
 libfft.a: fft.o
 	ar rcs $@ $^
 
 fft_omp: $(OBJS_OMP)
-	$(CXX) -o $@ $^ $(LINKFLAGS) -fopenmp
+	$(ICPC) -o $@ $^ $(LINKFLAGS) -openmp
 
 fft_omp.o: fft_omp.cpp
-	$(CXX) -o $@ -c $< $(CXXFLAGS) -fopenmp
+	$(ICPC) -o $@ -c $< $(ICPCFLAGS) -openmp
 
 %.o: %.cpp
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
+	$(ICPC) -o $@ -c $< $(ICPCFLAGS)
 
 clean:
 	rm -rf *.o $(OBJS) $(OBJS_OMP) $(TARGETS) *.a *.so
+

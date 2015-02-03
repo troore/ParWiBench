@@ -1,6 +1,4 @@
 
-
-
 #ifndef PI
 #define PI	3.14159265358979323846264338327950288
 #endif
@@ -12,47 +10,63 @@
 /*
  * p = 1, 2, ..., N/2
  */
-__kernel void fft_radix2_kernel(__global float2 *a, __global float2 *y, int p, int direction, int n_iters)
+__kernel void fft_radix2_kernel(__global float2 *a, __global float2 *y, int n, int p, int direction, int n_iters)
 {
 	int i = get_global_id(0); // current thread id
 	int t = get_global_size(0); // number of threads
-	int k = i & (p - 1); // == i % p, power of basic twiddle factor
+	int num_tasks;
+	int task_id;
+//	int k = i & (p - 1); // == i % p, power of basic twiddle factor
 	int j; // output index
 
 	float2 twiddle;
 	float2 u0, u1;
 	float2 tmp;
 
+	num_tasks = ((n >> 1) + t - 1) / t;
+
+//	printf("%d\n", num_tasks);
+//	printf("%d\n", t);
+
 //	printf("Thread #%d:%d\n", i, p);
 
-	for (int n = 0; n < n_iters; n++) {
+	for (int m = 0; m < n_iters; m++) {
 
-	twiddle.x = cos((2 * PI * k) / (2 * p));
-	twiddle.y = (float)direction * sin((2 * PI * k) / (2 * p));
+		for (int h = 0; h < num_tasks; h++)
+		{
+			task_id = h * t + i;
+			if (task_id < (n >> 1))
+			{
+				int k = task_id & (p - 1);
+
+				twiddle.x = cos((2 * PI * k) / (2 * p));
+				twiddle.y = (float)direction * sin((2 * PI * k) / (2 * p));
 
 //	printf("twiddle=(%f,%f)\n", twiddle.x, twiddle.y);
 
-	u0 = a[i];
-	u1 = a[i + t];
+				u0 = a[task_id];
+				u1 = a[task_id + (n >> 1)];
 
 //	printf("%f\t%f\n", u0.x, u0.y);
 //	printf("%f\t%f\n", u1.x, u1.y);
 
-	MUL(u1, twiddle, tmp);
+				MUL(u1, twiddle, tmp);
 
 //	printf("%f\t%f\n", u1.x, u1.y);
 
-	DFT2(u0, u1, tmp); // bufferfly
+				DFT2(u0, u1, tmp); // bufferfly
 
 //	printf("%f\t%f\n", u0.x, u0.y);
 //	printf("%f\t%f\n", u1.x, u1.y);
 
-	j = (i << 1) - k; // == (2 * i - k)
+				j = (task_id << 1) - k; // == (2 * i - k)
 //	printf("%d\t%d\n", j, j+p);
-	y[j] = u0;
-	y[j + p] = u1;
+				y[j] = u0;
+				y[j + p] = u1;
+			}
+		}
 
-	barrier(CLK_GLOBAL_MEM_FENCE);
+//	barrier(CLK_GLOBAL_MEM_FENCE);
 	}
 }
 

@@ -1,93 +1,13 @@
 
-/* Factored discrete Fourier transform, or FFT, and its inverse iFFT */
-
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
-#include "fft.h"
-
-#define N (1 << 5)
 #define PI	3.14159265358979323846264338327950288
 
-#ifdef DEBUG
-float v[N][2], v1[N][2], vout[N][2], v1out[N][2];
-#endif
-
-/* Print a vector of complexes as ordered pairs. */
-
-static void print_vector(
-	const char *title,
-	float (*x)[2],
-	int n)
-{
-	int i;
-	printf("%s (dim=%d):", title, n);
-
-	for (i = 0; i < n; i++ )
-		printf(" %f,%f ", x[i][0], x[i][1]);
-	
-	putchar('\n');
-}
-
-static void print_vector(
-		const char *title,
-		float *x,
-		int n)
-{
-	int i;
-	printf("%s (dim=%d):", title, n);
-
-	for (i = 0; i < n; i++ )
-		printf(" %f,%f ", x[i], x[i + n]);
-	
-	putchar('\n');
-}
-
-static void print_vector(
-	const char *title,
-	float *x_real, float *x_imag,
-	int n)
-{
-	int i;
-	printf("%s (dim=%d):", title, n);
-
-	for (i = 0; i < n; i++ )
-		printf(" %f,%f ", x_real[i], x_imag[i]);
-	
-	putchar('\n');
-}
-
-static int BitReverse(int src, int size)
-{
-	int tmp = src;
-	int des = 0;
-	for (int i=size-1; i>=0; i--)
-	{
-		des = ((tmp & 1) << i) | des;
-		tmp = tmp >> 1;
-	}
-	return des;
-}
-
-static inline int pow2(int n)
-{
-	return 1<<n;
-}
-
-static inline int log2(int n)
-{
-	int i = 0;
-
-	while (n > 1)
-	{
-		n /= 2;
-		i++;
-	}
-	return i;
-}
+#include "fft.h"
+#include "util.h"
 
 void fft_recur(int n, float (*a)[2], float (*y)[2], int direction)
 {
@@ -257,31 +177,36 @@ void fft_nrvs(int n, float *a, float *y, int direction)
 //	for (i = 0; i < n; i++)
 //		y[i] = a[i];
 
+//	omp_set_num_threads(num_twiddle_threads);
 	for (p = 1; p <= (n / 2); p <<= 1)
 	{
 		//	omega_m[0] = cos((2 * PI) / m);
 		//	omega_m[1] = ((float)direction) * sin((2 * PI) / m);
-		for (i = 0; i < (n >> 1); i++)
+//#pragma omp parallel shared(n, p, a, y, direction)
 		{
-			int o_idx = i + (n >> 1);
+//#pragma omp for private(i, k, ang, omega, t, u)
+			for (i = 0; i < (n >> 1); i++)
+			{
+				int o_idx = i + (n >> 1);
 			
-			k = i & (p - 1); // i % p
-			ang = ((2 * PI * k) / (2 * p));
-			omega[0] = cos(ang);
-			omega[1] = ((float)direction) * sin(ang);
-			// t = omega * a[i + n / 2];
-			t[0] = omega[0] * a[o_idx] - omega[1] * a[o_idx + n];
-			t[1] = omega[0] * a[o_idx + n] + omega[1] * a[o_idx];
-			// u = a[i];
-			u[0] = a[i];
-			u[1] = a[i + n];
+				k = i & (p - 1); // i % p
+				ang = ((2 * PI * k) / (2 * p));
+				omega[0] = cos(ang);
+				omega[1] = ((float)direction) * sin(ang);
+				// t = omega * a[i + n / 2];
+				t[0] = omega[0] * a[o_idx] - omega[1] * a[o_idx + n];
+				t[1] = omega[0] * a[o_idx + n] + omega[1] * a[o_idx];
+				// u = a[i];
+				u[0] = a[i];
+				u[1] = a[i + n];
 
-			//	y[2 * i - k] = u + t;
-			y[2 * i - k] = u[0] + t[0];
-			y[2 * i - k + n] = u[1] + t[1];
-			//	y[2 * i - k + p] = u - t;
-			y[2 * i - k + p] = u[0] - t[0];
-			y[2 * i - k + p + n] = u[1] - t[1];
+				//	y[2 * i - k] = u + t;
+				y[2 * i - k] = u[0] + t[0];
+				y[2 * i - k + n] = u[1] + t[1];
+				//	y[2 * i - k + p] = u - t;
+				y[2 * i - k + p] = u[0] - t[0];
+				y[2 * i - k + p + n] = u[1] - t[1];
+			}
 		}
 		
 		for (i = 0; i < n; i++)
@@ -341,55 +266,5 @@ void fft_nrvs(int n, float *a_real, float *a_imag,
 	}
 }
 
-/*
-int main(int argc, char *argv[])
-{
-	int k;
-	int n = atoi(argv[1]);
 
-	float *v, *v1, *vout, *v1out;
 
-	v = (float *)malloc(2 * n * sizeof(float));
-	v1 = (float *)malloc(2 * n * sizeof(float));
-	vout = (float *)malloc(2 * n * sizeof(float));
-	v1out = (float *)malloc(2 * n * sizeof(float));
-
-	// Fill v[] with a function of known FFT:
-	for (k = 0; k < n; k++)
-	{
-		v[k] = 0.125 * cos((2 * PI * k) / (float)N);
-		v[k + n] = 0.125 * sin((2 * PI * k ) / (float)N);
-		
-	//	v1[k][0] =  0.3*cos(2*PI*k/(float)N);
-	//	v1[k][1] = -0.3*sin(2*PI*k/(float)N);
-	}
-
-	print_vector("Orig", v, n);
-//	print_vector("Orig", v_real, v_imag, N);
-	fft_iter(n, v, vout, -1);
-
-	for (k = 0; k < n; k++)
-	{
-		vout[k] /= n;
-		vout[k + n] /= n;
-	}
-	print_vector("iFFT", vout, n);
-	fft_iter(n, vout, v, 1);
-//	fft_nrvs(N, vout_real, vout_imag, v_real, v_imag, 1);
-	print_vector(" FFT", v, n);
-//	print_vector(" FFT", v_real, v_imag, N);
-
-//	print_vector("Orig", v1, N);
-//	fft(N, v1, v1out, -1);
-//	print_vector(" FFT", v1out, N);
-//	fft(N, v1out, v1, 1);
-//	print_vector("iFFT", v1, N);
-
-	free(v);
-	free(vout);
-	free(v1);
-	free(v1out);
-
-	return 0;
-}
-*/
