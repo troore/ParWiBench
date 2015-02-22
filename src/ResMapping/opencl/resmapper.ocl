@@ -6,29 +6,41 @@ __kernel void mapping(__global float *pInpDataReal, __global float *pInpDataImag
 					  int NumLayer, int NumULSymbSF, int MDFT, int NIFFT, int SCLoc,
 					  int n_iters)
 {
-	int tid = get_global_id(0);
-	int nlayer = tid / (NumULSymbSF * MDFT);
-	int nsym = (tid % (NumULSymbSF * MDFT)) / MDFT;
-	int n = SCLoc + tid % MDFT;
-
-	int sym_out_idx = nlayer * NumULSymbSF + nsym;
-
-	for (int k = 0; k < n_iters; k++) { 
-	if (map_table[nsym] < 0)
+	for (int i = 0; i < n_iters; i++)
 	{
-		int sym_in_idx = ((-1) * map_table[nsym] - 1) * NumLayer + nlayer;
-		pOutDataReal[sym_out_idx * NIFFT + n] = pDMRSReal[sym_in_idx * MDFT + (n - SCLoc)];
-		pOutDataImag[sym_out_idx * NIFFT + n] = pDMRSImag[sym_in_idx * MDFT + (n - SCLoc)];
-		//	printf("%d\t%f\t%f\n", sym_out_idx * NIFFT + n, pOutDataReal[sym_out_idx * NIFFT + n], pOutDataReal[sym_out_idx * NIFFT + n]);
-	}
-	else
+	int num_work_items = get_global_size(0);
+	int num_tasks = NumLayer * NumULSymbSF * MDFT;
+	int num_tasks_per_item = (num_tasks + num_work_items - 1) / num_work_items;
+	int g_id = get_global_id(0);
+	int task_id;
+
+	for (int j = 0; j < num_tasks_per_item; j++)
 	{
-		int sym_offset = map_table[nsym];
-		pOutDataReal[sym_out_idx * NIFFT + n] = pInpDataReal[nlayer * (NumULSymbSF - 2) * MDFT + sym_offset * MDFT + n - SCLoc];
-		pOutDataImag[sym_out_idx * NIFFT + n] = pInpDataImag[nlayer * (NumULSymbSF - 2) * MDFT + sym_offset * MDFT + n - SCLoc];
-		//	printf("%d\t%f\t%f\n", sym_out_idx * NIFFT + n, pOutDataReal[sym_out_idx * NIFFT + n], pOutDataImag[sym_out_idx * NIFFT + n]);
+		task_id = j * num_work_items + g_id;
+		if (task_id < num_tasks)
+		{
+			int nlayer = task_id / (NumULSymbSF * MDFT);
+			int nsym = (task_id % (NumULSymbSF * MDFT)) / MDFT;
+			int n = SCLoc + task_id % MDFT;
+
+			int sym_out_idx = nlayer * NumULSymbSF + nsym;
+
+			if (map_table[nsym] < 0)
+			{
+				int sym_in_idx = ((-1) * map_table[nsym] - 1) * NumLayer + nlayer;
+				pOutDataReal[sym_out_idx * NIFFT + n] = pDMRSReal[sym_in_idx * MDFT + (n - SCLoc)];
+				pOutDataImag[sym_out_idx * NIFFT + n] = pDMRSImag[sym_in_idx * MDFT + (n - SCLoc)];
+				//	printf("%d\t%f\t%f\n", sym_out_idx * NIFFT + n, pOutDataReal[sym_out_idx * NIFFT + n], pOutDataReal[sym_out_idx * NIFFT + n]);
+			}
+			else
+			{
+				int sym_offset = map_table[nsym];
+				pOutDataReal[sym_out_idx * NIFFT + n] = pInpDataReal[nlayer * (NumULSymbSF - 2) * MDFT + sym_offset * MDFT + n - SCLoc];
+				pOutDataImag[sym_out_idx * NIFFT + n] = pInpDataImag[nlayer * (NumULSymbSF - 2) * MDFT + sym_offset * MDFT + n - SCLoc];
+				//	printf("%d\t%f\t%f\n", sym_out_idx * NIFFT + n, pOutDataReal[sym_out_idx * NIFFT + n], pOutDataImag[sym_out_idx * NIFFT + n]);
+			}
+		}
 	}
-	barrier(CLK_GLOBAL_MEM_FENCE);
 	}
 }
 

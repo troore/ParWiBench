@@ -526,6 +526,20 @@ itpp库中的Turbo解码模块认为其输入输出是“+1”或“-1”，因�
 
 外层循环迭代之间没有依赖，但有若干内层循环，对外层循环做的pipeline没有作用。
 
+\subsection{Resource Mapping}
+
+\subsubsection{OpenCL}
+
+为输出数据pOutData创建buffer时要使用CL\_USE\_HOST\_PTR类型，因为在进入kernel前有一个初始化过程，而在kernel中要保证没有被写入数据的位置这些初始化数据不丢。
+
+\subsection{OFDM}
+
+注意：ifft的direction为1，fft的direction为-1，稍候再从公式详细解释其中原因。
+
+如果复数的数据结构为实部和虚部分布在一个数组的前半段和后半段，那么对每一个symbol做fft不能在原数组上进行，应该开一个长度为2*IFFT长度的buffer，在buffer上进行。因为fft虚部的跨度为IFFT，而原数组的跨度为输入数组的长度。
+
+另外，fft\_nrvs版本的fft程序由于要使用输入数组作为迭代之间的scratchpad，所以程序结束后输入数组已经不是原来的输入数据，所以这个程序不能被运行多次。除非在程序外或内开辟一个专门的scratchpad用来缓存。
+
 \subsection{Equalizing}
 
 \subsection{Synchronization}

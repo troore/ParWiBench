@@ -16,6 +16,8 @@ extern "C" {
 }
 #endif
 
+int num_threads;
+
 int main(int argc, char *argv[])
 {
 	int k;

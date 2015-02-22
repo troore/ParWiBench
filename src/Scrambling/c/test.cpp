@@ -26,7 +26,7 @@ void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 
 	GenScrambInt(lte_phy_params->scramb_seq_int, lte_phy_params->scramb_in_buf_sz);
 	
-	double tstart, tend, ttime;
+//	double tstart, tend, ttime;
 
 //	tstart = dtime();
 

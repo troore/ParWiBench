@@ -5,6 +5,7 @@
 
 #include "lte_phy.h"
 #include "refs/dmrs.h"
+#include "util.h"
 
 #include <CL/cl.h>
 #include "opencl/clutil.h"
@@ -42,10 +43,12 @@ void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, float *pInpDataReal, floa
 
 	size_t global_size, local_size;
 
-	pDMRSReal = (float *)malloc((2 * NumLayer * MDFT) * sizeof(float));
-	pDMRSImag = (float *)malloc((2 * NumLayer * MDFT) * sizeof(float));
+//	pDMRSReal = (float *)malloc((2 * NumLayer * MDFT) * sizeof(float));
+//	pDMRSImag = (float *)malloc((2 * NumLayer * MDFT) * sizeof(float));
 
-	geneDMRS(pDMRSReal, pDMRSImag, NumLayer, MDFT);
+//	geneDMRS(pDMRSReal, pDMRSImag, NumLayer, MDFT);
+	pDMRSReal = lte_phy_params->DMRSReal;
+	pDMRSImag = lte_phy_params->DMRSImag;
 
 	map_table = (int *)malloc(NumULSymbSF * sizeof(int));
 
@@ -116,11 +119,13 @@ void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, float *pInpDataReal, floa
 	_err |= clSetKernelArg(kernel, 9, sizeof(int), &MDFT);
 	_err |= clSetKernelArg(kernel, 10, sizeof(int), &NIFFT);
 	_err |= clSetKernelArg(kernel, 11, sizeof(int), &SCLoc);
-	int n_iters = 100000;
+	int n_iters = 10000;
 	_err |= clSetKernelArg(kernel, 12, sizeof(int), &n_iters);
 	if (_err < 0) { perror("Couldn't create one of the kernel arguments");  exit(1); }
 
-	global_size = NumLayer * NumULSymbSF * MDFT;
+//	global_size = NumLayer * NumULSymbSF * MDFT;
+	global_size = num_threads;
+	local_size = 128;
 
 	_err = clEnqueueWriteBuffer(queue, pInpDataReal_buffer, CL_TRUE, 0, in_buf_sz * sizeof(float), pInpDataReal, 0, NULL, NULL);
 	_err |= clEnqueueWriteBuffer(queue, pInpDataImag_buffer, CL_TRUE, 0, in_buf_sz * sizeof(float), pInpDataImag, 0, NULL, NULL);
@@ -151,8 +156,8 @@ void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, float *pInpDataReal, floa
 	_err |= clEnqueueReadBuffer(queue, pOutDataImag_buffer, CL_TRUE, 0, out_buf_sz * sizeof(float), pOutDataImag, 0, NULL, NULL);
 	if (_err < 0) { perror("Couldn't enqueue one of the read buffers");  exit(1); }
 
-	free(pDMRSReal);
-	free(pDMRSImag);
+//	free(pDMRSReal);
+//	free(pDMRSImag);
 	free(map_table);
 
 	clReleaseMemObject(pInpDataReal_buffer);

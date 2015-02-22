@@ -1,8 +1,8 @@
 
 include ../../../common/makefile.config
 
-#SRC = fft.cpp test.cpp ../util.cpp
-SRC = test.cpp ../util.cpp
+SRC = fft.cpp test.cpp ../util.cpp
+#SRC = test.cpp
 SRC += $(LIB_DIR)/check/check.cpp $(LIB_DIR)/timer/meas.cpp
 
 SRC_OMP = $(subst fft, fft_omp, $(SRC))
@@ -14,16 +14,17 @@ INC_DIRS = ./ ../ $(LIB_DIR)
 
 CXXFLAGS += $(INC_DIRS:%=-I%)
 
-LINKFLAGS += -L$(LIB_DIR)/fft/c -lfft
+#LINKFLAGS += -L$(LIB_DIR)/fft/c -lfft
 
 TARGETS = fft fft_omp
 
 all: $(TARGETS) 
 
-fft: $(OBJS) libfft.a
+#fft: $(OBJS) libfft.a
+fft: $(OBJS)
 	$(CXX) -o $@ $(OBJS) $(LINKFLAGS)
 
-libfft.a: fft.o
+libfft.a: fft.o ../util.o
 	ar rcs $@ $^
 
 fft_omp: $(OBJS_OMP)
