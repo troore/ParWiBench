@@ -1,18 +1,24 @@
 include ../../../common/makefile.config
 
-SRC = ../EqualizerMain.cpp Equalizer.cpp
-SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp  $(LIB_DIR)/refs/dmrs.cpp $(LIB_DIR)/opencl/clutil.cpp $(LIB_DIR)/check/check.cpp
+SRC = $(SRC_DIR)/main_test.cpp Equalizer.cpp test.cpp ../util.cpp
+SRC += $(SRC_DIR)/OFDM/c/OFDM.cpp $(SRC_DIR)/ResMapping/c/ResMapper.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp  $(LIB_DIR)/refs/dmrs.cpp $(LIB_DIR)/opencl/clutil.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp
 SRC += $(SRC_DIR)/lte_phy.cpp
 
-OBJS := $(patsubst %.cpp,%.o, $(SRC))
+OBJS := $(patsubst %.cpp, %.o, $(SRC))
 
-INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)/refs -I$(LIB_DIR)
+INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)
+
+INC_FLAGS += -I$(SRC_DIR)/OFDM -I$(SRC_DIR)/ResMapping
 
 LINKFLAGS += -lOpenCL
+
+LINKFLAGS += -L$(LIB_DIR)/fft/c -lfft
 
 TARGETS = CEEQ.out
 
 CEEQ.out: $(OBJS)
+	$(MAKE) -C $(LIB_DIR)/fft/c libfft.a
 	$(CXX) $^ $(LINKFLAGS) -o $@
 
 %.o: %.cpp

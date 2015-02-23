@@ -50,5 +50,7 @@ double gflop_counter(LTE_PHY_PARAMS *lte_phy_params)
 	cnter = cnter + num_flops_matrixprod(n_tx_ant, n_rx_ant, n_tx_ant) + num_flops_matrixinv(n_tx_ant)
 		+ (n_symbs_sf - 2) * (num_flops_matrixprod(n_tx_ant, n_rx_ant, 1) + num_flops_matrixprod(n_tx_ant, n_tx_ant, 1));
 
+	cnter = cnter * n_dft;
+
 	return 1.0e-9 * cnter;
 }

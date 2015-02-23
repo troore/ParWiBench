@@ -9,6 +9,8 @@
 #include "opencl/clutil.h"
 #include "timer/meas.h"
 
+#include "util.h"
+
 #define PROGRAM_FILE "equalizer.ocl"
 #define KERNEL_FUNC "lsfreqdomain"
 
@@ -305,10 +307,12 @@ void Equalizing(LTE_PHY_PARAMS *lte_phy_params,
 
 	int dmrs_len = NumLayer * MDFT * 2;
 	
-	float *pDMRSReal = (float *)malloc(dmrs_len * sizeof(float));
-	float *pDMRSImag = (float *)malloc(dmrs_len * sizeof(float));
+//	float *pDMRSReal = (float *)malloc(dmrs_len * sizeof(float));
+//	float *pDMRSImag = (float *)malloc(dmrs_len * sizeof(float));
+	float *pDMRSReal = lte_phy_params->DMRSReal;
+	float *pDMRSImag = lte_phy_params->DMRSImag;
 	
-	geneDMRS(pDMRSReal, pDMRSImag, NumLayer, MDFT);
+//	geneDMRS(pDMRSReal, pDMRSImag, NumLayer, MDFT);
 
 	cl_platform_id platform;
 	cl_device_id device;
@@ -351,7 +355,7 @@ void Equalizing(LTE_PHY_PARAMS *lte_phy_params,
 	_err |= clSetKernelArg(kernel, 7, sizeof(int), &NumLayer);
 	_err |= clSetKernelArg(kernel, 8, sizeof(int), &NumRxAntenna);
 	_err |= clSetKernelArg(kernel, 9, sizeof(int), &NumULSymbSF);
-	int n_iters = 10000;
+	int n_iters = 1000;
 	_err |= clSetKernelArg(kernel, 10, sizeof(int), &n_iters);
 
 	_err = clEnqueueWriteBuffer(queue, pInpDataReal_buffer, CL_TRUE, 0, (NumRxAntenna * NumULSymbSF * MDFT) * sizeof(int), pInpDataReal, 0, NULL, NULL);
@@ -359,12 +363,13 @@ void Equalizing(LTE_PHY_PARAMS *lte_phy_params,
 	_err |= clEnqueueWriteBuffer(queue, pDMRSReal_buffer, CL_TRUE, 0, (2 * NumLayer * MDFT) * sizeof(int), pDMRSReal, 0, NULL, NULL);
 	_err |= clEnqueueWriteBuffer(queue, pDMRSImag_buffer, CL_TRUE, 0, (2 * NumLayer * MDFT) * sizeof(int), pDMRSImag, 0, NULL, NULL);
 
-	global_size = MDFT;
+	global_size = num_threads;
+	local_size = 128;
 
 	double elapsed_time = 0.0;
 	cl_event prof_event;
 
-	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, /*NULL*/&prof_event);
+	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, &local_size/*NULL*/, 0, NULL, /*NULL*/&prof_event);
 
 	cl_ulong ev_start_time = (cl_ulong)0;
 	cl_ulong ev_end_time = (cl_ulong)0;
@@ -382,8 +387,8 @@ void Equalizing(LTE_PHY_PARAMS *lte_phy_params,
 	_err = clEnqueueReadBuffer(queue, pOutDataImag_buffer, CL_TRUE, 0, (NumRxAntenna * (NumULSymbSF - 2) * MDFT) * sizeof(int), pOutDataImag, 0, NULL, NULL);
 
 
-	free(pDMRSReal);
-	free(pDMRSImag);
+//	free(pDMRSReal);
+//	free(pDMRSImag);
 
 	clReleaseMemObject(pInpDataReal_buffer);
 	clReleaseMemObject(pInpDataImag_buffer);

@@ -138,7 +138,7 @@ void SubCarrierMapping(LTE_PHY_PARAMS *lte_phy_params, float *pInpDataReal, floa
 	double elapsed_time = 0.0;
 	cl_event prof_event;
 	
-	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, NULL, 0, NULL, /*NULL*/ &prof_event);
+	_err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, &local_size /*NULL*/, 0, NULL, /*NULL*/ &prof_event);
 	
 	cl_ulong ev_start_time = (cl_ulong)0;
 	cl_ulong ev_end_time = (cl_ulong)0;

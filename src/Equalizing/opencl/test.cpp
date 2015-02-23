@@ -13,25 +13,14 @@
 #include "check/check.h"
 #include "util.h"
 
-#ifdef _RAPL
-extern "C" {
-#include "papi-rapl/rapl_power.h"
-}
-#endif
-
 void test_equalizer(LTE_PHY_PARAMS *lte_phy_params)
 {
 	std::cout << "Equalizing starts" << std::endl;
-
-#ifdef _RAPL
-	rapl_power_start();
-#else
 
 	double tstart, tend, ttime;
 	double n_gflops, gflops;
 
 	tstart = dtime();
-#endif
 
 //	GeneRandomInput(lte_phy_params->eq_in_real, lte_phy_params->eq_in_imag, lte_phy_params->eq_in_buf_sz, "../testsuite/LSCELSEqInputReal", "../testsuite/LSCELSEqInputImag");
 //	ReadInputFromFiles(lte_phy_params->eq_in, lte_phy_params->eq_in_buf_sz, "../testsuite/LSCELSEqInputReal", "../testsuite/LSCELSEqInputImag");
@@ -39,34 +28,40 @@ void test_equalizer(LTE_PHY_PARAMS *lte_phy_params)
 //	GeneRandomInput(lte_phy_params->eq_in, lte_phy_params->eq_in_buf_sz, "../testsuite/LSCELSEqInputReal", "../testsuite/LSCELSEqInputImag");
 
 	GeneRandomInput(lte_phy_params->resm_in, lte_phy_params->resm_in_buf_sz, "../testsuite/SubCarrierMapInputReal", "../testsuite/SubCarrierMapInputImag");
-	
+
+	// for SubCarrierMapping
 	geneDMRS(lte_phy_params->DMRS, lte_phy_params->N_tx_ant, lte_phy_params->N_dft_sz);
+	// for Equalizing
+	geneDMRS(lte_phy_params->DMRSReal, lte_phy_params->DMRSImag, lte_phy_params->N_tx_ant, lte_phy_params->N_dft_sz);
 	SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in, lte_phy_params->resm_out);
 	ofmodulating(lte_phy_params, lte_phy_params->resm_out, lte_phy_params->ofmod_out);
 	ofdemodulating(lte_phy_params, lte_phy_params->ofmod_out, lte_phy_params->ofdemod_out);
 	SubCarrierDemapping(lte_phy_params, lte_phy_params->ofdemod_out, lte_phy_params->resdm_out);
 
-	int n_iters = 1000;
+	for (int i = 0; i < lte_phy_params->resdm_out_buf_sz; i++)
+	{
+		lte_phy_params->resdm_out_real[i] = lte_phy_params->resdm_out[i];
+		lte_phy_params->resdm_out_imag[i] = lte_phy_params->resdm_out[i + lte_phy_params->resdm_out_buf_sz];
+	}
+
+	int n_iters = 1;
 	for (int i = 0; i < n_iters; i++) {
-		Equalizing(lte_phy_params, lte_phy_params->eq_in, lte_phy_params->eq_out);
+		//	Equalizing(lte_phy_params, lte_phy_params->resdm_out, lte_phy_params->eq_out);
+		Equalizing(lte_phy_params, lte_phy_params->resdm_out_real, lte_phy_params->resdm_out_imag, lte_phy_params->eq_out_real, lte_phy_params->eq_out_imag);
 	}
 //	geneDMRS(lte_phy_params->DMRSReal, lte_phy_params->DMRSImag, lte_phy_params->N_tx_ant, lte_phy_params->N_dft_sz);
 //	Equalizing(lte_phy_params, lte_phy_params->eq_in_real, lte_phy_params->eq_in_imag, lte_phy_params->eq_out_real, lte_phy_params->eq_out_imag);
 
-#ifndef _RAPL
 	tend = dtime();
 	ttime = tend - tstart;
 	n_gflops = n_iters * gflop_counter(lte_phy_params);
 	gflops = (n_gflops * 10e3) / ttime;
-	printf("%fms\n", ttime);
-	printf("Number of gflops = %lf\n", n_gflops);
-	printf("GFlops = %f\n", gflops);
-#else
-	rapl_power_stop();
-#endif
+//	printf("%fms\n", ttime);
+//	printf("Number of gflops = %lf\n", n_gflops);
+//	printf("GFlops = %f\n", gflops);
 
-	WriteOutputToFiles(lte_phy_params->eq_out, lte_phy_params->eq_out_buf_sz, "../testsuite/testLSCELSEqOutputReal", "../testsuite/testLSCELSEqOutputImag");
-//	WriteOutputToFiles(lte_phy_params->eq_out_real, lte_phy_params->eq_out_imag, lte_phy_params->eq_out_buf_sz, "../testsuite/testLSCELSEqOutputReal", "../testsuite/testLSCELSEqOutputImag");
+//	WriteOutputToFiles(lte_phy_params->eq_out, lte_phy_params->eq_out_buf_sz, "../testsuite/testLSCELSEqOutputReal", "../testsuite/testLSCELSEqOutputImag");
+	WriteOutputToFiles(lte_phy_params->eq_out_real, lte_phy_params->eq_out_imag, lte_phy_params->eq_out_buf_sz, "../testsuite/testLSCELSEqOutputReal", "../testsuite/testLSCELSEqOutputImag");
 
 	std::cout << "Equalizing ends" << std::endl;
 }

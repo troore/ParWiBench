@@ -1,0 +1,55 @@
+include ../../../common/makefile.config
+
+SRC = $(SRC_DIR)/main_test.cpp Equalizer.cpp test.cpp ../util.cpp
+# check
+SRC += $(SRC_DIR)/OFDM/c/OFDM.cpp $(SRC_DIR)/ResMapping/c/ResMapper.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp  $(LIB_DIR)/refs/dmrs.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp
+SRC += $(SRC_DIR)/lte_phy.cpp
+
+SRC_OMP = $(subst Equalizer, Equalizer_omp, $(SRC))
+
+OBJS := $(patsubst %.cpp, %.o, $(SRC))
+OBJS_OMP := $(patsubst %.cpp, %.o, $(SRC_OMP))
+
+INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR)
+# check
+INC_FLAGS += -I$(SRC_DIR)/OFDM -I$(SRC_DIR)/ResMapping -I$(LIB_DIR)/power
+
+LINKFLAGS += -L$(LIB_DIR)/fft/c -lfft
+
+#CXXFLAGS += -DDEBUG
+
+TARGETS = CEEQ.out CEEQ_omp.out
+
+ifeq ($(VEC),1)
+	ICPCFLAGS += -vec -vec-report2
+#	ICPCFLAGS += -ftree-vectorize -msse2 -ffast-math -vec-report
+else
+	ICPCFLAGS += -no-vec
+endif
+
+ifeq ($(RAPL),1)
+	LINKFLAGS += -L$(LIB_DIR)/power/papi-rapl -lraplpower
+	ICPCFLAGS += -D_RAPL
+endif
+
+
+all: $(TARGETS)
+
+CEEQ.out: $(OBJS)
+	$(MAKE) -C $(LIB_DIR)/fft/c libfft.a
+	$(ICPC) $^ $(LINKFLAGS) -o $@
+
+CEEQ_omp.out: $(OBJS_OMP)
+	$(MAKE) -C $(LIB_DIR)/fft/c libfft.a
+	$(ICPC) $^ $(LINKFLAGS) -openmp -o $@
+
+Equalizer_omp.o: Equalizer_omp.cpp
+	$(ICPC) -c $< -o $@ $(ICPCFLAGS) -openmp
+
+%.o: %.cpp
+	$(ICPC) -c $< -o $@ $(ICPCFLAGS)
+
+clean:
+	rm -rf $(TARGETS) $(OBJS) $(OBJS_OMP)
+
