@@ -1,0 +1,53 @@
+include ../../../common/makefile.config
+
+SRC = $(SRC_DIR)/main_test.cpp Turbo_cache.cpp test.cpp ../util.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp
+
+SRC_OMP = $(subst Turbo_cache, Turbo_omp, $(SRC))
+
+ifeq ($(PARD),1)
+	SRC += Turbo_pardec.cpp
+	ICPCFLAGS += -DPARD
+endif
+
+SRC += $(SRC_DIR)/lte_phy.cpp
+
+INC_FLAGS += -I. -I.. -I$(SRC_DIR) -I$(LIB_DIR) -I$(LIB_DIR)/power
+
+ifeq ($(VEC),1)
+	ICPCFLAGS += -vec -vec-report2
+#	ICPCFLAGS += -ftree-vectorize -msse2 -ffast-math -vec-report
+else
+	ICPCFLAGS += -no-vec
+endif
+
+ifeq ($(RAPL),1)
+	LINKFLAGS += -L$(LIB_DIR)/power/papi-rapl -lraplpower
+	ICPCFLAGS += -D_RAPL
+endif
+
+TARGETS = Turbo.out Turbo_omp.out
+
+OBJS := $(patsubst %.cpp, %.o, $(SRC))
+OBJS_OMP := $(patsubst %.cpp, %.o, $(SRC_OMP))
+
+ifeq ($(TX),1)
+	ICPCFLAGS += -DTurboEnc
+endif
+
+all: $(TARGETS)
+
+Turbo.out: $(OBJS)
+	$(ICPC) $^ $(LINKFLAGS) -o $@
+
+Turbo_omp.out: $(OBJS_OMP)
+	$(ICPC) $^ $(LINKFLAGS) -openmp -o $@
+
+Turbo_omp.o: Turbo_omp.cpp
+	$(ICPC) -c $< -o $@ $(ICPCFLAGS) -openmp
+
+%.o: %.cpp
+	$(ICPC) -c $< -o $@ $(ICPCFLAGS)
+
+clean:
+	rm -rf $(TARGETS) $(OBJS) $(OBJS_OMP)

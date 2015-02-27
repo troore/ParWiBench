@@ -177,3 +177,181 @@ __kernel void log_decoder_kernel(__global float *recv_syst,
 		barrier(CLK_GLOBAL_MEM_FENCE);
 	}
 }
+
+__kernel void gamma_kernel(__global float *recv_syst,
+						   __global float *recv_parity,
+						   __global float *apriori,
+						   __global float *gamma,
+						   __global float *g_output_parity,
+						   int block_length,
+						   int n_iters)
+{
+//	printf("%d\n", block_length);
+	int work_items = get_global_size(0);
+//	int num_tasks_per_item = (block_length * N_STATES + work_items - 1) / work_items;
+	int num_tasks_per_item = (block_length + work_items - 1) / work_items;
+	int tid = get_global_id(0);
+	int gid;
+
+//	printf("%d %d\n", work_items, num_tasks_per_item);
+
+	int k, kk, s_prim;
+	float exp_temp0, exp_temp1;
+	float rp;
+
+	/*
+	for (int h = 0; h < n_iters; h++)
+	{
+	for (int i = 0; i < num_tasks_per_item; i++)
+	{
+		gid = i * work_items + tid;
+		if (gid < block_length * N_STATES)
+		{
+		k = gid / N_STATES + 1;
+		kk = k - 1;
+		s_prim = gid % N_STATES;
+
+		//	for (s_prim = 0; s_prim < N_STATES; s_prim++)
+		///	{
+		exp_temp0 = 0.0;
+			exp_temp1 = 0.0;
+
+			for (int j = 0; j < (N_GENS - 1); j++)
+			{
+				rp = recv_parity[kk * (N_GENS - 1) + j];
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+				{
+					exp_temp0 += rp;
+				}
+				else
+				{ 
+					exp_temp0 -= rp;
+				}
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+				{
+					exp_temp1 += rp;
+				}
+				else
+				{
+					exp_temp1 -= rp; 
+				}
+			 }
+
+			gamma[(2 * s_prim + 0) + k * 2 * N_STATES] =  0.5 * ((apriori[kk] + recv_syst[kk]) + exp_temp0);
+			gamma[(2 * s_prim + 1) + k * 2 * N_STATES] = -0.5 * ((apriori[kk] + recv_syst[kk]) - exp_temp1);
+			//	}
+		}
+	}
+	}
+	*/
+
+	for (int h = 0; h < n_iters; h++)
+	{
+		for (int i = 0; i < num_tasks_per_item; i++)
+		{
+			gid = i * work_items + tid;
+			if (gid < block_length)
+			{
+				k = gid + 1;
+				kk = k - 1;
+				//	s_prim = gid % N_STATES;
+
+				for (s_prim = 0; s_prim < N_STATES; s_prim++)
+				{
+					exp_temp0 = 0.0;
+					exp_temp1 = 0.0;
+
+					for (int j = 0; j < (N_GENS - 1); j++)
+					{
+						rp = recv_parity[kk * (N_GENS - 1) + j];
+						if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+						{
+							exp_temp0 += rp;
+						}
+						else
+						{ 
+							exp_temp0 -= rp;
+						}
+						if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+						{
+							exp_temp1 += rp;
+						}
+						else
+						{
+							exp_temp1 -= rp; 
+						}
+					}
+
+					gamma[(2 * s_prim + 0) + k * 2 * N_STATES] =  0.5 * ((apriori[kk] + recv_syst[kk]) + exp_temp0);
+					gamma[(2 * s_prim + 1) + k * 2 * N_STATES] = -0.5 * ((apriori[kk] + recv_syst[kk]) - exp_temp1);
+				}
+			}
+		}
+	}
+}
+
+__kernel void extrinsic_kernel(__global float *recv_parity,
+							   __global float *g_state_trans,
+							   __global float *g_output_parity,
+							   __global float *alpha,
+							   __global float *beta,
+							   __global float *extrinsic,
+							   int block_length,
+							   int n_iters)
+{
+
+	int work_items = get_global_size(0);
+	int num_tasks_per_item = (block_length * N_STATES + work_items - 1) / work_items;
+	int tid = get_global_id(0);
+	int gid;
+
+	int k, kk, s_prim, s0, s1;
+	float nom, den, exp_temp0, exp_temp1;
+	float rp;
+
+	for (int h = 0; h < n_iters; h++)
+	{
+//	for (k = 1; k <= block_length; k++)
+	for (int i = 0; i < num_tasks_per_item; i++)
+	{
+		gid = i * work_items + tid;
+		if (gid < block_length)
+		{
+			k = gid + 1;
+		kk = k - 1;
+		nom = -LOG_INFINITY;
+		den = -LOG_INFINITY;
+		for (s_prim = 0; s_prim < N_STATES; s_prim++)
+		{
+			s0 = g_state_trans[s_prim * 2 + 0];
+			s1 = g_state_trans[s_prim * 2 + 1];
+			exp_temp0 = 0.0;
+			exp_temp1 = 0.0;
+			for (int j = 0; j < (N_GENS - 1); j++)
+			{
+				rp = recv_parity[kk * (N_GENS - 1) + j];
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+				{
+					exp_temp0 += rp;
+				}
+				else
+				{
+					exp_temp0 -= rp; 
+				}
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+				{ 
+					exp_temp1 += rp;
+				}
+				else
+				{
+					exp_temp1 -= rp;
+				}
+			}
+			nom = max_log(nom, alpha[s_prim + kk * N_STATES] + 0.5 * exp_temp0 + beta[s0 + k * N_STATES]);
+			den = max_log(den, alpha[s_prim + kk * N_STATES] + 0.5 * exp_temp1 + beta[s1 + k * N_STATES]);
+		}
+		extrinsic[kk] = nom - den;
+	}
+	}
+	}
+}

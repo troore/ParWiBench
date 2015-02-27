@@ -28,6 +28,7 @@ void set_generator_polynomials(int *gens, int n_gens, int constraint_length);
 void decode_block(float *recv_syst1, float *recv_syst2, float *recv_parity1, float *recv_parity2, int *decoded_bits_i, int interleaver_size, int n_iters);
 void map_decoder(float *recv_syst, float *recv_parity, float *apriori, float *extrinsic, int interleaver_size);
 void log_decoder(float *recv_syst, float *recv_parity, float *apriori, float *extrinsic, int interleaver_size);
+void log_decoder_two_kernels(float *recv_syst, float *recv_parity, float *apriori, float *extrinsic, int interleaver_size);
 
 template <typename T> void internal_interleaver(T *in, T *out, int m);
 template <typename T> void internal_deinterleaver(T *in, T *out, int m);

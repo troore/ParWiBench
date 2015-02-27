@@ -8,8 +8,13 @@
 #include "CL/opencl.h"
 #include "opencl/clutil.h"
 
+#include "timer/meas.h"
+#include "util.h"
+
 #define PROGRAM_FILE "log_decoder.ocl"
-#define KERNEL_FUNC "log_decoder_kernel"
+#define LOG_DECODER_KERNEL_FUNC "log_decoder_kernel"
+#define GAMMA_KERNEL_FUNC "gamma_kernel"
+#define EXTRINSIC_KERNEL_FUNC "extrinsic_kernel"
 
 #define LOG_INFINITY 1e30
 
@@ -497,7 +502,7 @@ void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, int *pOutBi
 	out_bit_offset = 0;
 	out_block_offset = 0;
 
-	printf("%d\n", n_blocks);
+//	printf("%d\n", n_blocks);
 
 	for (i = 0; i < n_blocks; i++)
 	{
@@ -585,7 +590,8 @@ void decode_block(float *recv_syst1,
 	for (i = 0; i < /*MAX_ITERATIONS*/ n_iters; i++)
 	{
 	//	map_decoder(recv_syst1, recv_parity1, Le21, Le12, interleaver_size);
-		log_decoder(recv_syst, recv_parity1, Le21, Le12, interleaver_size);
+	//	log_decoder(recv_syst, recv_parity1, Le21, Le12, interleaver_size);
+		log_decoder_two_kernels(recv_syst, recv_parity1, Le21, Le12, interleaver_size);
 		/*
 		for (int j = 0; j < interleaver_size; j++)
 			std::cout << Le21[j] << "\t" << Le12[j] << std::endl;
@@ -598,7 +604,8 @@ void decode_block(float *recv_syst1,
 			*/
 		memset(Le12_int + interleaver_size, 0, N_TAIL * sizeof(float));
 	//	map_decoder(recv_syst2, recv_parity2, Le12_int, Le21_int, interleaver_size);
-		log_decoder(int_recv_syst, recv_parity2, Le12_int, Le21_int, interleaver_size);
+	//	log_decoder(int_recv_syst, recv_parity2, Le12_int, Le21_int, interleaver_size);
+	//	log_decoder_two_kernels(int_recv_syst, recv_parity2, Le12_int, Le21_int, interleaver_size);
 		/*
 		for (int j = 0; j < interleaver_size; j++)
 		{
@@ -664,7 +671,7 @@ void log_decoder(float *recv_syst,
 	device = create_device(&platform);
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, &_err);
 	program = build_program(&context, &device, PROGRAM_FILE);
-	kernel = clCreateKernel(program, KERNEL_FUNC, &_err);
+	kernel = clCreateKernel(program, LOG_DECODER_KERNEL_FUNC, &_err);
 	queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &_err);
 
 	for (k = 0; k <= block_length; k++)
@@ -764,6 +771,299 @@ void log_decoder(float *recv_syst,
 	clReleaseMemObject(g_output_parity_buffer);
 	clReleaseMemObject(g_state_trans_buffer);
 	clReleaseMemObject(g_rev_state_trans_buffer);
+
+	free(alpha);
+	free(beta);
+	free(gamma);
+	free(denom);
+}
+
+
+void log_decoder_two_kernels(float *recv_syst,
+		float *recv_parity,
+		float *apriori,
+		float *extrinsic,
+		int interleaver_size)
+{
+	cl_platform_id platform;
+	cl_device_id device;
+	cl_context context;
+	cl_command_queue queue;
+	cl_program program;
+	cl_int _err;
+
+	cl_kernel gamma_kernel, extrinsic_kernel;
+
+//	cl_ulong local_mem_size;
+	cl_mem recv_syst_buffer, recv_parity_buffer, apriori_buffer, extrinsic_buffer;
+	cl_mem alpha_buffer, beta_buffer, gamma_buffer;
+//	cl_mem denom_buffer;
+//	cl_mem g_output_parity_buffer, g_state_trans_buffer, g_rev_state_trans_buffer;
+	cl_mem g_output_parity_buffer, g_state_trans_buffer;
+
+	size_t global_size, local_size;
+
+	float nom, den, temp0, temp1, exp_temp0, exp_temp1, rp;
+	int i, j, s0, s1, k, kk, l, s, s_prim, s_prim0, s_prim1;
+	int block_length = (interleaver_size + N_TAIL);
+
+	/*
+	float alpha[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
+	float beta[N_STATES * (BLOCK_SIZE + N_TAIL + 1)];
+	float gamma[N_STATES * 2 * (BLOCK_SIZE + N_TAIL + 1)];
+	float denom[BLOCK_SIZE + N_TAIL + 1];
+	*/
+
+	float *alpha = (float *)malloc((block_length + 1) * N_STATES * sizeof(float));
+	float *beta = (float *)malloc((block_length + 1) * N_STATES * sizeof(float));
+	float *gamma = (float *)malloc((block_length + 1) * N_STATES * 2 * sizeof(float));
+	float *denom = (float *)malloc((block_length + 1) * sizeof(float));
+
+	int n_iters = 100000;
+
+	Lc = 1.0;
+	com_log = max_log;
+	
+//	Lc = 1.0;
+//	com_log = max_log;
+
+	platform = device_query();
+	device = create_device(&platform);
+	context = clCreateContext(NULL, 1, &device, NULL, NULL, &_err);
+	program = build_program(&context, &device, PROGRAM_FILE);
+	gamma_kernel = clCreateKernel(program, GAMMA_KERNEL_FUNC, &_err);
+	extrinsic_kernel = clCreateKernel(program, EXTRINSIC_KERNEL_FUNC, &_err);
+	queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &_err);
+
+
+	/* Create buffers for gamma_kernel */
+	recv_syst_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, block_length * sizeof(float), NULL, &_err);
+	recv_parity_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, block_length * (N_GENS - 1) * sizeof(float), NULL, &_err);
+	apriori_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, block_length * sizeof(float), NULL, &_err);
+//	extrinsic_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, block_length * sizeof(float), NULL, &_err);
+//	alpha_buffer = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, N_STATES * (block_length + 1) * sizeof(float), alpha, &_err);
+//	beta_buffer = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, N_STATES * (block_length + 1) * sizeof(float), beta, &_err);
+	gamma_buffer = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, N_STATES * 2 * (block_length + 1) * sizeof(float), gamma, &_err);
+//	denom_buffer = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, (block_length + 1) * sizeof(float), denom, &_err);
+	g_output_parity_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, N_STATES * (N_GENS - 1) * 2 * sizeof(int), NULL, &_err);
+//	g_state_trans_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, N_STATES * 2 * sizeof(int), NULL, &_err);
+//	g_rev_state_trans_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, N_STATES * 2 * sizeof(int), NULL, &_err);
+
+	/* Set kernel arguments for gamma_kernel */
+	_err = clSetKernelArg(gamma_kernel, 0, sizeof(cl_mem), &recv_syst_buffer);
+	_err |= clSetKernelArg(gamma_kernel, 1, sizeof(cl_mem), &recv_parity_buffer);
+	_err |= clSetKernelArg(gamma_kernel, 2, sizeof(cl_mem), &apriori_buffer);
+//	_err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &extrinsic_buffer);
+//	_err |= clSetKernelArg(kernel, 4, sizeof(int), &interleaver_size);
+//	_err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &alpha_buffer);
+//	_err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &beta_buffer);
+	_err |= clSetKernelArg(gamma_kernel, 3, sizeof(cl_mem), &gamma_buffer);
+//	_err |= clSetKernelArg(kernel, 8, sizeof(cl_mem), &denom_buffer);
+	_err |= clSetKernelArg(gamma_kernel, 4, sizeof(cl_mem), &g_output_parity_buffer);
+	_err |= clSetKernelArg(gamma_kernel, 5, sizeof(int), &block_length);
+	_err |= clSetKernelArg(gamma_kernel, 6, sizeof(int), &n_iters);
+//	_err |= clSetKernelArg(kernel, 10, sizeof(cl_mem), &g_state_trans_buffer);
+//	_err |= clSetKernelArg(kernel, 11, sizeof(cl_mem), &g_rev_state_trans_buffer);
+//	_err |= clSetKernelArg(kernel, 12, N_STATES * sizeof(float), NULL);
+//	_err |= clSetKernelArg(kernel, 13, N_STATES * sizeof(float), NULL);
+
+	_err = clEnqueueWriteBuffer(queue, recv_syst_buffer, CL_TRUE, 0, block_length * sizeof(float), recv_syst, 0, NULL, NULL);
+	_err |= clEnqueueWriteBuffer(queue, recv_parity_buffer, CL_TRUE, 0, block_length * (N_GENS - 1) * sizeof(float), recv_parity, 0, NULL, NULL);
+	_err |= clEnqueueWriteBuffer(queue, apriori_buffer, CL_TRUE, 0, block_length * sizeof(float), apriori, 0, NULL, NULL);
+//	_err |= clEnqueueWriteBuffer(queue, alpha_buffer, CL_TRUE, 0, N_STATES * (block_length + 1) * sizeof(float), alpha, 0, NULL, NULL);
+//	_err |= clEnqueueWriteBuffer(queue, beta_buffer, CL_TRUE, 0, N_STATES * (block_length + 1) * sizeof(float), beta, 0, NULL, NULL);
+//	_err |= clEnqueueWriteBuffer(queue, gamma_buffer, CL_TRUE, 0, N_STATES * 2 * (block_length + 1) * sizeof(float), gamma, 0, NULL, NULL);
+//	_err |= clEnqueueWriteBuffer(queue, denom_buffer, CL_TRUE, 0, (block_length + 1) * sizeof(float), denom, 0, NULL, NULL);
+	_err |= clEnqueueWriteBuffer(queue, g_output_parity_buffer, CL_TRUE, 0, N_STATES * (N_GENS - 1) * 2 * sizeof(int), g_output_parity, 0, NULL, NULL);
+//	_err |= clEnqueueWriteBuffer(queue, g_state_trans_buffer, CL_TRUE, 0, N_STATES * 2 * sizeof(int), g_state_trans, 0, NULL, NULL);
+//	_err |= clEnqueueWriteBuffer(queue, g_rev_state_trans_buffer, CL_TRUE, 0, N_STATES * 2 * sizeof(int), g_rev_state_trans, 0, NULL, NULL);
+
+	global_size = num_threads;
+	local_size = 128;
+//	global_size = 1;
+//	local_size = 1;
+
+	double elapsed_time = 0.0;
+	cl_event prof_event;
+
+	_err = clEnqueueNDRangeKernel(queue, gamma_kernel, 1, NULL, &global_size, &local_size, 0, NULL, /*NULL*/&prof_event);
+
+	cl_ulong ev_start_time = (cl_ulong)0;
+	cl_ulong ev_end_time = (cl_ulong)0;
+	clFinish(queue);
+
+	_err = clWaitForEvents(1, &prof_event);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ev_start_time, NULL);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ev_end_time, NULL);
+
+//	printf("%d\n", ev_start_time);
+//	printf("%d\n", ev_end_time);
+
+	printf("Elapsed time of gamma_kernel is: %lfms\n", (double)(ev_end_time - ev_start_time) / 1000000.0);
+	elapsed_time = elapsed_time + (double)(ev_end_time - ev_start_time) / 1000000.0;
+
+//	_err = clEnqueueReadBuffer(queue, extrinsic_buffer, CL_TRUE, 0, block_length * sizeof(float), extrinsic, 0, NULL, NULL);
+	_err = clEnqueueWriteBuffer(queue, gamma_buffer, CL_TRUE, 0, N_STATES * 2 * (block_length + 1) * sizeof(float), gamma, 0, NULL, NULL);
+
+	double tstart, tend, ttime;
+
+	tstart = dtime();
+	for (int h = 0; h < n_iters; h++)
+	{
+	for (k = 0; k <= block_length; k++)
+	{
+		denom[k] = -LOG_INFINITY;
+	}
+	// Initiate alpha
+	for (i = 1; i < N_STATES; i++)
+	{
+		alpha[i + 0 * N_STATES] = -LOG_INFINITY;
+	}
+	alpha[0 + 0 * N_STATES] = 0.0;
+
+	for (k = 1; k <= block_length; k++)
+	{
+		for (s = 0; s < N_STATES; s++)
+		{
+			s_prim0 = g_rev_state_trans[s * 2 + 0];
+			s_prim1 = g_rev_state_trans[s * 2 + 1];
+			
+			temp0 = alpha[s_prim0 + (k - 1) * N_STATES] + gamma[(2 * s_prim0 + 0) + k * 2 * N_STATES];
+			temp1 = alpha[s_prim1 + (k - 1) * N_STATES] + gamma[(2 * s_prim1 + 1) + k * 2 * N_STATES];
+			alpha[s + k * N_STATES] = com_log(temp0, temp1);
+			denom[k] = com_log(alpha[s + k * N_STATES], denom[k]);
+		}
+
+		// Normalization of alpha
+		for (l = 0; l < N_STATES; l++)
+		{
+			alpha[l + k * N_STATES] -= denom[k];
+		}
+	}
+
+	// Initiate beta
+	for (i = 1; i < N_STATES; i++)
+	{
+		beta[i + block_length * N_STATES] = -LOG_INFINITY;
+	}
+	beta[0 + block_length * N_STATES] = 0.0;
+
+	for (k = block_length; k >= 2; k--)
+	{
+		for (s_prim = 0; s_prim < N_STATES; s_prim++)
+		{
+			s0 = g_state_trans[s_prim * 2 + 0];
+			s1 = g_state_trans[s_prim * 2 + 1];
+			beta[s_prim + (k - 1) * N_STATES] = com_log(beta[s0 + k * N_STATES] + gamma[(2 * s_prim + 0) + k * 2 * N_STATES], beta[s1 + k * N_STATES] + gamma[(2 * s_prim + 1) + k * 2 * N_STATES]);
+		}
+		// Normalization of beta
+		for (l = 0; l < N_STATES; l++)
+		{
+			beta[l + (k - 1) * N_STATES] -= denom[k];
+		}
+	}
+	}
+	tend = dtime();
+	ttime = tend - tstart;
+	printf("Elapsed time of alpha and beta is %fms\n", ttime);
+	elapsed_time = elapsed_time + ttime;
+
+	/* Create buffers for extrinsic_kernel */
+	g_state_trans_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY, N_STATES * 2 * sizeof(int), NULL, &_err);
+	extrinsic_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, block_length * sizeof(float), NULL, &_err);
+	alpha_buffer = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, N_STATES * (block_length + 1) * sizeof(float), alpha, &_err);
+	beta_buffer = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, N_STATES * (block_length + 1) * sizeof(float), beta, &_err);
+
+	/* Set args for extrinsic_kernel */
+	_err |= clSetKernelArg(extrinsic_kernel, 0, sizeof(cl_mem), &recv_parity_buffer);
+	_err |= clSetKernelArg(extrinsic_kernel, 1, sizeof(cl_mem), &g_state_trans_buffer);
+	_err |= clSetKernelArg(extrinsic_kernel, 2, sizeof(cl_mem), &g_output_parity_buffer);
+	_err |= clSetKernelArg(extrinsic_kernel, 3, sizeof(cl_mem), &alpha_buffer);
+	_err |= clSetKernelArg(extrinsic_kernel, 4, sizeof(cl_mem), &beta_buffer);
+	_err |= clSetKernelArg(extrinsic_kernel, 5, sizeof(cl_mem), &extrinsic_buffer);
+	_err |= clSetKernelArg(extrinsic_kernel, 6, sizeof(int), &block_length);
+	_err |= clSetKernelArg(extrinsic_kernel, 7, sizeof(int), &n_iters);
+
+	_err |= clEnqueueWriteBuffer(queue, recv_parity_buffer, CL_TRUE, 0, block_length * (N_GENS - 1) * sizeof(float), recv_parity, 0, NULL, NULL);
+	_err |= clEnqueueWriteBuffer(queue, g_state_trans_buffer, CL_TRUE, 0, N_STATES * 2 * sizeof(int), g_state_trans, 0, NULL, NULL);
+	_err |= clEnqueueWriteBuffer(queue, g_output_parity_buffer, CL_TRUE, 0, N_STATES * (N_GENS - 1) * 2 * sizeof(int), g_output_parity, 0, NULL, NULL);
+	_err |= clEnqueueWriteBuffer(queue, alpha_buffer, CL_TRUE, 0, N_STATES * (block_length + 1) * sizeof(float), alpha, 0, NULL, NULL);
+	_err |= clEnqueueWriteBuffer(queue, beta_buffer, CL_TRUE, 0, N_STATES * (block_length + 1) * sizeof(float), beta, 0, NULL, NULL);
+
+//	double elapsed_time = 0.0;
+//	cl_event prof_event;
+
+	_err = clEnqueueNDRangeKernel(queue, extrinsic_kernel, 1, NULL, &global_size, &local_size, 0, NULL, /*NULL*/&prof_event);
+
+	ev_start_time = (cl_ulong)0;
+	ev_end_time = (cl_ulong)0;
+	clFinish(queue);
+
+	_err = clWaitForEvents(1, &prof_event);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ev_start_time, NULL);
+	_err |= clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ev_end_time, NULL);
+
+//	printf("%d\n", ev_start_time);
+//	printf("%d\n", ev_end_time);
+	
+	printf("Elapsed time of extrinsic_kernel is: %lfms\n", (double)(ev_end_time - ev_start_time) / 1000000.0);
+	
+	elapsed_time = elapsed_time + (double)(ev_end_time - ev_start_time) / 1000000.0;
+
+	printf("Elapsed time of log_decoder_kernel is: %lfms\n", elapsed_time);
+
+
+	_err = clEnqueueReadBuffer(queue, extrinsic_buffer, CL_TRUE, 0, block_length * sizeof(float), extrinsic, 0, NULL, NULL);
+	/*
+	for (k = 1; k <= block_length; k++)
+	{
+		kk = k - 1;
+		nom = -LOG_INFINITY;
+		den = -LOG_INFINITY;
+		for (s_prim = 0; s_prim < N_STATES; s_prim++)
+		{
+			s0 = g_state_trans[s_prim * 2 + 0];
+			s1 = g_state_trans[s_prim * 2 + 1];
+			exp_temp0 = 0.0;
+			exp_temp1 = 0.0;
+			for (j = 0; j < (N_GENS - 1); j++)
+			{
+				rp = recv_parity[kk * (N_GENS - 1) + j];
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+				{
+					exp_temp0 += rp;
+				}
+				else
+				{
+					exp_temp0 -= rp; 
+				}
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+				{ 
+					exp_temp1 += rp;
+				}
+				else
+				{
+					exp_temp1 -= rp;
+				}
+			}
+			nom = com_log(nom, alpha[s_prim + kk * N_STATES] + 0.5 * exp_temp0 + beta[s0 + k * N_STATES]);
+			den = com_log(den, alpha[s_prim + kk * N_STATES] + 0.5 * exp_temp1 + beta[s1 + k * N_STATES]);
+		}
+		extrinsic[kk] = nom - den;
+	}
+	*/
+
+	clReleaseMemObject(recv_syst_buffer);
+	clReleaseMemObject(recv_parity_buffer);
+	clReleaseMemObject(apriori_buffer);
+	clReleaseMemObject(extrinsic_buffer);
+//	clReleaseMemObject(alpha_buffer);
+//	clReleaseMemObject(beta_buffer);
+	clReleaseMemObject(gamma_buffer);
+//	clReleaseMemObject(denom_buffer);
+	clReleaseMemObject(g_output_parity_buffer);
+	clReleaseMemObject(g_state_trans_buffer);
+//	clReleaseMemObject(g_rev_state_trans_buffer);
 
 	free(alpha);
 	free(beta);

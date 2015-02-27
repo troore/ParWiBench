@@ -13,13 +13,6 @@
 #include "check/check.h"
 #include "util.h"
 
-#ifdef _RAPL
-extern "C" {
-#include "papi-rapl/rapl_power.h"
-}
-#endif
-
-
 void test_turbo_encoding(LTE_PHY_PARAMS *lte_phy_params)
 {
 	std::cout << "Turbo Encoder starts" << std::endl;
@@ -50,32 +43,24 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_log_decoder_iters
 		lte_phy_params->td_in[i] = (1 - 2 * lte_phy_params->td_in[i]);
 	}
 
-#ifdef _RAPL
-	rapl_power_start();
-#else
 	double tstart, tend, ttime;
 	double n_gflops, gflops;
 
 	tstart = dtime();
-#endif
 
-	int n_test_iters = 1000;
+	int n_test_iters = 1;
 	for (int i = 0; i < n_test_iters; i++)
 	{
 	turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_log_decoder_iters);
 	}
 
-#ifndef _RAPL
 	tend = dtime();
 	ttime = tend - tstart;
 	n_gflops = n_test_iters * gflop_counter(lte_phy_params);
 	gflops = (n_gflops * 10e3) / ttime;
-	printf("%fms\n", ttime);
-	printf("Number of gflops = %lf\n", n_gflops);
-	printf("GFlops = %f\n", gflops);
-#else
-	rapl_power_stop();
-#endif
+//	printf("%fms\n", ttime);
+//	printf("Number of gflops = %lf\n", n_gflops);
+//	printf("GFlops = %f\n", gflops);
 
 	for (int i = 0; i < lte_phy_params->td_out_buf_sz; i++)
 	{

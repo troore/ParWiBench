@@ -3,7 +3,10 @@
 #include <limits>
 #include <stdio.h>
 
+#include <omp.h>
+
 #include "Turbo.h"
+#include "util.h"
 
 #define LOG_INFINITY 1e30
 
@@ -635,7 +638,12 @@ void log_decoder(float *recv_syst,
 		denom[k] = -LOG_INFINITY;
 	}
 
+	omp_set_num_threads(num_threads);
 	// Calculate gamma
+	/*
+#pragma omp parallel shared(block_length, recv_parity, g_output_parity, gamma)
+	{
+#pragma omp for private(k, kk, s_prim, exp_temp0, exp_temp1, rp, j)
 	for (k = 1; k <= block_length; k++)
 	{
 		kk = k - 1;
@@ -672,6 +680,53 @@ void log_decoder(float *recv_syst,
 		//	std::cout << gamma[(2 * s_prim + 1) * (block_length + 1) + k] << std::endl;
 		}
 	}
+	}
+	*/
+
+//	for (k = 1; k <= block_length; k++)
+#pragma omp parallel shared(block_length, recv_parity, g_output_parity, gamma)
+	{
+#pragma omp for private(i, k, kk, s_prim, exp_temp0, exp_temp1, rp, j)
+	for (i = 0; i < block_length * N_STATES; i++)
+	{
+		k = i / N_STATES + 1;
+		kk = k - 1;
+		s_prim = i % N_STATES;
+
+		//	for (s_prim = 0; s_prim < N_STATES; s_prim++)
+		//	{
+			exp_temp0 = 0.0;
+			exp_temp1 = 0.0;
+
+			for (j = 0; j < (N_GENS - 1); j++)
+			{
+				rp = recv_parity[kk * (N_GENS - 1) + j];
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 0])
+				{
+					exp_temp0 += rp;
+				}
+				else
+				{ 
+					exp_temp0 -= rp;
+				}
+				if (0 == g_output_parity[s_prim * (N_GENS - 1) * 2 + j * 2 + 1])
+				{
+					exp_temp1 += rp;
+				}
+				else
+				{
+					exp_temp1 -= rp; 
+				}
+			}
+
+			gamma[(2 * s_prim + 0) + k * 2 * N_STATES] =  0.5 * ((apriori[kk] + recv_syst[kk]) + exp_temp0);
+			//	std::cout << gamma[(2 * s_prim + 0) * (block_length + 1) + k] << "\t";
+			gamma[(2 * s_prim + 1) + k * 2 * N_STATES] = -0.5 * ((apriori[kk] + recv_syst[kk]) - exp_temp1);
+			//	std::cout << gamma[(2 * s_prim + 1) * (block_length + 1) + k] << std::endl;
+			//	}
+	}
+	}
+
 
 	// Initiate alpha
 	for (int i = 1; i < N_STATES; i++)
@@ -680,9 +735,13 @@ void log_decoder(float *recv_syst,
 	}
 	alpha[0 + 0 * N_STATES] = 0.0;
 
+//	omp_set_num_threads(N_STATES);
 	// Calculate alpha, going forward through the trellis
 	for (k = 1; k <= block_length; k++)
 	{
+//#pragma omp parallel shared(g_rev_state_trans, alpha, gamma, k)
+		{
+//#pragma omp for private(s, s_prim0, s_prim1, temp0, temp1)
 		for (s = 0; s < N_STATES; s++)
 		{
 			s_prim0 = g_rev_state_trans[s * 2 + 0];
@@ -691,6 +750,7 @@ void log_decoder(float *recv_syst,
 			temp1 = alpha[s_prim1 + (k - 1) * N_STATES] + gamma[(2 * s_prim1 + 1) + k * 2 * N_STATES];
 			alpha[s + k * N_STATES] = com_log(temp0, temp1);
 			denom[k] = com_log(alpha[s + k * N_STATES], denom[k]);
+		}
 		}
 
 		// Normalization of alpha
@@ -723,7 +783,13 @@ void log_decoder(float *recv_syst,
 		}
 	}
 
+//	printf("%d\n", num_threads);
+
+//	omp_set_num_threads(num_threads);
 	// Calculate extrinsic output for each bit
+#pragma omp parallel shared(block_length, recv_parity, g_output_parity, extrinsic)
+	{
+#pragma omp for private(k, kk, nom, den, s_prim, s0, s1, exp_temp0, exp_temp1, j, rp)
 	for (k = 1; k <= block_length; k++)
 	{
 		kk = k - 1;
@@ -761,5 +827,6 @@ void log_decoder(float *recv_syst,
 		extrinsic[kk] = nom - den;
 	//	std::cout << nom << "\t" << den << std::endl;
 	//	std::cout << extrinsic[kk] << std::endl;
+	}
 	}
 }
