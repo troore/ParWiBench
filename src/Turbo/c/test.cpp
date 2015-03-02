@@ -68,7 +68,7 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_log_decoder_iters
 #ifndef _RAPL
 	tend = dtime();
 	ttime = tend - tstart;
-	n_gflops = n_test_iters * gflop_counter(lte_phy_params);
+	n_gflops = n_test_iters * gflop_counter_turbo_decoder(lte_phy_params, n_log_decoder_iters);
 	gflops = (n_gflops * 10e3) / ttime;
 	printf("%fms\n", ttime);
 	printf("Number of gflops = %lf\n", n_gflops);

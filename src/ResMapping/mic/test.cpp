@@ -31,13 +31,15 @@ void test_SCMapper(LTE_PHY_PARAMS *lte_phy_params)
 	double energy, ttime, tbegin;
 	micpower_start();
 	tbegin = dtime();
-	for (int i = 0; i < 10000; i++)
+	for (int i = 0; i < 1000; i++)
 		SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in, lte_phy_params->resm_out);
 	ttime = dtime() - tbegin;
 	energy = micpower_finalize();
-	printf("Energy used is %lfJ\n", energy);
-	printf("whole time is %fms\n", ttime);
-	printf("Power is %fW\n", (energy * 1000.0) / ttime);
+//	printf("Energy used is %lfJ\n", energy);
+//	printf("whole time is %fms\n", ttime);
+//	printf("Power is %fW\n", (energy * 1000.0) / ttime);
+
+	printf("%lf\t%f\t%f\n", energy, ttime, (energy * 1000.0) / ttime);
 
 	ofmodulating(lte_phy_params, lte_phy_params->resm_out, lte_phy_params->ofmod_out);
 
@@ -97,7 +99,16 @@ void test(LTE_PHY_PARAMS *lte_phy_params)
 
 	test_SCDemapper(lte_phy_params);
 
-	check();
+	char tx_in_fname_real[100];
+	char tx_in_fname_imag[100];
+	char rx_out_fname_real[100];
+	char rx_out_fname_imag[100];
+	
+	strcpy(tx_in_fname_real, "/root/ResMapping/testsuite/SubCarrierMapInputReal");
+	strcpy(tx_in_fname_imag, "/root/ResMapping/testsuite/SubCarrierMapInputImag");
+	strcpy(rx_out_fname_real, "/root/ResMapping/testsuite/testLSCELSEqOutputReal");
+	strcpy(rx_out_fname_imag, "/root/ResMapping/testsuite/testLSCELSEqOutputImag");
+	check(tx_in_fname_real, tx_in_fname_imag, rx_out_fname_real, rx_out_fname_imag);
 
 //#endif
 }

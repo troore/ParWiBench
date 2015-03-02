@@ -12,6 +12,7 @@
 #include "timer/meas.h"
 #include "check/check.h"
 #include "micpower.h"
+#include "util.h"
 
 void test_turbo_encoding(LTE_PHY_PARAMS *lte_phy_params)
 {
@@ -49,11 +50,12 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_iters)
 	tbegin = dtime();
 
 	for(int i=0;i<1000;i++)
-	turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_iters);
-	ttime = dtime();
+		turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_iters);
+	ttime = dtime() - tbegin;
 	energy = micpower_finalize();
-	printf("Energy used in %lf\n", energy);
-	printf("real time is %fms\n", ttime - tbegin);
+//	printf("Energy used in %lf\n", energy);
+//	printf("real time is %fms\n", ttime);
+	printf("%lf\t%f\t%f\n", energy, ttime, (energy * 1000.0) / ttime);
 
 	for (int i = 0; i < lte_phy_params->td_out_buf_sz; i++)
 	{
@@ -64,19 +66,6 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_iters)
 	
 	std::cout << "Turbo Decoder ends" << std::endl;
 }
-
-void check()
-{
-	char tx_in_fname[100];
-	char rx_out_fname[100];
-	int err_n;
-
-	strcpy(tx_in_fname, "/home/xblee/ParWiBench/src/Turbo/testsuite/TurboEncoderInput");
-	strcpy(rx_out_fname, "/home/xblee/ParWiBench/src/Turbo/testsuite/testTurboDecoderOutput");
-	err_n = check_float(tx_in_fname, rx_out_fname);
-	printf("%d\n", err_n);
-}
-
 
 //#define TurboEnc
 void test(LTE_PHY_PARAMS *lte_phy_params)
@@ -91,6 +80,12 @@ void test(LTE_PHY_PARAMS *lte_phy_params)
 	int n_iters = 1;
 	
 	test_turbo_decoding(lte_phy_params, n_iters);
-	check();
+
+	char tx_in_fname[100];
+	char rx_out_fname[100];
+
+	strcpy(tx_in_fname, "/home/xblee/ParWiBench/src/Turbo/testsuite/TurboEncoderInput");
+	strcpy(rx_out_fname, "/home/xblee/ParWiBench/src/Turbo/testsuite/testTurboDecoderOutput");
+	check(tx_in_fname, rx_out_fname);
 //#endif
 }

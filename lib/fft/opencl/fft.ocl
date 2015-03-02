@@ -54,7 +54,7 @@ __kernel void fft_radix2_kernel(__global float2 *a, __global float2 *y, int n, i
 
 //	printf("%f\t%f\n", u1.x, u1.y);
 
-				DFT2(u0, u1, tmp); // bufferfly
+				DFT2(u0, u1, tmp); // butterfly
 
 //	printf("%f\t%f\n", u0.x, u0.y);
 //	printf("%f\t%f\n", u1.x, u1.y);

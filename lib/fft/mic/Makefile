@@ -1,7 +1,7 @@
 include ../../../common/makefile.config
 
-#SRC = test.cpp ../util.cpp
-SRC = test.cpp
+SRC = fft.cpp test.cpp ../util.cpp
+#SRC = test.cpp
 SRC += $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp
 OBJS = $(patsubst %.cpp, %.o, $(SRC))
 

@@ -9,6 +9,7 @@
 #include "timer/meas.h"
 #include "check/check.h"
 #include "test.h"
+#include "util.h"
 
 #ifdef _RAPL
 extern "C" {
@@ -105,18 +106,6 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 	cout << "Rx descrambling ends" << endl;
 }
 
-void check()
-{	
-	char tx_in_fname[50];
-	char rx_out_fname[50];
-	int err_n;
-	
-	strcpy(tx_in_fname, "../testsuite/RandomScrambleInput");
-	strcpy(rx_out_fname, "../testsuite/testDescrambleOutput");
-	err_n = check_float(tx_in_fname, rx_out_fname);
-	printf("%d\n", err_n);
-}
-
 //#define Scramb
 void test(LTE_PHY_PARAMS *lte_phy_params)
 {
@@ -124,15 +113,12 @@ void test(LTE_PHY_PARAMS *lte_phy_params)
 	test_scrambling(lte_phy_params);
 //#else
 	test_descrambling(lte_phy_params);
-	check();
+
+	char tx_in_fname[50];
+	char rx_out_fname[50];
+
+	strcpy(tx_in_fname, "../testsuite/RandomScrambleInput");
+	strcpy(rx_out_fname, "../testsuite/testDescrambleOutput");
+	check(tx_in_fname, rx_out_fname);
 //#endif
-}
-
-double gflop_counter(LTE_PHY_PARAMS *lte_phy_params)
-{
-	double cnter = 0.0;
-
-	cnter = ((double)lte_phy_params->scramb_in_buf_sz) * 3.0;
-
-	return 1.0e-9 * cnter;
 }

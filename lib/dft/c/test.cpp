@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	tstart = dtime();
 #endif
 
-	int n_iters = 1;
+	int n_iters = 1000;
 	for (int i = 0; i < n_iters; i++)
 	{
 		dft(n, v, vout, -1);

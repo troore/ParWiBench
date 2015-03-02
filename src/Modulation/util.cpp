@@ -8,14 +8,10 @@
 
 int num_threads;
 
-void check()
+void check(char *tx_in_fname, char *rx_out_fname)
 {
-	char tx_in_fname[50];
-	char rx_out_fname[50];
 	int err_n;
 	
-	strcpy(tx_in_fname, "../testsuite/RandomModulationInput");
-	strcpy(rx_out_fname, "../testsuite/testDemodulationOutput");
 	err_n = check_float(tx_in_fname, rx_out_fname);
 	printf("%d\n", err_n);
 }
