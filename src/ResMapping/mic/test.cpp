@@ -31,7 +31,7 @@ void test_SCMapper(LTE_PHY_PARAMS *lte_phy_params)
 	double energy, ttime, tbegin;
 	micpower_start();
 	tbegin = dtime();
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < 10000; i++)
 		SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in, lte_phy_params->resm_out);
 	ttime = dtime() - tbegin;
 	energy = micpower_finalize();

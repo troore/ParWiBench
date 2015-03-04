@@ -14,6 +14,13 @@ INC_FLAGS += -I../ -I. -I$(SRC_DIR) -I$(LIB_DIR) -I$(LIB_DIR)/power/micpower
 
 ICPCFLAGS += $(MMIC)
 LINKFLAGS += $(MMIC)
+LINKFLAGS += -lpthread 
+
+ifeq ($(VEC),1)
+	ICPCFLAGS += -vec -vec-report2
+else
+	ICPCFLAGS += -no-vec
+endif
 
 #CXXFLAGS += -DDEBUG_INTL
 

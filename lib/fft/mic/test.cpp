@@ -7,6 +7,7 @@
 #include "util.h"
 #include "timer/meas.h"
 #include "check/check.h"
+#include "micpower.h"
 
 #define PI	3.14159265358979323846264338327950288
 
@@ -42,7 +43,11 @@ int main(int argc, char *argv[])
 
 //	print_vector("Orig", v, n);
 
-	int n_iters = 1;
+	double energy,ttime,tbegin;
+	micpower_start();
+	tbegin = dtime();
+	
+	int n_iters = 10000;
 	for (int i = 0; i < n_iters; i++)
 	{
 		fft_nrvs(n, v, vout, -1);
@@ -53,6 +58,10 @@ int main(int argc, char *argv[])
 			v[k + n] = v1[k + n];
 		}
 	}
+	
+	ttime = dtime() - tbegin;
+	energy = micpower_finalize();
+	printf("%lf\t%f\t%f\n", energy, ttime, (energy * 1000.0) / ttime);
 
 	for (k = 0; k < n; k++)
 	{

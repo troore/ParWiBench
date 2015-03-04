@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern int num_threads;
+//extern int num_threads;
 
 #define PI	3.14159265358979323846264338327950288
 

@@ -59,8 +59,10 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 		Descrambling(lte_phy_params, rx_scramb_in, rx_scramb_out);
 	ttime = dtime() - tbegin;
 	energy = micpower_finalize();
-	printf("Energy used in %lf\n", energy);
-	printf("whole time is %fms\n", ttime);
+//	printf("Energy used in %lf\n", energy);
+//	printf("whole time is %fms\n", ttime);
+	printf("%lf\t%f\t%f\n", energy, ttime, (energy * 1000.0) / ttime);
+
 	for (i = 0; i < lte_phy_params->descramb_out_buf_sz; i++)
 	{
 		if (rx_scramb_out[i] > 0)

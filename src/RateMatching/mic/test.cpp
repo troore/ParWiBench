@@ -22,7 +22,7 @@ void tx_rate_matching(LTE_PHY_PARAMS *lte_phy_params)
 	double energy,ttime,tbegin;
 	micpower_start();
 	tbegin = dtime();
-	for(int i=0;i<1000;i++)
+	for(int i=0;i<10000;i++)
 		TxRateMatching(lte_phy_params, lte_phy_params->rm_in, lte_phy_params->rm_out);
 	ttime = dtime() - tbegin;
 	energy = micpower_finalize();
