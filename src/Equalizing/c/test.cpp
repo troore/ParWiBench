@@ -48,7 +48,7 @@ void test_equalizer(LTE_PHY_PARAMS *lte_phy_params)
 
 	int n_iters = 1000;
 	for (int i = 0; i < n_iters; i++) {
-		Equalizing(lte_phy_params, lte_phy_params->eq_in, lte_phy_params->eq_out);
+		Equalizing(lte_phy_params, lte_phy_params->resdm_out, lte_phy_params->eq_out);
 	}
 //	geneDMRS(lte_phy_params->DMRSReal, lte_phy_params->DMRSImag, lte_phy_params->N_tx_ant, lte_phy_params->N_dft_sz);
 //	Equalizing(lte_phy_params, lte_phy_params->eq_in_real, lte_phy_params->eq_in_imag, lte_phy_params->eq_out_real, lte_phy_params->eq_out_imag);

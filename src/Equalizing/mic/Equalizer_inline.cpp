@@ -599,7 +599,7 @@ inline void LSFreqDomain(float *pInpDataReal, float *pInpDataImag,
 	}
 
 }
-/*
+
 void Equalizing(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOutData)
 {
 	int MDFT = lte_phy_params->N_dft_sz;
@@ -608,7 +608,7 @@ void Equalizing(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, float *pOutData
 	int NumULSymbSF = LTE_PHY_N_SYMB_PER_SUBFR;
 	
 	LSFreqDomain(pInpData, pOutData, MDFT, NumLayer, NumRxAntenna, NumULSymbSF);
-}*/
+}
 
 void Equalizing(LTE_PHY_PARAMS *lte_phy_params,
 				float *pInpDataReal, float *pInpDataImag,
