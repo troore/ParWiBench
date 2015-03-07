@@ -60,4 +60,5 @@ ResMapper_omp.out: $(OBJS_OMP)
 	$(ICPC) -c $< -o $@ $(ICPCFLAGS)
 
 clean:
+	$(MAKE) -C $(LIB_DIR)/fft/mic clean
 	rm -rf $(TARGETS) $(OBJS) $(OBJS_SIMD) $(OBJS_OMP)

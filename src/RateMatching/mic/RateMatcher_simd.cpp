@@ -1,8 +1,15 @@
+#include <stdlib.h>
 #include <sys/time.h>
 #include "RateMatcher.h"
-#include "SubblockInterleaver_lte.h"
+//#include "SubblockInterleaver_lte.h"
 //SubblockInterleaver_lte<int,int> SbInterleaver;
 //SubblockInterleaver_lte<int,float> SbDeInterleaver;
+
+static int InterColumnPattern[32] = {0,16,8,24,4,20,12,28,
+									 2,18,10,26,6,22,14,30,
+									 1,17,9,25,5,21,13,29,3,
+									 19,11,27,7,23,15,31};
+
 inline void _SubblockInterleaving(int SeqLen, int *InSeq, int *OutSeq, int offset);
 
 #include<immintrin.h>
@@ -233,6 +240,196 @@ inline void _SubblockInterleaving(int SeqLen, int *InSeq, int *OutSeq, int offse
         }
     }
 }
+
+template<typename T>
+#ifdef DEBUG_INTL
+static void SubblockDeInterleaving(int SeqLen, T **pInpMtr, T **pOutMtr)
+#else
+static void SubblockDeInterleaving(int SeqLen, T pInpMtr[], T pOutMtr[])
+#endif
+{
+	int D;
+	int K_pi;
+	int Rate;
+	int R_sb, C_sb;
+	int NumDummy;
+	T DummyValue;
+	
+	int InIdx;
+	int OutIdx;
+
+	D = SeqLen;
+	Rate = 3;
+	C_sb = 32;
+	
+#ifdef DEBUG_INTL
+	R_sb = (int)(ceil((((float)D) / ((float)C_sb))));
+#else
+	R_sb = (D + (C_sb - 1)) / C_sb;
+#endif
+	
+	K_pi = R_sb * C_sb;
+	NumDummy = K_pi - D;
+	DummyValue = (T)1000000;
+	
+//////////////////// DeInterleaving for i=0,1 ///////////////////////
+#ifdef DEBUG_INTL
+	T **pInterMatrix=new T*[R_sb];
+	for(int r=0;r<R_sb;r++){*(pInterMatrix+r)=new T[C_sb];}
+#else
+	T pInterMatrix[((BLOCK_SIZE + 4 + 31) / 32) * 32];
+#endif
+
+#ifdef DEBUG_INTL
+	T *VpInpSeq;
+	T *VpOutSeq;
+#endif
+	
+	for (int StrIdx = 0; StrIdx < (Rate - 1); StrIdx++)
+	{
+#ifdef DEBUG_INTL
+		VpInpSeq=*(pInpMtr+StrIdx);
+		VpOutSeq=*(pOutMtr+StrIdx);
+#endif
+
+		InIdx=0;
+		for (int r = 0;r < R_sb; r++)
+		{
+			for (int c = 0; c < C_sb; c++)
+			{
+				int k = r * C_sb + c;
+				
+				if (k < NumDummy)
+				{
+#ifdef DEBUG_INTL
+					*(*(pInterMatrix+r)+c)=DummyValue;
+#else
+					pInterMatrix[r * C_sb + c] = DummyValue;
+#endif
+				}
+				else
+				{
+#ifdef DEBUG_INTL
+					*(*(pInterMatrix+r)+c)=(T)0;
+#else
+					pInterMatrix[r * C_sb + c] = (T)0;
+#endif
+				}
+			}
+		}
+
+		for (int c = 0; c < C_sb; c++)
+		{
+			int col = InterColumnPattern[c];
+			for (int r = 0; r < R_sb; r++)
+			{
+				int k = col * R_sb + r;
+#ifdef DEBUG_INTL
+				T v = *(*(pInterMatrix+r)+col);
+#else
+				T v = pInterMatrix[r * C_sb + col];
+#endif
+				if (v == DummyValue)
+				{}
+				else
+				{
+#ifdef DEBUG_INTL
+					*(*(pInterMatrix+r)+col)=*(VpInpSeq+InIdx);
+#else
+					pInterMatrix[r * C_sb + col] = pInpMtr[StrIdx * D + InIdx];
+#endif
+					InIdx++;
+				}  
+			}
+		}  
+
+		OutIdx=0;
+		for (int r = 0; r < R_sb; r++)
+		{
+			for(int c = 0; c < C_sb; c++)
+			{
+#ifdef DEBUG_INTL
+				T v = *(*(pInterMatrix+r)+c);
+#else
+				T v = pInterMatrix[r * C_sb + c];
+#endif
+				if (v == DummyValue)
+				{}
+				else
+				{
+#ifdef DEBUG_INTL
+					*(VpOutSeq+OutIdx)=*(*(pInterMatrix+r)+c);
+#else
+					pOutMtr[StrIdx * D + OutIdx] = pInterMatrix[r * C_sb + c];
+#endif
+					OutIdx++;
+				}
+			}
+		}
+	}
+#ifdef DEBUG_INTL
+	for(int r=0;r<R_sb;r++){delete[] *(pInterMatrix+r);}
+	delete[] pInterMatrix;
+#endif
+
+//////////////////// DeInterleaving for i=2 ///////////////////////
+#ifdef DEBUG_INTL	
+	int *Pi=new int[K_pi];
+	T *pInterSeq=new T[K_pi];
+	VpInpSeq=*(pInpMtr+(Rate-1));
+	VpOutSeq=*(pOutMtr+(Rate-1));
+#else
+	int Pi[((BLOCK_SIZE + 4 + 31) / 32) * 32];
+	T pInterSeq[((BLOCK_SIZE + 4 + 31) / 32) * 32];
+#endif
+	
+	for (int k = 0; k < NumDummy; k++)
+		pInterSeq[k] = DummyValue;
+//////////////// Pi & DePi//////////////////
+	for(int k=0;k<K_pi;k++)
+	{
+#ifdef DEBUG_INTL
+		int idxP=(int)(floor((((double)(k))/((double)(R_sb)))));
+#else
+		int idxP = k / R_sb;
+#endif
+		int idx = (InterColumnPattern[idxP] + (C_sb * (k % R_sb)) + 1) % K_pi;
+		Pi[k]=idx;
+	}
+/////////////// DeInterleaving ////////////////////
+	InIdx=0;
+	for(int k=0;k<K_pi;k++)
+	{
+		T v = pInterSeq[Pi[k]];
+		if (v == DummyValue)
+		{}
+		else
+		{
+#ifdef DEBUG_INTL	
+			*(pInterSeq+(*(Pi+k)))=*(VpInpSeq+InIdx);
+#else
+			pInterSeq[Pi[k]] = pInpMtr[(Rate - 1) * D + InIdx];
+#endif
+			InIdx++;
+		}
+	}
+	OutIdx=0;
+	for (int k = NumDummy; k < K_pi; k++)
+	{
+#ifdef DEBUG_INTL
+		*(VpOutSeq+OutIdx)=*(pInterSeq+k);
+#else
+		pOutMtr[(Rate - 1) * D + OutIdx] = pInterSeq[k];
+#endif
+		OutIdx++;
+	}
+
+#ifdef DEBUG_INTL
+	delete[] pInterSeq;
+	delete[] Pi;
+#endif
+}
+
 
 double ddtime();
 

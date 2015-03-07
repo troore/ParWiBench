@@ -19,8 +19,9 @@ int main(int argc, char *argv[])
 	int n = atoi(argv[1]);
 	int num_errs = 0;
 
-	float *v, *vout, *voutout;
 	num_threads = atoi(argv[2]);
+
+	float *v, *vout, *voutout;
 
 	v = (float *)malloc(2 * n * sizeof(float));
 	vout = (float *)malloc(2 * n * sizeof(float));
@@ -35,11 +36,12 @@ int main(int argc, char *argv[])
 
 //	print_vector("Orig", v, n);
 
+	int n_iters = (n < 600 ? 10000 : 1000);
+
 	double energy,ttime,tbegin;
 	micpower_start();
 	tbegin = dtime();
 
-	int n_iters = (n < 600 ? 10000 : 1000);
 	for (int i = 0; i < n_iters; i++)
 	{
 		dft(n, v, vout, -1);

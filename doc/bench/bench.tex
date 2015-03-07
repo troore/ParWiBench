@@ -540,6 +540,18 @@ itpp库中的Turbo解码模块认为其输入输出是“+1”或“-1”，因�
 
 另外，fft\_nrvs版本的fft程序由于要使用输入数组作为迭代之间的scratchpad，所以程序结束后输入数组已经不是原来的输入数据，所以这个程序不能被运行多次。除非在程序外或内开辟一个专门的scratchpad用来缓存。
 
+\subsection{DFT}
+
+\textbf{Multithreading}
+
+加了Reduction优化后会更慢。
+
+\textbf{SIMD}
+
+在MIC上，不加任何向量化，运行时间为450ms；自动向量化能够得到60ms；只做手动向量化，280ms；手动加自动，28ms。
+
+有一件奇怪的事，自动向量化只在main函数与dft函数放在一个文件中时才会生效，如果分放在两个文件里，加不加自动向量化运行时间差不多。
+
 \subsection{Equalizing}
 
 \subsection{Synchronization}

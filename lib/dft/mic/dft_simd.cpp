@@ -1,13 +1,21 @@
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include "dft.h"
-
+#include "timer/meas.h"
+#include "check/check.h"
+#include "micpower.h"
 #include <immintrin.h>
-
 #define LEN16 16
 #define PI      3.14159265358979323846264338327950288
+//#define N (8)
 
+
+/*
+   Discrete Fourier Transform
+   */
 
 #ifdef __MIC__
 typedef __attribute__((aligned(64))) union zmmf {
@@ -129,22 +137,5 @@ void dft(int n, float a[], float y[], int direction)
 		y[2 * k + 1] = p[1];
 
 	}
-#else
-	for (k = 0; k < n; k++) 
-	{
-		p[0] = 0.0;
-		p[1] = 0.0;
-		ang = ((float)direction) * 2.0 * PI * ((float)k) / ((float)n);
-
-		for (j = 0; j < n; j++) 
-		{
-			p[0] += (a[2 * j + 0] * cos(j * ang) - a[2 * j + 1] * sin(j * ang));
-			p[1] += (a[2 * j + 0] * sin(j * ang) - a[2 * j + 1] * cos(j * ang));
-		}
-
-		y[2 * k + 0] = p[0];
-		y[2 * k + 1] = p[1];
-	}
-
 #endif
 }

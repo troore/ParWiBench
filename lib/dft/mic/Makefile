@@ -33,6 +33,9 @@ dft: $(OBJS)
 dft_simd: $(OBJS_SIMD)
 	$(ICPC) $(MMIC) -o $@ $(OBJS_SIMD) $(LINKFLAGS)
 
+dft_omp: $(OBJS_OMP)
+	$(ICPC) $(MMIC) -o $@ $(OBJS_OMP) $(LINKFLAGS) -openmp
+
 libdft.a: dft.o ../util.o
 	ar rcs $@ $^
 
@@ -41,6 +44,9 @@ libdftsimd.a: dft_simd.o ../util.o
 
 %.o: %.cpp
 	$(ICPC) $(MMIC) -o $@ -c $< $(ICPCFLAGS)
+
+../c/dft_omp.o: ../c/dft_omp.cpp
+	$(ICPC) $(MMIC) -o $@ -c $< $(ICPCFLAGS) -openmp
 
 
 clean:

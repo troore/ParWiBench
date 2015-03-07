@@ -33,5 +33,6 @@ ResMapper.out: $(OBJS)
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
 clean:
+	$(MAKE) -C $(LIB_DIR)/fft/c clean
 	rm -rf $(TARGETS) $(OBJS)
 

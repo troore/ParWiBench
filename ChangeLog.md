@@ -28,3 +28,10 @@ Please cautiously choose the Read/Write/GeneRandom functions in GeneralFunc.cpp/
 [Bug Fixed]
 
 RateM: Offset is added directly on the input arguments (pointers), rather than make it a argument and get start addresses of block in the subblockinterleaver function.
+
+
+2015-03-07 Xuechao Wei <troore@gmail.com>
+
+1.	src/ResMapping/c/ResMapper_omp.cpp
+
+Move <code>geneDMRS</code> out of <code>SubCarrierMapping</code> to test.cpp.
