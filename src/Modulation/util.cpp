@@ -48,7 +48,7 @@ double gflop_counter(LTE_PHY_PARAMS *lte_phy_params)
 	cnter += mod_table_len * 5;
 	cnter += bits_per_samp * mod_table_len;
 
-	cnter *= lte_phy_params->scramb_in_buf_sz;
+	cnter *= lte_phy_params->demod_in_buf_sz;
 
 	return 1.0e-9 * cnter;
 }

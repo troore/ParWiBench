@@ -39,7 +39,7 @@ void test_SCMapper(LTE_PHY_PARAMS *lte_phy_params)
 	tstart = dtime();
 #endif
 
-	int n_iters = 1000;
+	int n_iters = 1;
 	for (int i = 0; i < n_iters; i++) {
 		SubCarrierMapping(lte_phy_params, lte_phy_params->resm_in, lte_phy_params->resm_out);
 	}

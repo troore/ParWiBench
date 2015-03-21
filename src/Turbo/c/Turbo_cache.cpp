@@ -5,6 +5,12 @@
 
 #include "Turbo.h"
 
+#include "timer/meas.h"
+
+#ifdef _RAPL
+#include "micpower.h"
+#endif
+
 #define LOG_INFINITY 1e30
 
 /**************Global variables*****************/
@@ -473,6 +479,7 @@ void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, int *pOutBi
 	
 	out_data_length = lte_phy_params->td_out_buf_sz;
 	n_blocks = ((out_data_length + BLOCK_SIZE - 1) / BLOCK_SIZE);
+	printf("number of blocks is %d\n", n_blocks);
 	if (out_data_length % BLOCK_SIZE)
 	{
 		last_block_length = (out_data_length % BLOCK_SIZE);
@@ -494,6 +501,7 @@ void turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, float *pInpData, int *pOutBi
 	for (i = 0; i < n_blocks; i++)
 	{
 		cur_blk_len = (i != (n_blocks - 1)) ? BLOCK_SIZE : last_block_length;
+		printf("current block length is %d\n", cur_blk_len);
 		// data part
 		for (j = 0; j < cur_blk_len; j++)
 		{
@@ -577,7 +585,26 @@ void decode_block(float *recv_syst1,
 	for (i = 0; i < /*MAX_ITERATIONS*/ n_iters; i++)
 	{
 	//	map_decoder(recv_syst1, recv_parity1, Le21, Le12, interleaver_size);
+
+#ifdef _RAPL
+		double tbegin,ttime,energy;
+		micpower_start();
+		tbegin = dtime();
+
+		for (int h = 0; h < 10000; h++) {
+#endif
 		log_decoder(recv_syst, recv_parity1, Le21, Le12, interleaver_size);
+#ifdef _RAPL
+		}
+
+		ttime = dtime() - tbegin;
+		energy = micpower_finalize();
+		//	printf("Energy used in %lf\n", energy);
+		//	printf("real time is %fms\n", ttime);
+		printf("%lf\t%f\t%f\n", energy, ttime, (energy * 1000.0) / ttime);
+#endif
+
+
 		/*
 		for (int j = 0; j < interleaver_size; j++)
 			std::cout << Le21[j] << "\t" << Le12[j] << std::endl;

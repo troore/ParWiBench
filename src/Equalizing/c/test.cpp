@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <iostream>
 
 #include "lte_phy.h"
@@ -46,7 +47,7 @@ void test_equalizer(LTE_PHY_PARAMS *lte_phy_params)
 	ofdemodulating(lte_phy_params, lte_phy_params->ofmod_out, lte_phy_params->ofdemod_out);
 	SubCarrierDemapping(lte_phy_params, lte_phy_params->ofdemod_out, lte_phy_params->resdm_out);
 
-	int n_iters = 1000;
+	int n_iters = 1;
 	for (int i = 0; i < n_iters; i++) {
 		Equalizing(lte_phy_params, lte_phy_params->resdm_out, lte_phy_params->eq_out);
 	}
@@ -75,5 +76,15 @@ void test_equalizer(LTE_PHY_PARAMS *lte_phy_params)
 void test(LTE_PHY_PARAMS *lte_phy_params)
 {
 	test_equalizer(lte_phy_params);
-	check();
+
+	char tx_in_fname_real[100];
+	char tx_in_fname_imag[100];
+	char rx_out_fname_real[100];
+	char rx_out_fname_imag[100];
+	
+	strcpy(tx_in_fname_real, "../testsuite/SubCarrierMapInputReal");
+	strcpy(tx_in_fname_imag, "../testsuite/SubCarrierMapInputImag");
+	strcpy(rx_out_fname_real, "../testsuite/testLSCELSEqOutputReal");
+	strcpy(rx_out_fname_imag, "../testsuite/testLSCELSEqOutputImag");
+	check(tx_in_fname_real, tx_in_fname_imag, rx_out_fname_real, rx_out_fname_imag);
 }

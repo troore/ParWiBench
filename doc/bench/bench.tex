@@ -830,6 +830,37 @@ Time synchronize sequence containing 96 samplings
 
 注意：即使只launch kernel，而kernel里什么也不做，这个launch的overhead相对于lte physical中这些模块的一次运行时间也比较大。
 
+Although NVML provides GPU's instant power usage, we still have to sample and collect this information to get energy and average power information. We use K20power\cite{k20power@gpgpu7} tool which is dedicated to do this. However, considering the fact that the running time of each individual kernel is relatively short and differs with each other, it is hard to set a single sampling time window for all kernels. What's more, it is observed that there is a power consumption lag behind the kernel activity thus the shape of power profile doesn't quite match the kernel activity\cite{k20power@gpgpu7}. So it is imperative to keep the kernel run for long enough to amortise this lag, or power strikes may probably be missed especially when sampling time window is comparable to a kernel run, which results in a downgrade in power curve. Intuitively, there are two choices to extend the GPU's active time when kernel is small:
+
+\begin{enumerate}
+\item Increase the workload of a single kernel run.
+\item Increase the number of kernel running times.
+\end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[angle=-90,width=0.5\textwidth]{k20power_merge}
+  \caption{K20 power measurement strategies}
+  \label{fig:k20power_merge}
+\end{figure}
+
+The red and dark blue lines in \ref{fig:k20power_merge} show power curves of the two situations above. We adapt the first strategy for the following reasons:
+
+\begin{enumerate}
+\item Kernel launch overhead exists for both performance and power.
+
+  Although thousands of kernel runs could extend the active time of GPU (about two magnitudes), the missing strikes case described above couldn't be avoided as the distance of two consecutive kernel runs is big. We have tested this case and results show that the power active time is much longer than the cumulated kernel running time;
+
+\item Kernel launch overhead could be amortised as much as workload increase.
+
+  Increasing the workload of kernel could help increase the running time of a single kernel, then the power peak for this kernel stably maintains long enough for accurate sampling. We achieve this by keeping the kernel's thread number constant and increasing the number of frames the kernel should compute. Experiment results show that the running time of a kernel is proportional to the number of frames except for 1 and 10 frames, in which case the launch overhead is still big for just 10 frames. 
+\end{enumerate}
+
+In \ref{fig:k20power_merge}, the green line shows the communication only power curve, and the light blue shows the kernel launch only power curve. we conclude that the power overhead brought about by kernel launch is less than communication. Therefore, the power curve will further descend if communication is considered. The pink line shows this case when we increase communication times along with kernel launch.
+
+In this work, we use a method with slightest overhead (kernel launch rather than communication) and amortise it as much as possible to increase the GPU power measurement confidence.
+
+
 在MIC上，我们目前使用native模式运行程序，所以直接在device端使用一个监测sensor的线程，采样和统计的思路和GPU上的做法类似。不过说是监测sensor，其实是不断的读device上“/sys/class/micras/power”这个文件来获取其中的power数据，这个读文件的操作会给我们采样时间窗口增加误差。也就是说，我们的初衷是要让采样时间窗口的累加值和MIC上计算线程的运行时间大致相同，但是由于监测线程中除采样时间之外的其它开销（例如上述的读文件操作），使得线程的运行时间要大于采样时间的累加值，因此我们在最后计算energy时要适当修正采样时间窗口值，让每个时间窗口值加上这些其它操作的开销。
 
 在测dft和fft的energy时，当数据集较小时（如dft的长度为75和150时），power的active time要比设计kernel的运行时间小不少，当数据集逐渐增大时，二者的差距逐渐减小趋近相等。我想这时因为数据集较小时，活动的线程数据较少，芯片上的能耗也较小；当活动线程数目随着数据集增多，能耗值也随之增大，采样power值超过threshold的次数越来越多。

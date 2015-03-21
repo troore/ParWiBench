@@ -11,12 +11,6 @@
 #include "test.h"
 #include "util.h"
 
-#ifdef _RAPL
-extern "C" {
-#include "papi-rapl/rapl_power.h"
-}
-#endif
-
 
 void test_scrambling(LTE_PHY_PARAMS *lte_phy_params)
 {
@@ -66,33 +60,11 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 			rx_scramb_in[i] = 1.0;
 	}
 
-#ifdef _RAPL
-	rapl_power_start();
-#else
-	
-	double tstart, tend, ttime;
-	double n_gflops, gflops;
-
-	tstart = dtime();
-#endif
-
 	int n_iters = 1;
 	for (i = 0; i < n_iters; i++) {
 		Descrambling(lte_phy_params, rx_scramb_in, rx_scramb_out);
 	}
 	
-#ifndef _RAPL
-	tend = dtime();
-	ttime = tend - tstart;
-	n_gflops = n_iters * gflop_counter(lte_phy_params);
-	gflops = (n_gflops * 10e3) / ttime;
-	printf("%fms\n", ttime);
-	printf("Number of gflops = %lf\n", n_gflops);
-	printf("GFlops = %lf\n", gflops);
-#else
-	rapl_power_stop();
-#endif
-
 	for (i = 0; i < lte_phy_params->descramb_out_buf_sz; i++)
 	{
 		if (rx_scramb_out[i] > 0)

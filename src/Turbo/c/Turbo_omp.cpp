@@ -8,6 +8,9 @@
 #include "Turbo.h"
 #include "util.h"
 
+#include "micpower.h"
+#include "timer/meas.h"
+
 #define LOG_INFINITY 1e30
 
 /**************Global variables*****************/
@@ -580,7 +583,21 @@ void decode_block(float *recv_syst1,
 	for (i = 0; i < /*MAX_ITERATIONS*/ n_iters; i++)
 	{
 	//	map_decoder(recv_syst1, recv_parity1, Le21, Le12, interleaver_size);
-		log_decoder(recv_syst, recv_parity1, Le21, Le12, interleaver_size);
+
+		double tbegin,ttime,energy;
+		micpower_start();
+		tbegin = dtime();
+
+		for (int h = 0; h < 10000; h++) {
+			log_decoder(recv_syst, recv_parity1, Le21, Le12, interleaver_size);
+		}
+
+		ttime = dtime() - tbegin;
+		energy = micpower_finalize();
+		//	printf("Energy used in %lf\n", energy);
+		//	printf("real time is %fms\n", ttime);
+		printf("%lf\t%f\t%f\n", energy, ttime, (energy * 1000.0) / ttime);
+
 		/*
 		for (int j = 0; j < interleaver_size; j++)
 			std::cout << Le21[j] << "\t" << Le12[j] << std::endl;

@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 	tstart = dtime();
 #endif
 
-	int n_iters = 1000;
+	int n_iters = 1;
 	for (int i = 0; i < n_iters; i++)
 	{
 		fft_nrvs(n, v, vout, -1);

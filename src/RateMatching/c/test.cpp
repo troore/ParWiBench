@@ -34,7 +34,7 @@ void tx_rate_matching(LTE_PHY_PARAMS *lte_phy_params)
 	tstart = dtime();
 #endif
 
-	int n_iters = 1000;
+	int n_iters = 1;
 	for (int i = 0; i < n_iters; i++) {
 		TxRateMatching(lte_phy_params, lte_phy_params->rm_in, lte_phy_params->rm_out);
 	}
@@ -92,7 +92,13 @@ void test(LTE_PHY_PARAMS *lte_phy_params)
 //	#else
 
 	rx_rate_matching(lte_phy_params);
-	check();
+	
+	char tx_in_fname[100];
+	char rx_out_fname[100];
+
+	strcpy(tx_in_fname, "../testsuite/RandomTxRateMatchInput");
+	strcpy(rx_out_fname, "../testsuite/testRxRateMatchOutput");
+	check(tx_in_fname, rx_out_fname);
 	
 //	#endif
 }

@@ -1,6 +1,7 @@
 
 #include <complex>
 #include <iostream>
+#include <string.h>
 
 #include "GeneralFunc.h"
 #include "timer/meas.h"
@@ -47,7 +48,7 @@ static void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 	tstart = dtime();
 #endif
 
-	int n_iters = 1000;
+	int n_iters = 1;
 	for (int i = 0; i < n_iters; i++) {
 		Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
 	}
@@ -91,7 +92,13 @@ void test(LTE_PHY_PARAMS *lte_phy_params)
 
 //	test_demod(lte_phy_params, lte_phy_params->mod_type);
 	test_demod(lte_phy_params, 2);
-	check();
+
+	char tx_in_fname[100];
+	char rx_out_fname[100];
+		
+	strcpy(tx_in_fname, "../testsuite/RandomModulationInput");
+	strcpy(rx_out_fname, "../testsuite/testDemodulationOutput");
+	check(tx_in_fname, rx_out_fname);
 
 //#endif
 }

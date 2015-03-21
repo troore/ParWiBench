@@ -3,9 +3,9 @@ include ../../../common/makefile.config
 NVCC = /usr/local/cuda/bin/nvcc
 LINKFLAGS += -L/usr/local/cuda/lib64 -lcudart
 
-SRC = ../ScrambMain.cpp
+SRC = ../../main_test.cpp test.cpp ../util.cpp
 CUDA_SRC = Scrambler.cu
-SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/meas.cpp
+SRC += $(LIB_DIR)/gauss.cpp $(LIB_DIR)/GeneralFunc.cpp $(LIB_DIR)/timer/meas.cpp $(LIB_DIR)/check/check.cpp
 
 SRC += $(SRC_DIR)/lte_phy.cpp
 

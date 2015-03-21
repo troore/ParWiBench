@@ -45,17 +45,17 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_iters)
 	}
 
 	turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_iters);
-	double tbegin,ttime,energy;
-	micpower_start();
-	tbegin = dtime();
+//	double tbegin,ttime,energy;
+//	micpower_start();
+//	tbegin = dtime();
 
-	for(int i=0;i<1000;i++)
-		turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_iters);
-	ttime = dtime() - tbegin;
-	energy = micpower_finalize();
+//	for(int i=0;i<1;i++)
+//		turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_iters);
+//	ttime = dtime() - tbegin;
+//	energy = micpower_finalize();
 //	printf("Energy used in %lf\n", energy);
 //	printf("real time is %fms\n", ttime);
-	printf("%lf\t%f\t%f\n", energy, ttime, (energy * 1000.0) / ttime);
+//	printf("%lf\t%f\t%f\n", energy, ttime, (energy * 1000.0) / ttime);
 
 	for (int i = 0; i < lte_phy_params->td_out_buf_sz; i++)
 	{

@@ -4,7 +4,11 @@
 #include <stdio.h>
 #include <omp.h>
 #include <immintrin.h>
+
 #include "Turbo.h"
+
+#include "micpower.h"
+#include "timer/meas.h"
 
 #define LOG_INFINITY 1e30
 #define LEN16 16
@@ -647,7 +651,17 @@ __forceinline void decode_block(float *recv_syst1,
 	{
 	//	map_decoder(recv_syst1, recv_parity1, Le21, Le12, interleaver_size);
 		
+		double tbegin,ttime,energy;
+		micpower_start();
+		tbegin = dtime();
+
+		for (int h = 0; h < 10000; h++) {
 		log_decoder_(recv_syst, recv_parity1, Le21, Le12, interleaver_size);
+		}
+
+		ttime = dtime() - tbegin;
+		energy = micpower_finalize();
+		printf("%lfJ\t%fms\t%fW\n", energy, ttime, (energy * 1000.0) / ttime);
 //		log_time = dtime();
 //		        printf("log time 1 is %f\n", log_time - log_begin);
 		/*

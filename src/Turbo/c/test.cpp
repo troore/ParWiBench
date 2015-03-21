@@ -51,7 +51,7 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_log_decoder_iters
 	}
 
 #ifdef _RAPL
-	rapl_power_start();
+//	rapl_power_start();
 #else
 	double tstart, tend, ttime;
 	double n_gflops, gflops;
@@ -59,7 +59,7 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_log_decoder_iters
 	tstart = dtime();
 #endif
 
-	int n_test_iters = 1000;
+	int n_test_iters = 1;
 	for (int i = 0; i < n_test_iters; i++)
 	{
 	turbo_decoding(lte_phy_params, lte_phy_params->td_in, lte_phy_params->td_out, n_log_decoder_iters);
@@ -74,7 +74,7 @@ void test_turbo_decoding(LTE_PHY_PARAMS *lte_phy_params, int n_log_decoder_iters
 	printf("Number of gflops = %lf\n", n_gflops);
 	printf("GFlops = %f\n", gflops);
 #else
-	rapl_power_stop();
+//	rapl_power_stop();
 #endif
 
 	for (int i = 0; i < lte_phy_params->td_out_buf_sz; i++)
