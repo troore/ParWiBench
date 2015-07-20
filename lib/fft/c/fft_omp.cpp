@@ -4,10 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//#include <omp.h>
+#include <omp.h>
 
-#include "fft/fftutil.h"
+#define PI	3.14159265358979323846264338327950288
+
+#include "fft/util.h"
 #include "fft/fft.h"
+
+extern int num_threads;
 
 void fft_recur(int n, float (*a)[2], float (*y)[2], int direction)
 {
@@ -178,13 +182,14 @@ void fft_nrvs(int n, float *a, float *y, int direction)
 //		y[i] = a[i];
 
 //	omp_set_num_threads(num_twiddle_threads);
+	omp_set_num_threads(num_threads);
 	for (p = 1; p <= (n / 2); p <<= 1)
 	{
 		//	omega_m[0] = cos((2 * PI) / m);
 		//	omega_m[1] = ((float)direction) * sin((2 * PI) / m);
-//#pragma omp parallel shared(n, p, a, y, direction)
+#pragma omp parallel shared(n, p, a, y, direction)
 		{
-//#pragma omp for private(i, k, ang, omega, t, u)
+#pragma omp for private(i, k, ang, omega, t, u)
 			for (i = 0; i < (n >> 1); i++)
 			{
 				int o_idx = i + (n >> 1);

@@ -9,3 +9,4 @@
 testsuite/
 *.trace
 *log
+*.dat

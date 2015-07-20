@@ -47,7 +47,7 @@ void test_equalizer(LTE_PHY_PARAMS *lte_phy_params)
 	ofdemodulating(lte_phy_params, lte_phy_params->ofmod_out, lte_phy_params->ofdemod_out);
 	SubCarrierDemapping(lte_phy_params, lte_phy_params->ofdemod_out, lte_phy_params->resdm_out);
 
-	int n_iters = 1;
+	int n_iters = 1000;
 	for (int i = 0; i < n_iters; i++) {
 		Equalizing(lte_phy_params, lte_phy_params->resdm_out, lte_phy_params->eq_out);
 	}

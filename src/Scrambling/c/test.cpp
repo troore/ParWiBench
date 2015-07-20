@@ -76,7 +76,7 @@ void test_descrambling(LTE_PHY_PARAMS *lte_phy_params)
 	tstart = dtime();
 #endif
 
-	int n_iters = 1;
+	int n_iters = 10000;
 	for (i = 0; i < n_iters; i++) {
 		Descrambling(lte_phy_params, rx_scramb_in, rx_scramb_out);
 	}

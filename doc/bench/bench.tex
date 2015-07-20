@@ -867,6 +867,15 @@ In this work, we use a method with slightest overhead (kernel launch rather than
 
 \subsection{CPU}
 
+在Linux下有三种方法测量CPU的power，分别为“perf and linux-kernel”，“Userspace Access without perf”以及“PAPI”。我测试过第二和第三种方法（第一种方法不知道怎么用），目前使用的是第三种方法。
+
+使用PAPI\cite{papi}中的RAPL compoment来测量CPU的power和energy。虽然PAPI的主页上说PAPI支持的platform包括x86和x86_64（Intel，AMD），但是目前从PAPI代码以及使用过程中来看，PAPI原生只支持Intel Sandybridge及其以上的结构（Sandybridge，Ivybridge，Haswell）。
+
+我的CPU power测量代码主要基于PAPI代码包中\$(PAPI_ROOT)/src/compoments/rapl/tests/rapl_basic.c，其中实现了一个测量矩阵乘法模块power和energy的功能。我将矩阵乘法模块之前和之后的代码封装成两个API，分别为rapl_power_start和rapl_power_stop，并将完成rapl_basic.c依赖的其它头文件、源文件和库文件（主要是\$(PAPI_ROOT)/src/libpapi.a和\$(PAPI_ROOT)/src/testlib/libtestlib.a）一起拿出来做成了一个libraplpower.a的静态库，以公其他benchmark调用，这样就不用到哪里都带上PAPI这个略庞大的包。详细过程可见\$(ParWiBench_ROOT)/lib/power/papi-rapl。
+
+上述谈到的测量power的方法中，至少后两种都要读取Model Specific Registers（MSRs），第二种方法比较明显，从rapl-read.c代码就可以看出，第三种方法可以从rapl_basic.c跟踪出来（\$(PAPI_ROOT)/src/compoments/rapl/tests/rapl_basic.c:main->\$(PAPI_ROOT)/src/papi.c:PAPI_library_init->\$(PAPI_ROOT)/src/papi_internal.c:_papi_hwi_init_global->\$(PAPI_ROOT)/src/compoments/rapl/linux-rapl.c:_rapl_init_component->\$(PAPI_ROOT)/src/compoments/rapl/linux-rapl.c:_open_fd）。这些registers的内容可以从/dev/cpu/*/msr读到\cite{msr}。想要看到这些文件并读取其内容，首先要保证当前安装的distribution已经将msr kernel module编译进内核。如果没有就需要重新编译内核，使其包含msr module，这样才能看到/dev/cpu/*/msr。目前来看，debian系的distribution没有包含这个module，yum系一般都有包含。
+
+
 在用20个线程运行Scrambling时，使用RAPL测量power和energy时得到的运行时间比不测power时测得的运行时间少一个数量级，这时不能用直接测得的时间求Performance per Watt，要用RAPL得到的那个时间，因为power是用RAPL算出来的。若出现这种情况要注意修正。
 
 \subsection{TODO List}

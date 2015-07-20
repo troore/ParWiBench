@@ -48,7 +48,7 @@ static void test_demod(LTE_PHY_PARAMS *lte_phy_params, int mod_type)
 	tstart = dtime();
 #endif
 
-	int n_iters = 1;
+	int n_iters = 1000;
 	for (int i = 0; i < n_iters; i++) {
 		Demodulating(lte_phy_params, lte_phy_params->demod_in, lte_phy_params->demod_LLR, mod_type, awgn_sigma);
 	}
